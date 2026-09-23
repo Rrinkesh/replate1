@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Clock,
   MapPin,
@@ -15,16 +15,24 @@ import {
   Plus,
   ArrowRight,
   RefreshCw,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { Badge, Button, Card, Modal, EmptyState, LoadingSpinner, ErrorState } from '../../components/common';
-import { useAuth } from '../../context/AuthContext';
-import { foodService } from '../../services/foodService';
-import { reservationService } from '../../services/reservationService';
-import { useCountdown } from '../../hooks/useCountdown';
+import {
+  Badge,
+  Button,
+  Card,
+  Modal,
+  EmptyState,
+  LoadingSpinner,
+  ErrorState,
+} from "../../components/common";
+import { useAuth } from "../../context/AuthContext";
+import { foodService } from "../../services/foodService";
+import { reservationService } from "../../services/reservationService";
+import { useCountdown } from "../../hooks/useCountdown";
 
 const DEFAULT_FOOD_IMAGE =
-  'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80';
+  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80";
 
 const FoodDetailPage = () => {
   const { id } = useParams();
@@ -56,11 +64,15 @@ const FoodDetailPage = () => {
           setQuantity(avail);
         }
       } else {
-        setError('Food listing details not found');
+        setError("Food listing details not found");
       }
     } catch (err) {
-      console.error('Error fetching food detail:', err);
-      setError(err.response?.data?.message || err.message || 'The requested food listing is unavailable.');
+      console.error("Error fetching food detail:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "The requested food listing is unavailable.",
+      );
     } finally {
       setLoading(false);
     }
@@ -87,9 +99,12 @@ const FoodDetailPage = () => {
       <div className="max-w-3xl mx-auto px-4 py-16">
         <EmptyState
           title="Food item not available"
-          message={error || 'The requested surplus listing may have been claimed or expired.'}
+          message={
+            error ||
+            "The requested surplus listing may have been claimed or expired."
+          }
           actionLabel="Return to Marketplace"
-          onAction={() => navigate('/food')}
+          onAction={() => navigate("/food")}
         />
       </div>
     );
@@ -97,16 +112,16 @@ const FoodDetailPage = () => {
 
   const maxQty = food.quantity !== undefined ? food.quantity : 0;
 
-  let calculatedStatus = food.status || 'AVAILABLE';
-  if (isExpired && calculatedStatus !== 'EXPIRED') {
-    calculatedStatus = 'EXPIRED';
-  } else if (maxQty <= 0 && calculatedStatus !== 'EXPIRED') {
-    calculatedStatus = 'SOLD_OUT';
+  let calculatedStatus = food.status || "AVAILABLE";
+  if (isExpired && calculatedStatus !== "EXPIRED") {
+    calculatedStatus = "EXPIRED";
+  } else if (maxQty <= 0 && calculatedStatus !== "EXPIRED") {
+    calculatedStatus = "SOLD_OUT";
   }
 
   const isAvailable =
-    calculatedStatus !== 'SOLD_OUT' &&
-    calculatedStatus !== 'EXPIRED' &&
+    calculatedStatus !== "SOLD_OUT" &&
+    calculatedStatus !== "EXPIRED" &&
     !isExpired &&
     maxQty > 0;
 
@@ -119,7 +134,7 @@ const FoodDetailPage = () => {
   const handleOpenModal = () => {
     if (!currentUser) {
       // Unauthenticated user -> Redirect to /login
-      navigate('/login', { state: { from: `/food/${id}` } });
+      navigate("/login", { state: { from: `/food/${id}` } });
       return;
     }
     setModalError(null);
@@ -131,7 +146,10 @@ const FoodDetailPage = () => {
     setModalError(null);
     try {
       const foodDbId = food._id || food.id;
-      const res = await reservationService.createReservation(foodDbId, quantity);
+      const res = await reservationService.createReservation(
+        foodDbId,
+        quantity,
+      );
 
       if (res && res.reservation) {
         setCreatedReservation(res.reservation);
@@ -140,18 +158,21 @@ const FoodDetailPage = () => {
           claimCode: `RPL-${Math.floor(100000 + Math.random() * 900000)}`,
           quantity,
           totalPrice: (food.price || 0) * quantity,
-          status: 'CONFIRMED',
+          status: "CONFIRMED",
           pickupTime: food.expiryTime
-            ? `Before ${new Date(food.expiryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-            : 'Today before 8:30 PM',
+            ? `Before ${new Date(food.expiryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+            : "Today before 8:30 PM",
         });
       }
       setIsClaimSuccess(true);
       // Immediately refresh food detail to get latest accurate stock & status
       await fetchFoodDetail();
     } catch (err) {
-      console.error('Reservation error:', err);
-      const errMsg = err.response?.data?.message || err.message || 'Failed to complete reservation';
+      console.error("Reservation error:", err);
+      const errMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to complete reservation";
       setModalError(errMsg);
       // Re-fetch food if stock became unavailable or expired
       await fetchFoodDetail();
@@ -180,24 +201,24 @@ const FoodDetailPage = () => {
     food.businessId?.organizationName ||
     food.businessId?.name ||
     food.businessName ||
-    'Commercial Partner';
+    "Commercial Partner";
 
   const businessType =
-    food.businessId?.businessType || 'Commercial Kitchen Partner';
+    food.businessId?.businessType || "Commercial Kitchen Partner";
 
   const pickupLocation =
-    food.pickupLocation?.address || food.location || 'Noida Sector 62';
+    food.pickupLocation?.address || food.location || "Noida Sector 62";
 
   const formattedDeadline = isExpired
-    ? 'Expired'
+    ? "Expired"
     : timeRemainingText
-    ? timeRemainingText
-    : food.expiryTime
-    ? `Before ${new Date(food.expiryTime).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      })}`
-    : food.pickupDeadline || 'Today before 8:30 PM';
+      ? timeRemainingText
+      : food.expiryTime
+        ? `Before ${new Date(food.expiryTime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}`
+        : food.pickupDeadline || "Today before 8:30 PM";
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
@@ -226,9 +247,14 @@ const FoodDetailPage = () => {
               loading="lazy"
             />
             <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
-              <Badge status={calculatedStatus} size="md" showDot className="shadow-soft-sm" />
+              <Badge
+                status={calculatedStatus}
+                size="md"
+                showDot
+                className="shadow-soft-sm"
+              />
               <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-charcoal-950/80 text-white backdrop-blur-md border border-white/20">
-                {food.category || 'Surplus Food'}
+                {food.category || "Surplus Food"}
               </span>
             </div>
           </div>
@@ -253,26 +279,35 @@ const FoodDetailPage = () => {
 
             <p className="text-xs sm:text-sm text-charcoal-600 leading-relaxed font-normal">
               {food.description ||
-                'High quality surplus food prepared by commercial kitchen partners, available for immediate NGO claim and community distribution.'}
+                "High quality surplus food prepared by commercial kitchen partners, available for immediate NGO claim and community distribution."}
             </p>
 
             {/* Countdown / Expiry Alerts */}
             {isAlmostExpired && !isExpired && (
               <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs flex items-center gap-2 font-bold">
                 <Clock className="w-4 h-4 text-amber-600 animate-pulse shrink-0" />
-                <span>Act Fast! This surplus food item expires in less than 1 hour ({formattedDeadline}).</span>
+                <span>
+                  Act Fast! This surplus food item expires in less than 1 hour (
+                  {formattedDeadline}).
+                </span>
               </div>
             )}
             {isExpiringSoon && !isAlmostExpired && !isExpired && (
               <div className="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/80 text-amber-900 text-xs flex items-center gap-2 font-semibold">
                 <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>Expiring Soon: This item must be claimed within {formattedDeadline}.</span>
+                <span>
+                  Expiring Soon: This item must be claimed within{" "}
+                  {formattedDeadline}.
+                </span>
               </div>
             )}
             {isExpired && (
               <div className="p-3.5 bg-red-50 rounded-xl border border-red-200 text-red-800 text-xs flex items-center gap-2 font-bold">
                 <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
-                <span>Expired: This food listing has expired and is no longer available for reservation.</span>
+                <span>
+                  Expired: This food listing has expired and is no longer
+                  available for reservation.
+                </span>
               </div>
             )}
           </div>
@@ -284,23 +319,34 @@ const FoodDetailPage = () => {
               <div className="p-3.5 bg-surface-50 rounded-xl border border-charcoal-100 flex items-center justify-between">
                 <span className="text-charcoal-500">Available Quantity:</span>
                 <span className="font-extrabold text-charcoal-900">
-                  {maxQty} {food.quantityUnit || 'servings'}
+                  {maxQty} {food.quantityUnit || "servings"}
                 </span>
               </div>
-              <div className={`p-3.5 rounded-xl border flex items-center justify-between ${isAlmostExpired ? 'bg-amber-50 border-amber-200 text-amber-900 font-bold' : 'bg-surface-50 border-charcoal-100'}`}>
+              <div
+                className={`p-3.5 rounded-xl border flex items-center justify-between ${isAlmostExpired ? "bg-amber-50 border-amber-200 text-amber-900 font-bold" : "bg-surface-50 border-charcoal-100"}`}
+              >
                 <span className="text-charcoal-500">Pickup Deadline:</span>
-                <span className={`font-bold ${isExpired ? 'text-red-700' : isAlmostExpired ? 'text-amber-700' : 'text-amber-700'}`}>{formattedDeadline}</span>
+                <span
+                  className={`font-bold ${isExpired ? "text-red-700" : isAlmostExpired ? "text-amber-700" : "text-amber-700"}`}
+                >
+                  {formattedDeadline}
+                </span>
               </div>
               <div className="p-3.5 bg-surface-50 rounded-xl border border-charcoal-100 flex items-center justify-between">
                 <span className="text-charcoal-500">Category:</span>
-                <span className="font-bold text-brand-700">{food.category || 'Prepared Meals'}</span>
+                <span className="font-bold text-brand-700">
+                  {food.category || "Prepared Meals"}
+                </span>
               </div>
               <div className="p-3.5 bg-surface-50 rounded-xl border border-charcoal-100 flex items-center justify-between">
                 <span className="text-charcoal-500">Preparation Time:</span>
                 <span className="font-bold text-charcoal-900">
                   {food.preparationTime
-                    ? new Date(food.preparationTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : 'Fresh Today'}
+                    ? new Date(food.preparationTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "Fresh Today"}
                 </span>
               </div>
             </div>
@@ -309,7 +355,9 @@ const FoodDetailPage = () => {
             <div className="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="leading-relaxed font-medium">
-                <strong>FSSAI Food Safety Standard:</strong> Commercial partners verify food temperature and packaging integrity prior to dispatch.
+                <strong>FSSAI Food Safety Standard:</strong> Commercial partners
+                verify food temperature and packaging integrity prior to
+                dispatch.
               </p>
             </div>
           </Card>
@@ -324,7 +372,9 @@ const FoodDetailPage = () => {
                 Recovery Price
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-charcoal-900">₹{totalPrice}</span>
+                <span className="text-3xl font-black text-charcoal-900">
+                  ₹{totalPrice}
+                </span>
                 {originalPrice && originalPrice > unitPrice && (
                   <span className="text-sm text-charcoal-400 line-through font-semibold">
                     Original: ₹{originalPrice * quantity}
@@ -337,7 +387,7 @@ const FoodDetailPage = () => {
                 )}
               </div>
               <p className="text-[11px] text-charcoal-500 font-medium">
-                Unit price: ₹{unitPrice} per {food.quantityUnit || 'serving'}
+                Unit price: ₹{unitPrice} per {food.quantityUnit || "serving"}
               </p>
             </div>
 
@@ -345,8 +395,12 @@ const FoodDetailPage = () => {
             {isAvailable ? (
               <div className="space-y-2 pt-3 border-t border-charcoal-100">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-charcoal-700">Available Stock:</span>
-                  <span className="font-extrabold text-brand-700">{maxQty} meals</span>
+                  <span className="font-bold text-charcoal-700">
+                    Available Stock:
+                  </span>
+                  <span className="font-extrabold text-brand-700">
+                    {maxQty} meals
+                  </span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-surface-50 rounded-2xl border border-charcoal-100">
                   <Button
@@ -359,7 +413,7 @@ const FoodDetailPage = () => {
                     <Minus className="w-4 h-4" />
                   </Button>
                   <span className="font-extrabold text-charcoal-900 text-base">
-                    {quantity} {food.quantityUnit || 'servings'}
+                    {quantity} {food.quantityUnit || "servings"}
                   </span>
                   <Button
                     size="sm"
@@ -374,17 +428,22 @@ const FoodDetailPage = () => {
               </div>
             ) : (
               <div className="p-3 bg-red-50 rounded-xl border border-red-200 text-red-800 text-xs font-bold text-center">
-                This food listing is currently {calculatedStatus === 'EXPIRED' || isExpired ? 'EXPIRED' : 'SOLD OUT'}.
+                This food listing is currently{" "}
+                {calculatedStatus === "EXPIRED" || isExpired
+                  ? "EXPIRED"
+                  : "SOLD OUT"}
+                .
               </div>
             )}
 
             {/* Role-Based Action Buttons */}
             <div className="space-y-3 pt-3 border-t border-charcoal-100">
-              {userRole === 'business' ? (
+              {userRole === "business" ? (
                 <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs font-medium text-center">
-                  Business accounts manage food listings from the Business Dashboard.
+                  Business accounts manage food listings from the Business
+                  Dashboard.
                 </div>
-              ) : userRole === 'admin' ? (
+              ) : userRole === "admin" ? (
                 <div className="p-3 bg-blue-50 rounded-xl border border-blue-200 text-blue-900 text-xs font-medium text-center">
                   Super Admin preview mode.
                 </div>
@@ -397,7 +456,7 @@ const FoodDetailPage = () => {
                   iconRight={HeartHandshake}
                   onClick={handleOpenModal}
                 >
-                  {isAvailable ? 'Reserve Food' : 'Sold Out / Expired'}
+                  {isAvailable ? "Reserve Food" : "Sold Out / Expired"}
                 </Button>
               )}
 
@@ -415,7 +474,9 @@ const FoodDetailPage = () => {
               <p className="text-charcoal-600 text-[11px]">{pickupLocation}</p>
               <div className="pt-2 border-t border-charcoal-200 flex items-center justify-between text-charcoal-500">
                 <span>FSSAI License</span>
-                <span className="font-semibold text-charcoal-800">#11519001421</span>
+                <span className="font-semibold text-charcoal-800">
+                  #11519001421
+                </span>
               </div>
             </div>
           </Card>
@@ -426,7 +487,11 @@ const FoodDetailPage = () => {
       <Modal
         isOpen={isReserveModalOpen}
         onClose={handleCloseModal}
-        title={isClaimSuccess ? 'Food Reserved Successfully' : 'Confirm Food Reservation'}
+        title={
+          isClaimSuccess
+            ? "Food Reserved Successfully"
+            : "Confirm Food Reservation"
+        }
         size="md"
       >
         {isClaimSuccess ? (
@@ -436,9 +501,11 @@ const FoodDetailPage = () => {
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-2xl font-black text-charcoal-900">{food.name}</h3>
+              <h3 className="text-2xl font-black text-charcoal-900">
+                {food.name}
+              </h3>
               <p className="text-xs text-charcoal-600">
-                Verification Claim Code:{' '}
+                Verification Claim Code:{" "}
                 <strong className="text-brand-700 font-black text-base uppercase">
                   {createdReservation?.claimCode}
                 </strong>
@@ -447,18 +514,28 @@ const FoodDetailPage = () => {
 
             <div className="p-4 bg-surface-50 rounded-2xl border border-charcoal-100 text-xs text-left space-y-2.5">
               <div className="flex justify-between border-b border-charcoal-200 pb-2">
-                <span className="text-charcoal-500 font-medium">Reserved Quantity:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Reserved Quantity:
+                </span>
                 <span className="font-bold text-charcoal-900">
-                  {quantity} {food.quantityUnit || 'servings'}
+                  {quantity} {food.quantityUnit || "servings"}
                 </span>
               </div>
               <div className="flex justify-between border-b border-charcoal-200 pb-2">
-                <span className="text-charcoal-500 font-medium">Total Price:</span>
-                <span className="font-black text-emerald-700 text-sm">₹{totalPrice}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Total Price:
+                </span>
+                <span className="font-black text-emerald-700 text-sm">
+                  ₹{totalPrice}
+                </span>
               </div>
               <div className="flex justify-between border-b border-charcoal-200 pb-2">
-                <span className="text-charcoal-500 font-medium">Pickup Deadline:</span>
-                <span className="font-bold text-amber-700">{formattedDeadline}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Pickup Deadline:
+                </span>
+                <span className="font-bold text-amber-700">
+                  {formattedDeadline}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-charcoal-500 font-medium">Status:</span>
@@ -472,7 +549,7 @@ const FoodDetailPage = () => {
                 fullWidth
                 onClick={() => {
                   handleCloseModal();
-                  navigate('/food');
+                  navigate("/food");
                 }}
               >
                 Continue Exploring
@@ -494,8 +571,12 @@ const FoodDetailPage = () => {
         ) : (
           <div className="space-y-4 text-xs">
             <p className="text-charcoal-600 leading-relaxed">
-              You are reserving <strong>{quantity} {food.quantityUnit || 'servings'}</strong> of{' '}
-              <strong>{food.name}</strong> from <strong>{businessName}</strong>.
+              You are reserving{" "}
+              <strong>
+                {quantity} {food.quantityUnit || "servings"}
+              </strong>{" "}
+              of <strong>{food.name}</strong> from{" "}
+              <strong>{businessName}</strong>.
             </p>
 
             {modalError && (
@@ -508,21 +589,33 @@ const FoodDetailPage = () => {
               <div className="flex justify-between">
                 <span className="text-charcoal-500 font-medium">Quantity:</span>
                 <span className="font-bold text-charcoal-900">
-                  {quantity} {food.quantityUnit || 'servings'}
+                  {quantity} {food.quantityUnit || "servings"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Total Recovery Amount:</span>
-                <span className="font-black text-emerald-700 text-sm">₹{totalPrice}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Total Recovery Amount:
+                </span>
+                <span className="font-black text-emerald-700 text-sm">
+                  ₹{totalPrice}
+                </span>
               </div>
               <div className="flex justify-between border-t border-charcoal-200 pt-2">
-                <span className="text-charcoal-500 font-medium">Pickup Deadline:</span>
-                <span className="font-bold text-amber-700">{formattedDeadline}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Pickup Deadline:
+                </span>
+                <span className="font-bold text-amber-700">
+                  {formattedDeadline}
+                </span>
               </div>
             </div>
 
             <div className="pt-4 flex justify-end gap-3 border-t border-charcoal-100">
-              <Button variant="outline" onClick={handleCloseModal} disabled={isSubmitting}>
+              <Button
+                variant="outline"
+                onClick={handleCloseModal}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
               <Button
@@ -531,7 +624,7 @@ const FoodDetailPage = () => {
                 disabled={isSubmitting}
                 onClick={handleConfirmReservation}
               >
-                {isSubmitting ? 'Reserving...' : 'Confirm Reservation'}
+                {isSubmitting ? "Reserving..." : "Confirm Reservation"}
               </Button>
             </div>
           </div>

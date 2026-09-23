@@ -1,16 +1,18 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import Card from './Card';
+import React from "react";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import Card from "./Card";
 
 const trendColors = {
-  up: 'text-emerald-700 bg-emerald-50 border-emerald-200',
-  down: 'text-rose-700 bg-rose-50 border-rose-200',
-  neutral: 'text-charcoal-700 bg-charcoal-100 border-charcoal-200',
+  up: "text-emerald-700 bg-emerald-50 border-emerald-200",
+  down: "text-rose-700 bg-rose-50 border-rose-200",
+  neutral: "text-charcoal-700 bg-charcoal-100 border-charcoal-200",
 };
 
 const TrendIcon = ({ direction }) => {
-  if (direction === 'up') return <TrendingUp className="w-3.5 h-3.5 shrink-0" />;
-  if (direction === 'down') return <TrendingDown className="w-3.5 h-3.5 shrink-0" />;
+  if (direction === "up")
+    return <TrendingUp className="w-3.5 h-3.5 shrink-0" />;
+  if (direction === "down")
+    return <TrendingDown className="w-3.5 h-3.5 shrink-0" />;
   return <Minus className="w-3.5 h-3.5 shrink-0" />;
 };
 
@@ -18,11 +20,11 @@ const StatCard = ({
   title,
   value,
   change,
-  changeDirection = 'up',
+  changeDirection = "up",
   icon: Icon,
   helperText,
-  variant = 'default',
-  className = '',
+  variant = "default",
+  className = "",
 }) => {
   return (
     <Card variant={variant} className={`relative overflow-hidden ${className}`}>

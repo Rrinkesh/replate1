@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { EmptyState, Button } from '../../components/common';
-import { FileQuestion, Home } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { EmptyState, Button } from "../../components/common";
+import { FileQuestion, Home } from "lucide-react";
 
 const NotFoundPage = () => {
   return (

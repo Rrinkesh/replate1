@@ -1,22 +1,24 @@
-import React from 'react';
-import { Utensils } from 'lucide-react';
+import React from "react";
+import { Utensils } from "lucide-react";
 
 const spinnerSizes = {
-  sm: 'w-5 h-5 border-2',
-  md: 'w-8 h-8 border-3',
-  lg: 'w-12 h-12 border-4',
-  xl: 'w-16 h-16 border-4',
+  sm: "w-5 h-5 border-2",
+  md: "w-8 h-8 border-3",
+  lg: "w-12 h-12 border-4",
+  xl: "w-16 h-16 border-4",
 };
 
 const LoadingSpinner = ({
-  message = 'Loading...',
-  size = 'md',
+  message = "Loading...",
+  size = "md",
   fullScreen = false,
   showIcon = true,
-  className = '',
+  className = "",
 }) => {
   const content = (
-    <div className={`flex flex-col items-center justify-center p-6 text-center ${className}`}>
+    <div
+      className={`flex flex-col items-center justify-center p-6 text-center ${className}`}
+    >
       <div className="relative flex items-center justify-center">
         {/* Outer Rotating Ring */}
         <div
@@ -27,9 +29,9 @@ const LoadingSpinner = ({
         />
 
         {/* Center Pulsing Icon */}
-        {showIcon && (size === 'lg' || size === 'xl') && (
+        {showIcon && (size === "lg" || size === "xl") && (
           <div className="absolute text-brand-600 animate-pulse">
-            <Utensils className={size === 'xl' ? 'w-6 h-6' : 'w-4 h-4'} />
+            <Utensils className={size === "xl" ? "w-6 h-6" : "w-4 h-4"} />
           </div>
         )}
       </div>

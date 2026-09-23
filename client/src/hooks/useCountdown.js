@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * Custom React hook for live food expiry countdown calculation
@@ -21,7 +21,7 @@ export const useCountdown = (expiryTime) => {
 
   if (!expiryTime) {
     return {
-      timeRemainingText: '',
+      timeRemainingText: "",
       diffMs: Infinity,
       isExpired: false,
       isExpiringSoon: false,
@@ -34,11 +34,11 @@ export const useCountdown = (expiryTime) => {
 
   const isExpired = diffMs <= 0;
   const isAlmostExpired = !isExpired && diffMs <= 1 * 60 * 60 * 1000; // <= 1 hour
-  const isExpiringSoon = !isExpired && diffMs <= 3 * 60 * 60 * 1000;   // <= 3 hours
+  const isExpiringSoon = !isExpired && diffMs <= 3 * 60 * 60 * 1000; // <= 3 hours
 
-  let timeRemainingText = '';
+  let timeRemainingText = "";
   if (isExpired) {
-    timeRemainingText = 'Expired';
+    timeRemainingText = "Expired";
   } else {
     const totalMinutes = Math.floor(diffMs / (60 * 1000));
     const hours = Math.floor(totalMinutes / 60);

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Clock,
   CheckCircle2,
@@ -15,26 +15,33 @@ import {
   MapPin,
   QrCode,
   ArrowRight,
-} from 'lucide-react';
+} from "lucide-react";
 
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import { Card, Badge, Button, Modal, LoadingSpinner, EmptyState } from '../../components/common';
-import { reservationService } from '../../services/reservationService';
+import DashboardLayout from "../../components/layout/DashboardLayout";
+import {
+  Card,
+  Badge,
+  Button,
+  Modal,
+  LoadingSpinner,
+  EmptyState,
+} from "../../components/common";
+import { reservationService } from "../../services/reservationService";
 
 const TAB_FILTERS = [
-  { key: 'ALL', label: 'All Reservations' },
-  { key: 'PENDING', label: 'Pending' },
-  { key: 'CONFIRMED', label: 'Confirmed' },
-  { key: 'READY_FOR_PICKUP', label: 'Ready for Pickup' },
-  { key: 'COMPLETED', label: 'Completed' },
-  { key: 'CANCELLED', label: 'Cancelled' },
+  { key: "ALL", label: "All Reservations" },
+  { key: "PENDING", label: "Pending" },
+  { key: "CONFIRMED", label: "Confirmed" },
+  { key: "READY_FOR_PICKUP", label: "Ready for Pickup" },
+  { key: "COMPLETED", label: "Completed" },
+  { key: "CANCELLED", label: "Cancelled" },
 ];
 
 const BusinessReservationsPage = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Confirmation Modal State
   const [selectedAction, setSelectedAction] = useState(null);
@@ -50,7 +57,7 @@ const BusinessReservationsPage = () => {
         setReservations(data.reservations);
       }
     } catch (err) {
-      console.error('Failed to load business reservations:', err);
+      console.error("Failed to load business reservations:", err);
     } finally {
       setLoading(false);
     }
@@ -65,8 +72,11 @@ const BusinessReservationsPage = () => {
     setSelectedAction({
       reservationId: reservation._id,
       claimCode: reservation.claimCode,
-      foodName: reservation.foodId?.name || 'Surplus Item',
-      recipientName: reservation.recipientId?.organizationName || reservation.recipientId?.name || 'NGO Recipient',
+      foodName: reservation.foodId?.name || "Surplus Item",
+      recipientName:
+        reservation.recipientId?.organizationName ||
+        reservation.recipientId?.name ||
+        "NGO Recipient",
       currentStatus: reservation.status,
       newStatus,
       actionTitle,
@@ -80,12 +90,14 @@ const BusinessReservationsPage = () => {
     try {
       await reservationService.updateReservationStatus(
         selectedAction.reservationId,
-        selectedAction.newStatus
+        selectedAction.newStatus,
       );
       setSelectedAction(null);
       await fetchReservations();
     } catch (err) {
-      setActionError(err.response?.data?.message || err.message || 'Failed to update status');
+      setActionError(
+        err.response?.data?.message || err.message || "Failed to update status",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -94,12 +106,14 @@ const BusinessReservationsPage = () => {
   // Filter & Search logic
   const filteredReservations = reservations.filter((r) => {
     const matchesTab =
-      activeTab === 'ALL' || r.status?.toUpperCase() === activeTab;
+      activeTab === "ALL" || r.status?.toUpperCase() === activeTab;
 
-    const code = (r.claimCode || '').toLowerCase();
-    const foodName = (r.foodId?.name || '').toLowerCase();
+    const code = (r.claimCode || "").toLowerCase();
+    const foodName = (r.foodId?.name || "").toLowerCase();
     const recipientName = (
-      r.recipientId?.organizationName || r.recipientId?.name || ''
+      r.recipientId?.organizationName ||
+      r.recipientId?.name ||
+      ""
     ).toLowerCase();
 
     const matchesSearch =
@@ -113,18 +127,18 @@ const BusinessReservationsPage = () => {
 
   const getStatusBadgeConfig = (status) => {
     switch (status?.toUpperCase()) {
-      case 'PENDING':
-        return { variant: 'warning', label: 'Pending', icon: Clock };
-      case 'CONFIRMED':
-        return { variant: 'info', label: 'Confirmed', icon: CheckCircle2 };
-      case 'READY_FOR_PICKUP':
-        return { variant: 'brand', label: 'Ready for Pickup', icon: Package };
-      case 'COMPLETED':
-        return { variant: 'success', label: 'Completed', icon: ShieldCheck };
-      case 'CANCELLED':
-        return { variant: 'danger', label: 'Cancelled', icon: XCircle };
+      case "PENDING":
+        return { variant: "warning", label: "Pending", icon: Clock };
+      case "CONFIRMED":
+        return { variant: "info", label: "Confirmed", icon: CheckCircle2 };
+      case "READY_FOR_PICKUP":
+        return { variant: "brand", label: "Ready for Pickup", icon: Package };
+      case "COMPLETED":
+        return { variant: "success", label: "Completed", icon: ShieldCheck };
+      case "CANCELLED":
+        return { variant: "danger", label: "Cancelled", icon: XCircle };
       default:
-        return { variant: 'neutral', label: status || 'Pending', icon: Clock };
+        return { variant: "neutral", label: status || "Pending", icon: Clock };
     }
   };
 
@@ -138,7 +152,8 @@ const BusinessReservationsPage = () => {
               Order & Claim Management
             </h2>
             <p className="text-xs text-charcoal-500">
-              Manage incoming NGO claims, confirm orders, and update pickup statuses.
+              Manage incoming NGO claims, confirm orders, and update pickup
+              statuses.
             </p>
           </div>
 
@@ -171,7 +186,8 @@ const BusinessReservationsPage = () => {
             </div>
 
             <div className="text-xs text-charcoal-500 font-semibold shrink-0">
-              Showing {filteredReservations.length} of {reservations.length} total orders
+              Showing {filteredReservations.length} of {reservations.length}{" "}
+              total orders
             </div>
           </div>
 
@@ -179,9 +195,11 @@ const BusinessReservationsPage = () => {
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-t border-charcoal-100 pt-3">
             {TAB_FILTERS.map((tab) => {
               const count =
-                tab.key === 'ALL'
+                tab.key === "ALL"
                   ? reservations.length
-                  : reservations.filter((r) => r.status?.toUpperCase() === tab.key).length;
+                  : reservations.filter(
+                      (r) => r.status?.toUpperCase() === tab.key,
+                    ).length;
 
               return (
                 <button
@@ -191,8 +209,8 @@ const BusinessReservationsPage = () => {
                     px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5
                     ${
                       activeTab === tab.key
-                        ? 'bg-brand-600 text-white shadow-soft-xs'
-                        : 'bg-surface-100 text-charcoal-700 hover:bg-surface-200'
+                        ? "bg-brand-600 text-white shadow-soft-xs"
+                        : "bg-surface-100 text-charcoal-700 hover:bg-surface-200"
                     }
                   `}
                 >
@@ -200,8 +218,8 @@ const BusinessReservationsPage = () => {
                   <span
                     className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                       activeTab === tab.key
-                        ? 'bg-brand-700 text-white'
-                        : 'bg-charcoal-200 text-charcoal-800'
+                        ? "bg-brand-700 text-white"
+                        : "bg-charcoal-200 text-charcoal-800"
                     }`}
                   >
                     {count}
@@ -222,13 +240,13 @@ const BusinessReservationsPage = () => {
             title="No reservations found"
             message={
               searchQuery
-                ? 'No orders match your search criteria.'
-                : 'No reservations found in this status category.'
+                ? "No orders match your search criteria."
+                : "No reservations found in this status category."
             }
             actionLabel="Reset Search Filters"
             onAction={() => {
-              setActiveTab('ALL');
-              setSearchQuery('');
+              setActiveTab("ALL");
+              setSearchQuery("");
             }}
           />
         ) : (
@@ -255,7 +273,10 @@ const BusinessReservationsPage = () => {
                     const recipient = r.recipientId || {};
 
                     return (
-                      <tr key={r._id} className="hover:bg-surface-50 transition-colors">
+                      <tr
+                        key={r._id}
+                        className="hover:bg-surface-50 transition-colors"
+                      >
                         <td className="py-3.5 px-4 font-black text-brand-700 tracking-wider">
                           <Link
                             to={`/reservation/${r._id}`}
@@ -266,63 +287,85 @@ const BusinessReservationsPage = () => {
                           </Link>
                         </td>
                         <td className="py-3.5 px-4 font-bold text-charcoal-900">
-                          {food.name || 'Surplus Item'}
+                          {food.name || "Surplus Item"}
                         </td>
                         <td className="py-3.5 px-4 text-charcoal-800 font-semibold">
-                          {recipient.organizationName || recipient.name || 'NGO Recipient'}
+                          {recipient.organizationName ||
+                            recipient.name ||
+                            "NGO Recipient"}
                         </td>
                         <td className="py-3.5 px-4 font-bold text-charcoal-900">
-                          {r.quantity} {food.quantityUnit || 'servings'}
+                          {r.quantity} {food.quantityUnit || "servings"}
                         </td>
                         <td className="py-3.5 px-4 font-black text-emerald-700">
                           ₹{r.totalPrice}
                         </td>
                         <td className="py-3.5 px-4 text-amber-700 font-medium">
-                          {r.pickupTime || 'Today before 8:30 PM'}
+                          {r.pickupTime || "Today before 8:30 PM"}
                         </td>
                         <td className="py-3.5 px-4">
-                          <Badge variant={statusConfig.variant} size="sm" icon={statusConfig.icon}>
+                          <Badge
+                            variant={statusConfig.variant}
+                            size="sm"
+                            icon={statusConfig.icon}
+                          >
                             {statusConfig.label}
                           </Badge>
                         </td>
                         <td className="py-3.5 px-4 text-right space-x-2">
                           <Link to={`/reservation/${r._id}`}>
-                            <Button size="sm" variant="ghost" className="p-1.5 text-charcoal-600">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="p-1.5 text-charcoal-600"
+                            >
                               <Eye className="w-4 h-4" />
                             </Button>
                           </Link>
 
-                          {r.status === 'PENDING' && (
+                          {r.status === "PENDING" && (
                             <Button
                               size="sm"
                               variant="primary"
                               onClick={() =>
-                                handleOpenActionModal(r, 'CONFIRMED', 'Confirm Reservation')
+                                handleOpenActionModal(
+                                  r,
+                                  "CONFIRMED",
+                                  "Confirm Reservation",
+                                )
                               }
                             >
                               Confirm
                             </Button>
                           )}
 
-                          {r.status === 'CONFIRMED' && (
+                          {r.status === "CONFIRMED" && (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() =>
-                                handleOpenActionModal(r, 'READY_FOR_PICKUP', 'Mark Ready for Pickup')
+                                handleOpenActionModal(
+                                  r,
+                                  "READY_FOR_PICKUP",
+                                  "Mark Ready for Pickup",
+                                )
                               }
                             >
                               Mark Ready
                             </Button>
                           )}
 
-                          {r.status === 'READY_FOR_PICKUP' && (
+                          {r.status === "READY_FOR_PICKUP" && (
                             <Button
                               size="sm"
                               variant="primary"
                               iconLeft={CheckCircle2}
                               onClick={() =>
-                                handleOpenActionModal(r, 'COMPLETED', 'Complete Pickup')
+                                handleOpenActionModal(
+                                  r,
+                                  "COMPLETED",
+                                  "Complete Pickup",
+                                )
                               }
                             >
                               Complete
@@ -344,7 +387,11 @@ const BusinessReservationsPage = () => {
                 const recipient = r.recipientId || {};
 
                 return (
-                  <Card key={r._id} variant="default" className="space-y-4 shadow-soft-xs">
+                  <Card
+                    key={r._id}
+                    variant="default"
+                    className="space-y-4 shadow-soft-xs"
+                  >
                     <div className="flex items-center justify-between pb-3 border-b border-charcoal-100">
                       <div className="flex items-center gap-2">
                         <QrCode className="w-4 h-4 text-brand-600" />
@@ -355,21 +402,38 @@ const BusinessReservationsPage = () => {
                           {r.claimCode}
                         </Link>
                       </div>
-                      <Badge variant={statusConfig.variant} size="sm" icon={statusConfig.icon}>
+                      <Badge
+                        variant={statusConfig.variant}
+                        size="sm"
+                        icon={statusConfig.icon}
+                      >
                         {statusConfig.label}
                       </Badge>
                     </div>
 
                     <div className="space-y-1 text-xs">
                       <h4 className="font-extrabold text-charcoal-900 text-sm">
-                        {food.name || 'Surplus Item'}
+                        {food.name || "Surplus Item"}
                       </h4>
                       <p className="text-charcoal-600">
-                        Recipient: <strong>{recipient.organizationName || recipient.name}</strong>
+                        Recipient:{" "}
+                        <strong>
+                          {recipient.organizationName || recipient.name}
+                        </strong>
                       </p>
                       <div className="flex justify-between pt-2 text-charcoal-500 font-medium">
-                        <span>Quantity: <strong>{r.quantity} {food.quantityUnit || 'servings'}</strong></span>
-                        <span>Total: <strong className="text-emerald-700">₹{r.totalPrice}</strong></span>
+                        <span>
+                          Quantity:{" "}
+                          <strong>
+                            {r.quantity} {food.quantityUnit || "servings"}
+                          </strong>
+                        </span>
+                        <span>
+                          Total:{" "}
+                          <strong className="text-emerald-700">
+                            ₹{r.totalPrice}
+                          </strong>
+                        </span>
                       </div>
                     </div>
 
@@ -381,37 +445,49 @@ const BusinessReservationsPage = () => {
                       </Link>
 
                       <div className="flex items-center gap-2">
-                        {r.status === 'PENDING' && (
+                        {r.status === "PENDING" && (
                           <Button
                             size="sm"
                             variant="primary"
                             onClick={() =>
-                              handleOpenActionModal(r, 'CONFIRMED', 'Confirm Reservation')
+                              handleOpenActionModal(
+                                r,
+                                "CONFIRMED",
+                                "Confirm Reservation",
+                              )
                             }
                           >
                             Confirm
                           </Button>
                         )}
 
-                        {r.status === 'CONFIRMED' && (
+                        {r.status === "CONFIRMED" && (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() =>
-                              handleOpenActionModal(r, 'READY_FOR_PICKUP', 'Mark Ready for Pickup')
+                              handleOpenActionModal(
+                                r,
+                                "READY_FOR_PICKUP",
+                                "Mark Ready for Pickup",
+                              )
                             }
                           >
                             Mark Ready
                           </Button>
                         )}
 
-                        {r.status === 'READY_FOR_PICKUP' && (
+                        {r.status === "READY_FOR_PICKUP" && (
                           <Button
                             size="sm"
                             variant="primary"
                             iconLeft={CheckCircle2}
                             onClick={() =>
-                              handleOpenActionModal(r, 'COMPLETED', 'Complete Pickup')
+                              handleOpenActionModal(
+                                r,
+                                "COMPLETED",
+                                "Complete Pickup",
+                              )
                             }
                           >
                             Complete
@@ -431,13 +507,14 @@ const BusinessReservationsPage = () => {
       <Modal
         isOpen={Boolean(selectedAction)}
         onClose={() => setSelectedAction(null)}
-        title={selectedAction?.actionTitle || 'Confirm Status Change'}
+        title={selectedAction?.actionTitle || "Confirm Status Change"}
         size="md"
       >
         {selectedAction && (
           <div className="space-y-4 text-xs">
             <p className="text-charcoal-600 leading-relaxed">
-              Are you sure you want to update the status for claim <strong>{selectedAction.claimCode}</strong>?
+              Are you sure you want to update the status for claim{" "}
+              <strong>{selectedAction.claimCode}</strong>?
             </p>
 
             {actionError && (
@@ -448,20 +525,36 @@ const BusinessReservationsPage = () => {
 
             <div className="p-4 bg-surface-50 rounded-2xl border border-charcoal-100 space-y-2">
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Food Item:</span>
-                <span className="font-bold text-charcoal-900">{selectedAction.foodName}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Food Item:
+                </span>
+                <span className="font-bold text-charcoal-900">
+                  {selectedAction.foodName}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Recipient NGO:</span>
-                <span className="font-bold text-charcoal-900">{selectedAction.recipientName}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Recipient NGO:
+                </span>
+                <span className="font-bold text-charcoal-900">
+                  {selectedAction.recipientName}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Current Status:</span>
-                <span className="font-bold text-amber-700">{selectedAction.currentStatus}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Current Status:
+                </span>
+                <span className="font-bold text-amber-700">
+                  {selectedAction.currentStatus}
+                </span>
               </div>
               <div className="flex justify-between pt-1 border-t border-charcoal-200">
-                <span className="text-charcoal-500 font-medium">New Target Status:</span>
-                <span className="font-black text-brand-700">{selectedAction.newStatus}</span>
+                <span className="text-charcoal-500 font-medium">
+                  New Target Status:
+                </span>
+                <span className="font-black text-brand-700">
+                  {selectedAction.newStatus}
+                </span>
               </div>
             </div>
 
@@ -478,7 +571,7 @@ const BusinessReservationsPage = () => {
                 onClick={handleConfirmStatusChange}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Updating...' : 'Confirm Status Transition'}
+                {isSubmitting ? "Updating..." : "Confirm Status Transition"}
               </Button>
             </div>
           </div>

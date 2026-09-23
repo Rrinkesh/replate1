@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { PageHeader, Card, Button } from '../../components/common';
-import { Building2, ArrowRight, Shield, Award } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { PageHeader, Card, Button } from "../../components/common";
+import { Building2, ArrowRight, Shield, Award } from "lucide-react";
 
 const BusinessPage = () => {
   return (
@@ -22,19 +22,28 @@ const BusinessPage = () => {
         <Card variant="default">
           <Building2 className="w-8 h-8 text-brand-600 mb-4" />
           <Card.Title>Commercial Hotels & Buffets</Card.Title>
-          <Card.Description>Manage large-scale event surplus efficiently with automated pick-up notifications.</Card.Description>
+          <Card.Description>
+            Manage large-scale event surplus efficiently with automated pick-up
+            notifications.
+          </Card.Description>
         </Card>
 
         <Card variant="default">
           <Shield className="w-8 h-8 text-brand-600 mb-4" />
           <Card.Title>Tax & CSR Compliance</Card.Title>
-          <Card.Description>Track carbon offset metrics and receive monthly CSR impact statements.</Card.Description>
+          <Card.Description>
+            Track carbon offset metrics and receive monthly CSR impact
+            statements.
+          </Card.Description>
         </Card>
 
         <Card variant="default">
           <Award className="w-8 h-8 text-brand-600 mb-4" />
           <Card.Title>Zero Waste Certification</Card.Title>
-          <Card.Description>Earn RePlate Sustainable Partner badges for public brand recognition.</Card.Description>
+          <Card.Description>
+            Earn RePlate Sustainable Partner badges for public brand
+            recognition.
+          </Card.Description>
         </Card>
       </div>
     </div>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Bell,
   CheckCheck,
@@ -11,9 +11,9 @@ import {
   ShieldCheck,
   Utensils,
   ExternalLink,
-} from 'lucide-react';
-import { notificationService } from '../../services/notificationService';
-import { useAuth } from '../../context/AuthContext';
+} from "lucide-react";
+import { notificationService } from "../../services/notificationService";
+import { useAuth } from "../../context/AuthContext";
 
 const NotificationDropdown = () => {
   const navigate = useNavigate();
@@ -38,8 +38,8 @@ const NotificationDropdown = () => {
         setUnreadCount(res.unreadCount || 0);
       }
     } catch (err) {
-      console.warn('Failed to load notifications:', err.message);
-      setError('Unable to load notifications.');
+      console.warn("Failed to load notifications:", err.message);
+      setError("Unable to load notifications.");
     } finally {
       setLoading(false);
     }
@@ -61,8 +61,8 @@ const NotificationDropdown = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleMarkAsRead = async (id, e) => {
@@ -70,11 +70,11 @@ const NotificationDropdown = () => {
     try {
       await notificationService.markAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (err) {
-      console.error('Failed to mark notification read:', err);
+      console.error("Failed to mark notification read:", err);
     }
   };
 
@@ -84,7 +84,7 @@ const NotificationDropdown = () => {
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {
-      console.error('Failed to mark all read:', err);
+      console.error("Failed to mark all read:", err);
     }
   };
 
@@ -98,7 +98,7 @@ const NotificationDropdown = () => {
         setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (err) {
-      console.error('Failed to delete notification:', err);
+      console.error("Failed to delete notification:", err);
     }
   };
 
@@ -112,40 +112,40 @@ const NotificationDropdown = () => {
     const type = notif.type;
     const relatedId = notif.relatedId;
 
-    if (type.startsWith('RESERVATION_')) {
-      if (userRole === 'business') {
-        navigate('/business/reservations');
-      } else if (userRole === 'recipient') {
-        navigate('/recipient/dashboard');
+    if (type.startsWith("RESERVATION_")) {
+      if (userRole === "business") {
+        navigate("/business/reservations");
+      } else if (userRole === "recipient") {
+        navigate("/recipient/dashboard");
       } else {
-        navigate(relatedId ? `/reservation/${relatedId}` : '/dashboard');
+        navigate(relatedId ? `/reservation/${relatedId}` : "/dashboard");
       }
-    } else if (type.startsWith('FOOD_')) {
-      navigate(relatedId ? `/food/${relatedId}` : '/food');
-    } else if (type === 'VERIFICATION_UPDATED') {
-      navigate('/profile');
+    } else if (type.startsWith("FOOD_")) {
+      navigate(relatedId ? `/food/${relatedId}` : "/food");
+    } else if (type === "VERIFICATION_UPDATED") {
+      navigate("/profile");
     } else {
-      navigate('/notifications');
+      navigate("/notifications");
     }
   };
 
   // Helper icon mapper
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'RESERVATION_CREATED':
+      case "RESERVATION_CREATED":
         return <Utensils className="w-4 h-4 text-brand-600" />;
-      case 'RESERVATION_CONFIRMED':
+      case "RESERVATION_CONFIRMED":
         return <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
-      case 'RESERVATION_READY':
+      case "RESERVATION_READY":
         return <PackageCheck className="w-4 h-4 text-sky-600" />;
-      case 'RESERVATION_COMPLETED':
+      case "RESERVATION_COMPLETED":
         return <CheckCheck className="w-4 h-4 text-emerald-700" />;
-      case 'RESERVATION_CANCELLED':
+      case "RESERVATION_CANCELLED":
         return <AlertTriangle className="w-4 h-4 text-rose-600" />;
-      case 'FOOD_EXPIRING':
-      case 'FOOD_EXPIRED':
+      case "FOOD_EXPIRING":
+      case "FOOD_EXPIRED":
         return <Clock className="w-4 h-4 text-amber-600" />;
-      case 'VERIFICATION_UPDATED':
+      case "VERIFICATION_UPDATED":
         return <ShieldCheck className="w-4 h-4 text-purple-600" />;
       default:
         return <Bell className="w-4 h-4 text-charcoal-600" />;
@@ -153,14 +153,17 @@ const NotificationDropdown = () => {
   };
 
   const formatRelativeTime = (dateString) => {
-    if (!dateString) return 'Just now';
+    if (!dateString) return "Just now";
     const date = new Date(dateString);
     const diffSeconds = Math.floor((new Date() - date) / 1000);
 
-    if (diffSeconds < 60) return 'Just now';
+    if (diffSeconds < 60) return "Just now";
     if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
     if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
   };
 
   if (!currentUser) return null;
@@ -179,7 +182,7 @@ const NotificationDropdown = () => {
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-soft-xs animate-in zoom-in-50">
-            {unreadCount > 99 ? '99+' : unreadCount}
+            {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
@@ -190,7 +193,9 @@ const NotificationDropdown = () => {
           {/* Header */}
           <div className="px-4 py-3.5 bg-surface-50 border-b border-charcoal-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="font-black text-charcoal-900 text-sm">Notifications</h3>
+              <h3 className="font-black text-charcoal-900 text-sm">
+                Notifications
+              </h3>
               {unreadCount > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-brand-100 text-brand-800 font-extrabold text-[10px]">
                   {unreadCount} new
@@ -222,7 +227,9 @@ const NotificationDropdown = () => {
             ) : notifications.length === 0 ? (
               <div className="py-10 text-center px-4">
                 <Bell className="w-8 h-8 text-charcoal-300 mx-auto mb-2" />
-                <p className="text-xs font-bold text-charcoal-700">No notifications yet</p>
+                <p className="text-xs font-bold text-charcoal-700">
+                  No notifications yet
+                </p>
                 <p className="text-[11px] text-charcoal-500 mt-0.5">
                   Updates on food claims and account status will appear here.
                 </p>
@@ -234,7 +241,7 @@ const NotificationDropdown = () => {
                   onClick={() => handleItemClick(notif)}
                   className={`
                     p-3.5 hover:bg-surface-50 transition-colors cursor-pointer flex items-start gap-3 group relative
-                    ${!notif.isRead ? 'bg-brand-50/40' : ''}
+                    ${!notif.isRead ? "bg-brand-50/40" : ""}
                   `}
                 >
                   {/* Type Icon */}
@@ -245,7 +252,9 @@ const NotificationDropdown = () => {
                   {/* Body Text */}
                   <div className="flex-1 min-w-0 pr-6">
                     <div className="flex items-center justify-between gap-1 mb-0.5">
-                      <h4 className={`text-xs font-bold truncate ${!notif.isRead ? 'text-charcoal-900 font-black' : 'text-charcoal-700'}`}>
+                      <h4
+                        className={`text-xs font-bold truncate ${!notif.isRead ? "text-charcoal-900 font-black" : "text-charcoal-700"}`}
+                      >
                         {notif.title}
                       </h4>
                       <span className="text-[10px] text-charcoal-400 font-medium shrink-0">

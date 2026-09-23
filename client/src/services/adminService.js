@@ -24,6 +24,18 @@ export const adminService = {
     const response = await api.put(`/admin/recipients/${id}/verify`, { isVerified });
     return response.data;
   },
+
+  // Reject and delete a business profile
+  rejectBusiness: async (id) => {
+    const response = await api.delete(`/admin/businesses/${id}/reject`);
+    return response.data;
+  },
+
+  // Reject and delete a recipient profile
+  rejectRecipient: async (id) => {
+    const response = await api.delete(`/admin/recipients/${id}/reject`);
+    return response.data;
+  },
 };
 
 export default adminService;

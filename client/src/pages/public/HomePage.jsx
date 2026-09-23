@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 import {
   Utensils,
   ArrowRight,
@@ -17,47 +17,62 @@ import {
   ChevronRight,
   Bot,
   Zap,
-} from 'lucide-react';
+} from "lucide-react";
 
-import {
-  Button,
-  Badge,
-  Card,
-  StatCard,
-} from '../../components/common';
+import { Button, Badge, Card, StatCard } from "../../components/common";
 
 // Impact statistics mock dataset
 const impactMetrics = [
-  { value: '12,480+', label: 'Meals Rescued', helper: 'Plates served to community', icon: Utensils },
-  { value: '8.7 Tons', label: 'Food Diverted', helper: 'Methane emissions offset', icon: Leaf },
-  { value: '₹4.2L', label: 'Value Recovered', helper: 'Returned to food businesses', icon: DollarSign },
-  { value: '96', label: 'Food Partners', helper: 'Noida & Delhi NCR network', icon: Building2 },
+  {
+    value: "12,480+",
+    label: "Meals Rescued",
+    helper: "Plates served to community",
+    icon: Utensils,
+  },
+  {
+    value: "8.7 Tons",
+    label: "Food Diverted",
+    helper: "Methane emissions offset",
+    icon: Leaf,
+  },
+  {
+    value: "₹4.2L",
+    label: "Value Recovered",
+    helper: "Returned to food businesses",
+    icon: DollarSign,
+  },
+  {
+    value: "96",
+    label: "Food Partners",
+    helper: "Noida & Delhi NCR network",
+    icon: Building2,
+  },
 ];
 
 // 4-Step How It Works dataset
 const howItWorksSteps = [
   {
-    step: '01',
-    title: 'Businesses List Surplus',
-    desc: 'Hotels, bakeries, and cloud kitchens post excess prepared food with expiry timing and pickup window.',
+    step: "01",
+    title: "Businesses List Surplus",
+    desc: "Hotels, bakeries, and cloud kitchens post excess prepared food with expiry timing and pickup window.",
     icon: Store,
   },
   {
-    step: '02',
-    title: 'RePlate Finds a Match',
-    desc: 'Intelligent routing instantly alerts verified recipient NGOs within a 5km radius.',
+    step: "02",
+    title: "RePlate Finds a Match",
+    desc: "Intelligent routing instantly alerts verified recipient NGOs within a 5km radius.",
     icon: Zap,
   },
   {
-    step: '03',
-    title: 'Recipient Reserves Food',
-    desc: 'Organizations confirm claim requests and schedule rapid, temperature-safe pickup.',
+    step: "03",
+    title: "Recipient Reserves Food",
+    desc: "Organizations confirm claim requests and schedule rapid, temperature-safe pickup.",
     icon: CheckCircle2,
   },
   {
-    step: '04',
-    title: 'Food Gets a Second Plate',
-    desc: 'Good food is served directly to community shelters instead of going to landfills.',
+    step: "04",
+    title: "Food Gets a Second Plate",
+    desc: "Good food is served directly to community shelters instead of going to landfills.",
     icon: Utensils,
   },
 ];
@@ -65,34 +80,54 @@ const howItWorksSteps = [
 // For Business Feature Cards
 const businessFeatures = [
   {
-    title: 'Reduce Waste',
-    desc: 'Track how much food becomes surplus across daily operations with automated logs.',
+    title: "Reduce Waste",
+    desc: "Track how much food becomes surplus across daily operations with automated logs.",
     icon: Leaf,
   },
   {
-    title: 'Recover Revenue',
-    desc: 'Sell suitable surplus or claim tax benefits instead of throwing away edible value.',
+    title: "Recover Revenue",
+    desc: "Sell suitable surplus or claim tax benefits instead of throwing away edible value.",
     icon: DollarSign,
   },
   {
-    title: 'Smart Insights',
-    desc: 'Prepare for future surplus trends using AI-powered historical prep analysis.',
+    title: "Smart Insights",
+    desc: "Prepare for future surplus trends using AI-powered historical prep analysis.",
     icon: Sparkles,
   },
   {
-    title: 'Sustainability Reports',
-    desc: 'Generate monthly ESG and carbon reduction reports for corporate compliance.',
+    title: "Sustainability Reports",
+    desc: "Generate monthly ESG and carbon reduction reports for corporate compliance.",
     icon: BarChart3,
   },
 ];
 
 // For Recipient Feature Cards
 const recipientFeatures = [
-  { title: 'Affordable Food', desc: 'Access high-quality surplus meals at zero or minimal recovery cost.', icon: Utensils },
-  { title: 'Nearby Availability', desc: 'Proximity-matched listings in Noida, Greater Noida, and Delhi NCR.', icon: MapPin },
-  { title: 'Verified Businesses', desc: 'Partner only with FSSAI-compliant hotels and commercial kitchens.', icon: ShieldCheck },
-  { title: 'Easy Pickup', desc: 'Seamless QR verification and structured pickup windows.', icon: Clock },
-  { title: 'Real-time Listings', desc: 'Instant live alerts as soon as commercial kitchens post excess food.', icon: Zap },
+  {
+    title: "Affordable Food",
+    desc: "Access high-quality surplus meals at zero or minimal recovery cost.",
+    icon: Utensils,
+  },
+  {
+    title: "Nearby Availability",
+    desc: "Proximity-matched listings in Noida, Greater Noida, and Delhi NCR.",
+    icon: MapPin,
+  },
+  {
+    title: "Verified Businesses",
+    desc: "Partner only with FSSAI-compliant hotels and commercial kitchens.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Easy Pickup",
+    desc: "Seamless QR verification and structured pickup windows.",
+    icon: Clock,
+  },
+  {
+    title: "Real-time Listings",
+    desc: "Instant live alerts as soon as commercial kitchens post excess food.",
+    icon: Zap,
+  },
 ];
 
 const HomePage = () => {
@@ -113,19 +148,25 @@ const HomePage = () => {
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-charcoal-900 tracking-tight leading-[1.15]">
-                Turn Surplus Food Into{' '}
+                Turn Surplus Food Into{" "}
                 <span className="bg-gradient-to-r from-brand-600 via-emerald-600 to-teal-700 bg-clip-text text-transparent">
                   Second Chances.
                 </span>
               </h1>
 
               <p className="text-sm sm:text-lg text-charcoal-600 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                RePlate helps food businesses reduce waste, recover value, and connect surplus food with people and organizations that need it.
+                RePlate helps food businesses reduce waste, recover value, and
+                connect surplus food with people and organizations that need it.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
                 <Link to="/list-food" className="w-full sm:w-auto">
-                  <Button size="lg" variant="primary" iconRight={ArrowRight} fullWidth>
+                  <Button
+                    size="lg"
+                    variant="primary"
+                    iconRight={ArrowRight}
+                    fullWidth
+                  >
                     List Surplus Food
                   </Button>
                 </Link>
@@ -139,10 +180,12 @@ const HomePage = () => {
               {/* Trust Badges */}
               <div className="pt-6 border-t border-charcoal-100 flex flex-wrap items-center justify-center lg:justify-start gap-5 text-xs text-charcoal-500">
                 <span className="flex items-center gap-1.5 font-bold text-charcoal-700">
-                  <ShieldCheck className="w-4 h-4 text-brand-600" /> FSSAI Verified Standards
+                  <ShieldCheck className="w-4 h-4 text-brand-600" /> FSSAI
+                  Verified Standards
                 </span>
                 <span className="flex items-center gap-1.5 font-bold text-charcoal-700">
-                  <HeartHandshake className="w-4 h-4 text-brand-600" /> 45+ NGO Partners
+                  <HeartHandshake className="w-4 h-4 text-brand-600" /> 45+ NGO
+                  Partners
                 </span>
               </div>
             </div>
@@ -165,11 +208,15 @@ const HomePage = () => {
                 <div className="grid grid-cols-4 gap-2 mb-5 items-center text-center">
                   <div className="p-2.5 sm:p-3 bg-white rounded-2xl border border-charcoal-100 shadow-soft-xs">
                     <Store className="w-5 h-5 text-brand-600 mx-auto mb-1" />
-                    <p className="text-[10px] sm:text-[11px] font-bold text-charcoal-900">Restaurant</p>
+                    <p className="text-[10px] sm:text-[11px] font-bold text-charcoal-900">
+                      Restaurant
+                    </p>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] text-brand-700 font-bold mb-1">Excess</span>
+                    <span className="text-[10px] text-brand-700 font-bold mb-1">
+                      Excess
+                    </span>
                     <div className="w-full h-0.5 bg-gradient-to-r from-brand-300 to-brand-600 relative">
                       <ChevronRight className="w-4 h-4 text-brand-600 absolute -top-1.5 right-0" />
                     </div>
@@ -177,12 +224,16 @@ const HomePage = () => {
 
                   <div className="p-2.5 sm:p-3 bg-brand-600 text-white rounded-2xl shadow-soft-sm">
                     <Utensils className="w-5 h-5 mx-auto mb-1" />
-                    <p className="text-[10px] sm:text-[11px] font-bold">RePlate</p>
+                    <p className="text-[10px] sm:text-[11px] font-bold">
+                      RePlate
+                    </p>
                   </div>
 
                   <div className="p-2.5 sm:p-3 bg-white rounded-2xl border border-charcoal-100 shadow-soft-xs">
                     <HeartHandshake className="w-5 h-5 text-brand-600 mx-auto mb-1" />
-                    <p className="text-[10px] sm:text-[11px] font-bold text-charcoal-900">Recipient</p>
+                    <p className="text-[10px] sm:text-[11px] font-bold text-charcoal-900">
+                      Recipient
+                    </p>
                   </div>
                 </div>
 
@@ -196,8 +247,12 @@ const HomePage = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/85 via-transparent to-transparent flex items-end p-4">
                     <div className="text-white">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-brand-300">Radisson Hotel Noida</p>
-                      <p className="text-xs sm:text-sm font-extrabold">Dinner Buffet Surplus • 45 Servings Saved</p>
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-brand-300">
+                        Radisson Hotel Noida
+                      </p>
+                      <p className="text-xs sm:text-sm font-extrabold">
+                        Dinner Buffet Surplus • 45 Servings Saved
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -214,7 +269,9 @@ const HomePage = () => {
                     </span>
                   </div>
                   <p className="text-xs text-charcoal-800 leading-relaxed font-semibold">
-                    "Based on today's activity, your kitchen may have <strong className="text-brand-700">18–25 meals</strong> of surplus by 8:00 PM."
+                    "Based on today's activity, your kitchen may have{" "}
+                    <strong className="text-brand-700">18–25 meals</strong> of
+                    surplus by 8:00 PM."
                   </p>
                 </div>
               </div>
@@ -253,12 +310,15 @@ const HomePage = () => {
       {/* 3. HOW IT WORKS TIMELINE SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <Badge status="Verified" className="mb-3">Simplicity First</Badge>
+          <Badge status="Verified" className="mb-3">
+            Simplicity First
+          </Badge>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-charcoal-900 tracking-tight">
             How RePlate Recovers Food
           </h2>
           <p className="text-charcoal-600 mt-2 text-xs sm:text-base">
-            From surplus identification to recipient distribution in 4 seamless steps.
+            From surplus identification to recipient distribution in 4 seamless
+            steps.
           </p>
         </div>
 
@@ -267,12 +327,18 @@ const HomePage = () => {
           <div className="absolute top-10 left-12 right-12 h-0.5 bg-charcoal-200 -z-10" />
 
           {howItWorksSteps.map((item, idx) => (
-            <Card key={idx} variant="default" className="relative flex flex-col h-full hover:border-brand-300">
+            <Card
+              key={idx}
+              variant="default"
+              className="relative flex flex-col h-full hover:border-brand-300"
+            >
               <div className="w-12 h-12 rounded-2xl bg-brand-600 text-white font-black text-lg flex items-center justify-center mb-4 shadow-soft-xs">
                 {item.step}
               </div>
               <Card.Title className="text-base">{item.title}</Card.Title>
-              <Card.Description className="mt-2 text-xs leading-relaxed">{item.desc}</Card.Description>
+              <Card.Description className="mt-2 text-xs leading-relaxed">
+                {item.desc}
+              </Card.Description>
             </Card>
           ))}
         </div>
@@ -280,13 +346,20 @@ const HomePage = () => {
         {/* Mobile Vertical Timeline */}
         <div className="lg:hidden space-y-4">
           {howItWorksSteps.map((item, idx) => (
-            <div key={idx} className="flex gap-4 p-5 bg-white rounded-2xl border border-charcoal-100 shadow-soft-xs">
+            <div
+              key={idx}
+              className="flex gap-4 p-5 bg-white rounded-2xl border border-charcoal-100 shadow-soft-xs"
+            >
               <div className="w-10 h-10 rounded-xl bg-brand-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
                 {item.step}
               </div>
               <div>
-                <h3 className="font-bold text-charcoal-900 text-sm">{item.title}</h3>
-                <p className="text-xs text-charcoal-600 mt-1 leading-relaxed">{item.desc}</p>
+                <h3 className="font-bold text-charcoal-900 text-sm">
+                  {item.title}
+                </h3>
+                <p className="text-xs text-charcoal-600 mt-1 leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
             </div>
           ))}
@@ -305,7 +378,9 @@ const HomePage = () => {
                 Your surplus shouldn't become your loss.
               </h2>
               <p className="text-charcoal-300 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto lg:mx-0">
-                Empower your culinary and operations team with software tools that streamline food recovery, optimize prep forecasts, and reduce waste disposal costs.
+                Empower your culinary and operations team with software tools
+                that streamline food recovery, optimize prep forecasts, and
+                reduce waste disposal costs.
               </p>
               <Link to="/signup" className="inline-block pt-2">
                 <Button variant="primary" size="lg" iconRight={ArrowRight}>
@@ -321,8 +396,12 @@ const HomePage = () => {
                   className="p-5 sm:p-6 rounded-2xl bg-charcoal-900/80 border border-charcoal-800 hover:border-brand-500/50 transition-colors"
                 >
                   <feat.icon className="w-7 h-7 sm:w-8 sm:h-8 text-brand-400 mb-3" />
-                  <h3 className="font-bold text-sm sm:text-base text-white mb-1">{feat.title}</h3>
-                  <p className="text-xs text-charcoal-400 leading-relaxed">{feat.desc}</p>
+                  <h3 className="font-bold text-sm sm:text-base text-white mb-1">
+                    {feat.title}
+                  </h3>
+                  <p className="text-xs text-charcoal-400 leading-relaxed">
+                    {feat.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -333,23 +412,32 @@ const HomePage = () => {
       {/* 5. FOR RECIPIENTS SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <Badge status="Verified" className="mb-3">Verified Recipient Network</Badge>
+          <Badge status="Verified" className="mb-3">
+            Verified Recipient Network
+          </Badge>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-charcoal-900 tracking-tight">
             Reliable Surplus Access for NGOs
           </h2>
           <p className="text-charcoal-600 mt-2 text-xs sm:text-base">
-            Connecting community kitchens, shelters, and distribution networks with surplus meals.
+            Connecting community kitchens, shelters, and distribution networks
+            with surplus meals.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           {recipientFeatures.map((item, idx) => (
-            <Card key={idx} variant="default" className="hover:border-brand-200">
+            <Card
+              key={idx}
+              variant="default"
+              className="hover:border-brand-200"
+            >
               <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-3">
                 <item.icon className="w-5 h-5" />
               </div>
               <Card.Title className="text-base">{item.title}</Card.Title>
-              <Card.Description className="mt-1 text-xs leading-relaxed">{item.desc}</Card.Description>
+              <Card.Description className="mt-1 text-xs leading-relaxed">
+                {item.desc}
+              </Card.Description>
             </Card>
           ))}
         </div>
@@ -378,7 +466,9 @@ const HomePage = () => {
               </h2>
 
               <p className="text-charcoal-600 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto lg:mx-0">
-                Our machine learning models analyze historical prep logs, occupancy, weather patterns, and event schedules to help kitchens adjust prep volumes before food is cooked.
+                Our machine learning models analyze historical prep logs,
+                occupancy, weather patterns, and event schedules to help
+                kitchens adjust prep volumes before food is cooked.
               </p>
 
               <div className="pt-2">
@@ -390,11 +480,16 @@ const HomePage = () => {
 
             {/* Tomorrow's Forecast UI Dashboard Mockup */}
             <div className="lg:col-span-6">
-              <Card variant="glass" className="border-brand-200 shadow-soft-xl p-5 sm:p-6">
+              <Card
+                variant="glass"
+                className="border-brand-200 shadow-soft-xl p-5 sm:p-6"
+              >
                 <div className="flex items-center justify-between pb-4 mb-4 border-b border-charcoal-100">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-brand-600" />
-                    <h3 className="font-bold text-charcoal-900 text-sm">Tomorrow's Forecast</h3>
+                    <h3 className="font-bold text-charcoal-900 text-sm">
+                      Tomorrow's Forecast
+                    </h3>
                   </div>
                   <span className="text-[10px] sm:text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800">
                     Confidence: 87%
@@ -403,19 +498,30 @@ const HomePage = () => {
 
                 <div className="space-y-3 text-xs">
                   <div className="flex justify-between items-center p-3 bg-white rounded-xl border border-charcoal-100">
-                    <span className="text-charcoal-600 font-medium">Expected Surplus:</span>
-                    <span className="font-extrabold text-charcoal-900 text-sm">24–31 meals</span>
+                    <span className="text-charcoal-600 font-medium">
+                      Expected Surplus:
+                    </span>
+                    <span className="font-extrabold text-charcoal-900 text-sm">
+                      24–31 meals
+                    </span>
                   </div>
 
                   <div className="flex justify-between items-center p-3 bg-white rounded-xl border border-charcoal-100">
-                    <span className="text-charcoal-600 font-medium">Likely Surplus Category:</span>
-                    <span className="font-bold text-brand-700">Prepared meals (Buffet)</span>
+                    <span className="text-charcoal-600 font-medium">
+                      Likely Surplus Category:
+                    </span>
+                    <span className="font-bold text-brand-700">
+                      Prepared meals (Buffet)
+                    </span>
                   </div>
 
                   <div className="p-4 bg-brand-50 border border-brand-200 rounded-xl">
-                    <p className="font-bold text-brand-900 mb-1">Recommended Action:</p>
+                    <p className="font-bold text-brand-900 mb-1">
+                      Recommended Action:
+                    </p>
                     <p className="text-brand-800 font-medium leading-relaxed">
-                      Reduce preparation volume by <strong>12%</strong> for lunch buffet service to optimize food yield.
+                      Reduce preparation volume by <strong>12%</strong> for
+                      lunch buffet service to optimize food yield.
                     </p>
                   </div>
                 </div>
@@ -432,16 +538,27 @@ const HomePage = () => {
             Ready to give good food another plate?
           </h2>
           <p className="text-brand-100 max-w-xl mx-auto text-xs sm:text-lg mb-8 font-medium">
-            Join leading hotels, restaurants, bakeries, and NGOs in Noida / Delhi NCR building a zero-food-waste ecosystem.
+            Join leading hotels, restaurants, bakeries, and NGOs in Noida /
+            Delhi NCR building a zero-food-waste ecosystem.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/signup" className="w-full sm:w-auto">
-              <Button size="lg" variant="secondary" iconRight={ArrowRight} fullWidth>
+              <Button
+                size="lg"
+                variant="secondary"
+                iconRight={ArrowRight}
+                fullWidth
+              >
                 Register Your Organization
               </Button>
             </Link>
             <Link to="/food" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" fullWidth className="bg-white/10 text-white border-white/30 hover:bg-white/20">
+              <Button
+                size="lg"
+                variant="outline"
+                fullWidth
+                className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+              >
                 Browse Surplus Listings
               </Button>
             </Link>

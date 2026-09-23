@@ -1,33 +1,45 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Clock, MapPin, Utensils, ShieldCheck, ArrowRight, AlertTriangle } from 'lucide-react';
-import Card from '../common/Card';
-import Badge from '../common/Badge';
-import Button from '../common/Button';
-import { useCountdown } from '../../hooks/useCountdown';
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  Clock,
+  MapPin,
+  Utensils,
+  ShieldCheck,
+  ArrowRight,
+  AlertTriangle,
+} from "lucide-react";
+import Card from "../common/Card";
+import Badge from "../common/Badge";
+import Button from "../common/Button";
+import { useCountdown } from "../../hooks/useCountdown";
 
 const DEFAULT_FOOD_IMAGE =
-  'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80';
+  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80";
 
-const FoodCard = ({ food, onReserve, className = '' }) => {
+const FoodCard = ({ food, onReserve, className = "" }) => {
   if (!food) return null;
 
   const foodId = food._id || food.id;
 
-  const name = food.name || 'Surplus Food Item';
+  const name = food.name || "Surplus Food Item";
   const businessName =
+    food.businessId?.businessName ||
     food.businessId?.organizationName ||
     food.businessId?.name ||
     food.businessName ||
-    'Commercial Partner';
+    "Partner";
 
   const addressLocation =
-    food.pickupLocation?.address || food.location || 'Noida Sector 62';
-  const distanceText = food.distanceText || 'Nearby • 1.2 km';
+    food.pickupLocation?.address ||
+    (food.businessId?.city
+      ? `${food.businessId.city}, ${food.businessId.state}`
+      : "Location provided upon booking");
+
+  const distanceText = food.distanceText || null;
 
   const imageSrc = food.image || DEFAULT_FOOD_IMAGE;
   const quantity = food.quantity !== undefined ? food.quantity : 1;
-  const quantityUnit = food.quantityUnit || 'servings';
+  const quantityUnit = food.quantityUnit || "servings";
   const quantityDisplay = food.quantityText || `${quantity} ${quantityUnit}`;
 
   const price = food.price || 0;
@@ -43,26 +55,27 @@ const FoodCard = ({ food, onReserve, className = '' }) => {
     useCountdown(food.expiryTime);
 
   const formattedDeadline = isExpired
-    ? 'Expired'
+    ? "Expired"
     : timeRemainingText
-    ? timeRemainingText
-    : food.expiryTime
-    ? `Before ${new Date(food.expiryTime).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      })}`
-    : food.pickupDeadline || 'Today before 8:30 PM';
+      ? timeRemainingText
+      : food.expiryTime
+        ? `Before ${new Date(food.expiryTime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}`
+        : food.pickupDeadline || "Today before 8:30 PM";
 
-  const category = food.category || 'Prepared Meals';
-  let status = food.status || 'AVAILABLE';
+  const category = food.category || "Prepared Meals";
+  let status = food.status || "AVAILABLE";
 
-  if (isExpired && status !== 'EXPIRED') {
-    status = 'EXPIRED';
-  } else if (quantity <= 0 && status !== 'EXPIRED') {
-    status = 'SOLD_OUT';
+  if (isExpired && status !== "EXPIRED") {
+    status = "EXPIRED";
+  } else if (quantity <= 0 && status !== "EXPIRED") {
+    status = "SOLD_OUT";
   }
 
-  const isReservable = status !== 'EXPIRED' && status !== 'SOLD_OUT' && !isExpired && quantity > 0;
+  const isReservable =
+    status !== "EXPIRED" && status !== "SOLD_OUT" && !isExpired && quantity > 0;
 
   const handleImageError = (e) => {
     e.target.src = DEFAULT_FOOD_IMAGE;
@@ -138,8 +151,12 @@ const FoodCard = ({ food, onReserve, className = '' }) => {
                 {quantityDisplay}
               </span>
             </div>
-            <div className={`p-2 rounded-xl border flex items-center gap-1.5 ${isAlmostExpired ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-surface-50 border-charcoal-100 text-charcoal-600'}`}>
-              <Clock className={`w-3.5 h-3.5 shrink-0 ${isAlmostExpired ? 'text-amber-600 animate-pulse' : 'text-amber-600'}`} />
+            <div
+              className={`p-2 rounded-xl border flex items-center gap-1.5 ${isAlmostExpired ? "bg-amber-50 border-amber-200 text-amber-900" : "bg-surface-50 border-charcoal-100 text-charcoal-600"}`}
+            >
+              <Clock
+                className={`w-3.5 h-3.5 shrink-0 ${isAlmostExpired ? "text-amber-600 animate-pulse" : "text-amber-600"}`}
+              />
               <span className="truncate font-extrabold">
                 {formattedDeadline}
               </span>
@@ -154,7 +171,9 @@ const FoodCard = ({ food, onReserve, className = '' }) => {
               Recovery Price
             </span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-black text-charcoal-900">₹{price}</span>
+              <span className="text-lg font-black text-charcoal-900">
+                ₹{price}
+              </span>
               {originalPrice && originalPrice > price && (
                 <span className="text-xs text-charcoal-400 line-through font-semibold">
                   ₹{originalPrice}
@@ -166,22 +185,30 @@ const FoodCard = ({ food, onReserve, className = '' }) => {
           {onReserve ? (
             <Button
               size="sm"
-              variant={isReservable ? 'primary' : 'outline'}
+              variant={isReservable ? "primary" : "outline"}
               disabled={!isReservable}
               onClick={() => isReservable && onReserve(food)}
               iconRight={isReservable ? ArrowRight : undefined}
             >
-              {status === 'EXPIRED' ? 'Expired' : status === 'SOLD_OUT' ? 'Sold Out' : 'Reserve'}
+              {status === "EXPIRED"
+                ? "Expired"
+                : status === "SOLD_OUT"
+                  ? "Sold Out"
+                  : "Reserve"}
             </Button>
           ) : (
             <Link to={`/food/${foodId}`}>
               <Button
                 size="sm"
-                variant={isReservable ? 'primary' : 'outline'}
+                variant={isReservable ? "primary" : "outline"}
                 disabled={!isReservable}
                 iconRight={isReservable ? ArrowRight : undefined}
               >
-                {status === 'EXPIRED' ? 'Expired' : status === 'SOLD_OUT' ? 'Sold Out' : 'Reserve'}
+                {status === "EXPIRED"
+                  ? "Expired"
+                  : status === "SOLD_OUT"
+                    ? "Sold Out"
+                    : "Reserve"}
               </Button>
             </Link>
           )}

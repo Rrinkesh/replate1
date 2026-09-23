@@ -1,21 +1,21 @@
-import api from './api';
+import api from "./api";
 
 export const reservationService = {
   // Reserve / Claim Surplus Food Listing (Recipient)
   createReservation: async (foodId, quantity = 1) => {
-    const response = await api.post('/reservations', { foodId, quantity });
+    const response = await api.post("/reservations", { foodId, quantity });
     return response.data;
   },
 
   // Fetch Current Recipient User's Claims & Reservations
   getMyReservations: async (params = {}) => {
-    const response = await api.get('/reservations/my', { params });
+    const response = await api.get("/reservations/my", { params });
     return response.data;
   },
 
   // Fetch Incoming Reservations for Authenticated Business Owner
   getBusinessReservations: async () => {
-    const response = await api.get('/reservations/business');
+    const response = await api.get("/reservations/business");
     return response.data;
   },
 

@@ -1,6 +1,6 @@
-import React from 'react';
-import Card from './Card';
-import LoadingSpinner from './LoadingSpinner';
+import React from "react";
+import Card from "./Card";
+import LoadingSpinner from "./LoadingSpinner";
 
 const DashboardCard = ({
   title,
@@ -9,8 +9,8 @@ const DashboardCard = ({
   children,
   footer,
   isLoading = false,
-  variant = 'default',
-  className = '',
+  variant = "default",
+  className = "",
 }) => {
   return (
     <Card variant={variant} className={`flex flex-col h-full ${className}`}>
@@ -34,7 +34,11 @@ const DashboardCard = ({
       <div className="flex-1">
         {isLoading ? (
           <div className="py-12">
-            <LoadingSpinner size="md" message="Loading dashboard data..." showIcon={false} />
+            <LoadingSpinner
+              size="md"
+              message="Loading dashboard data..."
+              showIcon={false}
+            />
           </div>
         ) : (
           children
@@ -42,9 +46,7 @@ const DashboardCard = ({
       </div>
 
       {footer && (
-        <div className="mt-4 pt-3 border-t border-charcoal-100">
-          {footer}
-        </div>
+        <div className="mt-4 pt-3 border-t border-charcoal-100">{footer}</div>
       )}
     </Card>
   );

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Utensils,
@@ -14,39 +14,43 @@ import {
   X,
   Bell,
   Sparkles,
-} from 'lucide-react';
-import Logo from '../common/Logo';
-import { useAuth } from '../../context/AuthContext';
+} from "lucide-react";
+import Logo from "../common/Logo";
+import { useAuth } from "../../context/AuthContext";
 
 const getNavItemsForRole = (role) => {
-  if (role === 'recipient') {
+  if (role === "recipient") {
     return [
-      { name: 'Overview', path: '/recipient/dashboard', icon: LayoutDashboard },
-      { name: 'Available Food', path: '/food', icon: Utensils },
-      { name: 'My Profile', path: '/profile', icon: User },
-      { name: 'Settings', path: '/settings', icon: Settings },
+      { name: "Overview", path: "/recipient/dashboard", icon: LayoutDashboard },
+      { name: "Available Food", path: "/food", icon: Utensils },
+      { name: "My Profile", path: "/profile", icon: User },
+      { name: "Settings", path: "/settings", icon: Settings },
     ];
   }
-  if (role === 'admin') {
+  if (role === "admin") {
     return [
-      { name: 'Overview', path: '/admin/dashboard', icon: LayoutDashboard },
-      { name: 'Partner Verifications', path: '/admin/dashboard', icon: ShieldCheck },
-      { name: 'All Listings', path: '/food', icon: Utensils },
-      { name: 'Settings', path: '/settings', icon: Settings },
+      { name: "Overview", path: "/admin/dashboard", icon: LayoutDashboard },
+      {
+        name: "Verification Queue",
+        path: "/admin/verifications",
+        icon: ShieldCheck,
+      },
+      { name: "All Listings", path: "/food", icon: Utensils },
+      { name: "Settings", path: "/settings", icon: Settings },
     ];
   }
   // Default Business role
   return [
-    { name: 'Overview', path: '/business/dashboard', icon: LayoutDashboard },
-    { name: 'Reservations', path: '/business/reservations', icon: FileText },
-    { name: 'Post Surplus', path: '/list-food', icon: PlusCircle },
-    { name: 'Marketplace', path: '/food', icon: Utensils },
-    { name: 'Profile', path: '/profile', icon: User },
-    { name: 'Settings', path: '/settings', icon: Settings },
+    { name: "Overview", path: "/business/dashboard", icon: LayoutDashboard },
+    { name: "Reservations", path: "/business/reservations", icon: FileText },
+    { name: "Post Surplus", path: "/list-food", icon: PlusCircle },
+    { name: "Marketplace", path: "/food", icon: Utensils },
+    { name: "Profile", path: "/profile", icon: User },
+    { name: "Settings", path: "/settings", icon: Settings },
   ];
 };
 
-const DashboardLayout = ({ children, title = 'Dashboard' }) => {
+const DashboardLayout = ({ children, title = "Dashboard" }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { currentUser, userRole, logout, switchRole } = useAuth();
   const navigate = useNavigate();
@@ -56,9 +60,9 @@ const DashboardLayout = ({ children, title = 'Dashboard' }) => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate("/login");
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error("Logout error:", err);
     }
   };
 
@@ -71,33 +75,11 @@ const DashboardLayout = ({ children, title = 'Dashboard' }) => {
           <Logo size="md" showTagline />
         </div>
 
-        {/* User Role Switcher Pill (Dev / Role Testing) */}
-        <div className="px-4 py-3 bg-surface-50 border-b border-charcoal-100 flex items-center justify-between text-xs">
-          <span className="font-bold text-charcoal-500 uppercase tracking-wider text-[10px]">
-            Portal Role:
-          </span>
-          <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-charcoal-200">
-            {['business', 'recipient', 'admin'].map((r) => (
-              <button
-                key={r}
-                onClick={() => {
-                  switchRole(r);
-                  navigate(`/${r}/dashboard`);
-                }}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize transition-colors ${
-                  userRole === r
-                    ? 'bg-brand-600 text-white'
-                    : 'text-charcoal-600 hover:text-charcoal-900'
-                }`}
-              >
-                {r[0]}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Navigation Items */}
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto" aria-label="Dashboard Navigation">
+        <nav
+          className="flex-1 p-4 space-y-1.5 overflow-y-auto"
+          aria-label="Dashboard Navigation"
+        >
           {navItems.map((item) => (
             <NavLink
               key={item.name}
@@ -106,8 +88,8 @@ const DashboardLayout = ({ children, title = 'Dashboard' }) => {
                 flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-150
                 ${
                   isActive
-                    ? 'bg-brand-50 text-brand-700 shadow-soft-xs border border-brand-200/50'
-                    : 'text-charcoal-700 hover:text-charcoal-900 hover:bg-surface-100'
+                    ? "bg-brand-50 text-brand-700 shadow-soft-xs border border-brand-200/50"
+                    : "text-charcoal-700 hover:text-charcoal-900 hover:bg-surface-100"
                 }
               `}
             >
@@ -122,11 +104,15 @@ const DashboardLayout = ({ children, title = 'Dashboard' }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 truncate">
               <div className="w-8 h-8 rounded-full bg-brand-600 text-white font-black flex items-center justify-center text-xs shrink-0">
-                {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : 'U'}
+                {currentUser?.displayName
+                  ? currentUser.displayName[0].toUpperCase()
+                  : "U"}
               </div>
               <div className="truncate">
                 <p className="text-xs font-bold text-charcoal-900 truncate">
-                  {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Partner User'}
+                  {currentUser?.displayName ||
+                    currentUser?.email?.split("@")[0] ||
+                    "Partner User"}
                 </p>
                 <p className="text-[10px] text-brand-700 font-semibold uppercase tracking-wider">
                   {userRole}
@@ -210,8 +196,8 @@ const DashboardLayout = ({ children, title = 'Dashboard' }) => {
                       flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-all
                       ${
                         isActive
-                          ? 'bg-brand-50 text-brand-700 font-extrabold'
-                          : 'text-charcoal-700 hover:bg-surface-100'
+                          ? "bg-brand-50 text-brand-700 font-extrabold"
+                          : "text-charcoal-700 hover:bg-surface-100"
                       }
                     `}
                   >

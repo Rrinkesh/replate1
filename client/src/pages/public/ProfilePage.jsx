@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   User,
   Mail,
@@ -12,34 +12,45 @@ import {
   HeartHandshake,
   AlertCircle,
   Shield,
-} from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { PageHeader, Card, Badge, Button, Input, Select, Modal, LoadingSpinner } from '../../components/common';
-import { businessService } from '../../services/businessService';
-import { recipientService } from '../../services/recipientService';
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import {
+  PageHeader,
+  Card,
+  Badge,
+  Button,
+  LoadingSpinner,
+  EmptyState,
+  Modal,
+  Input,
+  Select,
+  ImageUploader,
+} from "../../components/common";
+import { businessService } from "../../services/businessService";
+import { recipientService } from "../../services/recipientService";
 
 const ProfilePage = () => {
   const { currentUser, userRole, mongoUser } = useAuth();
 
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    type: '',
-    description: '',
-    address: '',
-    city: 'Noida',
-    state: 'Uttar Pradesh',
-    pincode: '201301',
+    name: "",
+    email: "",
+    phone: "",
+    type: "",
+    description: "",
+    address: "",
+    city: "Noida",
+    state: "Uttar Pradesh",
+    pincode: "201301",
     isVerified: true,
-    profileImage: '',
+    profileImage: "",
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({ ...profileData });
-  const [formError, setFormError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [formError, setFormError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch role-specific profile data on mount
@@ -49,73 +60,113 @@ const ProfilePage = () => {
     const fetchProfile = async () => {
       try {
         setIsLoading(true);
-        if (userRole === 'business') {
+        if (userRole === "business") {
           const res = await businessService.getMyBusinessProfile();
           if (isMounted && res.success && res.profile) {
             const p = res.profile;
             setProfileData({
-              name: p.businessName || mongoUser?.organizationName || 'Commercial Kitchen',
-              email: currentUser?.email || 'partner@replate.org',
-              phone: p.phone || mongoUser?.phone || '+91 98102 34567',
-              type: p.businessType || 'RESTAURANT',
-              description: p.description || 'Verified commercial food surplus partner in Noida.',
-              address: p.address || 'Plot 2, Sector 55',
-              city: p.city || 'Noida',
-              state: p.state || 'Uttar Pradesh',
-              pincode: p.pincode || '201301',
+              name:
+                p.businessName ||
+                mongoUser?.organizationName ||
+                "Commercial Kitchen",
+              email: currentUser?.email || "partner@replate.org",
+              phone: p.phone || mongoUser?.phone || "+91 98102 34567",
+              type: p.businessType || "RESTAURANT",
+              description:
+                p.description ||
+                "Verified commercial food surplus partner in Noida.",
+              address: p.address || "Plot 2, Sector 55",
+              city: p.city || "Noida",
+              state: p.state || "Uttar Pradesh",
+              pincode: p.pincode || "201301",
               isVerified: p.isVerified ?? true,
-              profileImage: p.profileImage || currentUser?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+              profileImage:
+                p.profileImage ||
+                currentUser?.photoURL ||
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
             });
           }
-        } else if (userRole === 'recipient') {
+        } else if (userRole === "recipient") {
           const res = await recipientService.getMyRecipientProfile();
           if (isMounted && res.success && res.profile) {
             const p = res.profile;
             setProfileData({
-              name: p.organizationName || mongoUser?.organizationName || 'Grace Care Shelter',
-              email: currentUser?.email || 'shelter@replate.org',
-              phone: p.phone || mongoUser?.phone || '+91 98765 43210',
-              type: p.recipientType || 'NGO',
-              description: p.description || 'Community shelter distributing surplus meals in Noida Sector 62.',
-              address: p.address || 'Community Center, Sector 62',
-              city: p.city || 'Noida',
-              state: p.state || 'Uttar Pradesh',
-              pincode: p.pincode || '201309',
+              name:
+                p.organizationName ||
+                mongoUser?.organizationName ||
+                "Grace Care Shelter",
+              email: currentUser?.email || "shelter@replate.org",
+              phone: p.phone || mongoUser?.phone || "+91 98765 43210",
+              type: p.recipientType || "NGO",
+              description:
+                p.description ||
+                "Community shelter distributing surplus meals in Noida Sector 62.",
+              address: p.address || "Community Center, Sector 62",
+              city: p.city || "Noida",
+              state: p.state || "Uttar Pradesh",
+              pincode: p.pincode || "201309",
               isVerified: p.isVerified ?? true,
-              profileImage: p.profileImage || currentUser?.photoURL || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+              profileImage:
+                p.profileImage ||
+                currentUser?.photoURL ||
+                "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
             });
           }
         } else {
           // Admin role
           setProfileData({
-            name: currentUser?.displayName || mongoUser?.name || 'RePlate Super Admin',
-            email: currentUser?.email || 'admin@replate.org',
-            phone: '+91 99999 00000',
-            type: 'SUPER_ADMIN',
-            description: 'Platform Super Administrator with system verification privileges.',
-            address: 'Headquarters, Sector 62',
-            city: 'Noida',
-            state: 'Uttar Pradesh',
-            pincode: '201301',
+            name:
+              currentUser?.displayName ||
+              mongoUser?.name ||
+              "RePlate Super Admin",
+            email: currentUser?.email || "admin@replate.org",
+            phone: "+91 99999 00000",
+            type: "SUPER_ADMIN",
+            description:
+              "Platform Super Administrator with system verification privileges.",
+            address: "Headquarters, Sector 62",
+            city: "Noida",
+            state: "Uttar Pradesh",
+            pincode: "201301",
             isVerified: true,
-            profileImage: currentUser?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+            profileImage:
+              currentUser?.photoURL ||
+              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
           });
         }
       } catch (err) {
-        console.warn('Profile fetch warning (using default profile):', err.message);
+        console.warn(
+          "Profile fetch warning (using default profile):",
+          err.message,
+        );
         // Fallback default state
         setProfileData({
-          name: mongoUser?.organizationName || mongoUser?.name || (userRole === 'business' ? 'Radisson Executive Partner' : 'Grace Care Shelter'),
-          email: currentUser?.email || 'partner@replate.org',
-          phone: '+91 98102 34567',
-          type: userRole === 'business' ? 'RESTAURANT' : userRole === 'recipient' ? 'NGO' : 'SUPER_ADMIN',
-          description: userRole === 'business' ? 'Verified commercial food surplus partner.' : 'Verified community shelter organization.',
-          address: 'Sector 55',
-          city: 'Noida',
-          state: 'Uttar Pradesh',
-          pincode: '201301',
+          name:
+            mongoUser?.organizationName ||
+            mongoUser?.name ||
+            (userRole === "business"
+              ? "Radisson Executive Partner"
+              : "Grace Care Shelter"),
+          email: currentUser?.email || "partner@replate.org",
+          phone: "+91 98102 34567",
+          type:
+            userRole === "business"
+              ? "RESTAURANT"
+              : userRole === "recipient"
+                ? "NGO"
+                : "SUPER_ADMIN",
+          description:
+            userRole === "business"
+              ? "Verified commercial food surplus partner."
+              : "Verified community shelter organization.",
+          address: "Sector 55",
+          city: "Noida",
+          state: "Uttar Pradesh",
+          pincode: "201301",
           isVerified: true,
-          profileImage: currentUser?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+          profileImage:
+            currentUser?.photoURL ||
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
         });
       } finally {
         if (isMounted) setIsLoading(false);
@@ -130,17 +181,21 @@ const ProfilePage = () => {
 
   const handleOpenEditModal = () => {
     setEditFormData({ ...profileData });
-    setFormError('');
+    setFormError("");
     setIsEditModalOpen(true);
   };
 
   const validateEditForm = () => {
     if (!editFormData.name.trim()) {
-      setFormError(userRole === 'recipient' ? 'Organization name is required.' : 'Business name is required.');
+      setFormError(
+        userRole === "recipient"
+          ? "Organization name is required."
+          : "Business name is required.",
+      );
       return false;
     }
     if (editFormData.pincode && editFormData.pincode.length !== 6) {
-      setFormError('Pincode must be exactly 6 digits.');
+      setFormError("Pincode must be exactly 6 digits.");
       return false;
     }
     return true;
@@ -148,13 +203,13 @@ const ProfilePage = () => {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    setFormError('');
+    setFormError("");
 
     if (!validateEditForm()) return;
 
     try {
       setIsSaving(true);
-      if (userRole === 'business') {
+      if (userRole === "business") {
         await businessService.updateBusinessProfile({
           businessName: editFormData.name,
           businessType: editFormData.type,
@@ -164,8 +219,9 @@ const ProfilePage = () => {
           city: editFormData.city,
           state: editFormData.state,
           pincode: editFormData.pincode,
+          profileImage: editFormData.profileImage,
         });
-      } else if (userRole === 'recipient') {
+      } else if (userRole === "recipient") {
         await recipientService.updateRecipientProfile({
           organizationName: editFormData.name,
           recipientType: editFormData.type,
@@ -175,20 +231,21 @@ const ProfilePage = () => {
           city: editFormData.city,
           state: editFormData.state,
           pincode: editFormData.pincode,
+          profileImage: editFormData.profileImage,
         });
       }
 
       setProfileData({ ...editFormData });
       setIsEditModalOpen(false);
-      setSuccessMessage('Profile information updated successfully!');
-      setTimeout(() => setSuccessMessage(''), 4000);
+      setSuccessMessage("Profile information updated successfully!");
+      setTimeout(() => setSuccessMessage(""), 4000);
     } catch (err) {
-      console.warn('Profile update API error:', err.message);
+      console.warn("Profile update API error:", err.message);
       // Fallback state update
       setProfileData({ ...editFormData });
       setIsEditModalOpen(false);
-      setSuccessMessage('Profile updated in session successfully!');
-      setTimeout(() => setSuccessMessage(''), 4000);
+      setSuccessMessage("Profile updated in session successfully!");
+      setTimeout(() => setSuccessMessage(""), 4000);
     } finally {
       setIsSaving(false);
     }
@@ -206,11 +263,15 @@ const ProfilePage = () => {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Page Header */}
       <PageHeader
-        title={`${userRole === 'business' ? 'Business Partner' : userRole === 'recipient' ? 'Recipient Organization' : 'Admin'} Profile`}
+        title={`${userRole === "business" ? "Business Partner" : userRole === "recipient" ? "Recipient Organization" : "Admin"} Profile`}
         subtitle="Manage your RePlate account identity, contact details, and organization verification status."
         actions={
-          userRole !== 'admin' && (
-            <Button variant="primary" iconLeft={Edit3} onClick={handleOpenEditModal}>
+          userRole !== "admin" && (
+            <Button
+              variant="primary"
+              iconLeft={Edit3}
+              onClick={handleOpenEditModal}
+            >
               Edit Profile
             </Button>
           )
@@ -238,7 +299,7 @@ const ProfilePage = () => {
                 alt={profileData.name}
                 className="w-24 h-24 rounded-3xl object-cover border-2 border-brand-200 shadow-soft-sm"
               />
-              {userRole !== 'admin' && (
+              {userRole !== "admin" && (
                 <button
                   onClick={handleOpenEditModal}
                   className="absolute inset-0 rounded-3xl bg-charcoal-950/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -257,20 +318,23 @@ const ProfilePage = () => {
                   {profileData.name}
                 </h2>
                 <Badge
-                  status={profileData.isVerified ? 'Verified' : 'Expiring Soon'}
+                  status={profileData.isVerified ? "Verified" : "Expiring Soon"}
                   size="sm"
                 />
               </div>
 
               <p className="text-sm font-semibold text-charcoal-600 flex items-center justify-center sm:justify-start gap-1.5">
-                {userRole === 'business' ? (
+                {userRole === "business" ? (
                   <Building2 className="w-4 h-4 text-brand-600" />
-                ) : userRole === 'recipient' ? (
+                ) : userRole === "recipient" ? (
                   <HeartHandshake className="w-4 h-4 text-brand-600" />
                 ) : (
                   <Shield className="w-4 h-4 text-brand-600" />
                 )}
-                <span className="font-bold text-brand-700">{profileData.type}</span> • {profileData.description}
+                <span className="font-bold text-brand-700">
+                  {profileData.type}
+                </span>{" "}
+                • {profileData.description}
               </p>
 
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-1 text-xs">
@@ -278,7 +342,8 @@ const ProfilePage = () => {
                   Role: {userRole}
                 </span>
                 <span className="text-charcoal-500 font-medium">
-                  ID: RPL-USR-{currentUser?.uid ? currentUser.uid.substring(0, 8) : '9421'}
+                  ID: RPL-USR-
+                  {currentUser?.uid ? currentUser.uid.substring(0, 8) : "9421"}
                 </span>
               </div>
             </div>
@@ -292,8 +357,12 @@ const ProfilePage = () => {
                   <Mail className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase font-bold text-charcoal-500">Email Address</p>
-                  <p className="text-sm font-extrabold text-charcoal-900">{profileData.email}</p>
+                  <p className="text-[11px] uppercase font-bold text-charcoal-500">
+                    Email Address
+                  </p>
+                  <p className="text-sm font-extrabold text-charcoal-900">
+                    {profileData.email}
+                  </p>
                 </div>
               </div>
 
@@ -302,8 +371,12 @@ const ProfilePage = () => {
                   <Phone className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase font-bold text-charcoal-500">Contact Phone</p>
-                  <p className="text-sm font-extrabold text-charcoal-900">{profileData.phone}</p>
+                  <p className="text-[11px] uppercase font-bold text-charcoal-500">
+                    Contact Phone
+                  </p>
+                  <p className="text-sm font-extrabold text-charcoal-900">
+                    {profileData.phone}
+                  </p>
                 </div>
               </div>
             </div>
@@ -314,9 +387,12 @@ const ProfilePage = () => {
                   <MapPin className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase font-bold text-charcoal-500">Registered Address</p>
+                  <p className="text-[11px] uppercase font-bold text-charcoal-500">
+                    Registered Address
+                  </p>
                   <p className="text-sm font-extrabold text-charcoal-900">
-                    {profileData.address}, {profileData.city}, {profileData.state} {profileData.pincode}
+                    {profileData.address}, {profileData.city},{" "}
+                    {profileData.state} {profileData.pincode}
                   </p>
                 </div>
               </div>
@@ -326,7 +402,9 @@ const ProfilePage = () => {
                   <ShieldCheck className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase font-bold text-charcoal-500">Verification Status</p>
+                  <p className="text-[11px] uppercase font-bold text-charcoal-500">
+                    Verification Status
+                  </p>
                   <p className="text-sm font-extrabold text-emerald-700 flex items-center gap-1">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     Verified Partner (FSSAI / 80G Certified)
@@ -342,14 +420,18 @@ const ProfilePage = () => {
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        title={`Edit ${userRole === 'business' ? 'Business' : 'Recipient'} Profile`}
+        title={`Edit ${userRole === "business" ? "Business" : "Recipient"} Profile`}
         subtitle="Update your contact, location, and organization details."
         footer={
           <>
             <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" isLoading={isSaving} onClick={handleSaveProfile}>
+            <Button
+              variant="primary"
+              isLoading={isSaving}
+              onClick={handleSaveProfile}
+            >
               Save Profile Changes
             </Button>
           </>
@@ -362,39 +444,63 @@ const ProfilePage = () => {
           </div>
         )}
 
-        <form onSubmit={handleSaveProfile} className="space-y-4">
+        <form
+          id="profile-edit-form"
+          onSubmit={handleSaveProfile}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-xs sm:text-sm font-bold text-charcoal-800 mb-1.5">
+              Profile Image Upload
+            </label>
+            <ImageUploader
+              currentImage={editFormData.profileImage}
+              onUploadSuccess={(url) =>
+                setEditFormData({ ...editFormData, profileImage: url })
+              }
+            />
+          </div>
+
           <Input
-            label={userRole === 'business' ? 'Business / Kitchen Name' : 'Organization / NGO Name'}
+            label={
+              userRole === "recipient" ? "Organization Name" : "Business Name"
+            }
             value={editFormData.name}
-            onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+            onChange={(e) =>
+              setEditFormData({ ...editFormData, name: e.target.value })
+            }
             required
           />
 
-          {userRole === 'business' ? (
+          {userRole === "business" ? (
             <Select
               label="Business Type"
               value={editFormData.type}
-              onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, type: e.target.value })
+              }
               options={[
-                { value: 'HOTEL', label: 'Hotel' },
-                { value: 'RESTAURANT', label: 'Restaurant' },
-                { value: 'CAFE', label: 'Café' },
-                { value: 'BAKERY', label: 'Bakery' },
-                { value: 'CLOUD_KITCHEN', label: 'Cloud Kitchen' },
-                { value: 'OTHER', label: 'Other Commercial' },
+                { value: "HOTEL", label: "Hotel" },
+                { value: "RESTAURANT", label: "Restaurant" },
+                { value: "CAFE", label: "Café" },
+                { value: "BAKERY", label: "Bakery" },
+                { value: "CLOUD_KITCHEN", label: "Cloud Kitchen" },
+                { value: "OTHER", label: "Other Commercial" },
               ]}
             />
           ) : (
             <Select
               label="Recipient Type"
               value={editFormData.type}
-              onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, type: e.target.value })
+              }
               options={[
-                { value: 'NGO', label: 'Registered NGO Shelter' },
-                { value: 'COMMUNITY', label: 'Community Kitchen' },
-                { value: 'ORGANIZATION', label: 'Charity Organization' },
-                { value: 'INDIVIDUAL', label: 'Individual Volunteer' },
-                { value: 'BUYER', label: 'Value Recipient Buyer' },
+                { value: "NGO", label: "Registered NGO Shelter" },
+                { value: "COMMUNITY", label: "Community Kitchen" },
+                { value: "ORGANIZATION", label: "Charity Organization" },
+                { value: "INDIVIDUAL", label: "Individual Volunteer" },
+                { value: "BUYER", label: "Value Recipient Buyer" },
               ]}
             />
           )}
@@ -406,7 +512,12 @@ const ProfilePage = () => {
             <textarea
               rows={2}
               value={editFormData.description}
-              onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({
+                  ...editFormData,
+                  description: e.target.value,
+                })
+              }
               className="w-full rounded-xl border border-charcoal-200 p-3 text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600"
             />
           </div>
@@ -414,14 +525,18 @@ const ProfilePage = () => {
           <Input
             label="Phone Number"
             value={editFormData.phone}
-            onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+            onChange={(e) =>
+              setEditFormData({ ...editFormData, phone: e.target.value })
+            }
             required
           />
 
           <Input
             label="Address"
             value={editFormData.address}
-            onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+            onChange={(e) =>
+              setEditFormData({ ...editFormData, address: e.target.value })
+            }
             required
           />
 
@@ -429,19 +544,25 @@ const ProfilePage = () => {
             <Input
               label="City"
               value={editFormData.city}
-              onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, city: e.target.value })
+              }
               required
             />
             <Input
               label="State"
               value={editFormData.state}
-              onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, state: e.target.value })
+              }
               required
             />
             <Input
               label="Pincode"
               value={editFormData.pincode}
-              onChange={(e) => setEditFormData({ ...editFormData, pincode: e.target.value })}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, pincode: e.target.value })
+              }
               required
             />
           </div>

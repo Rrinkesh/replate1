@@ -1,8 +1,8 @@
-const Reservation = require('../models/Reservation');
-const Food = require('../models/Food');
-const User = require('../models/User');
-const { calculateFoodStatus } = require('../services/foodStatusService');
-const { createNotificationHelper } = require('../utils/notificationUtils');
+const Reservation = require("../models/Reservation");
+const Food = require("../models/Food");
+const User = require("../models/User");
+const { calculateFoodStatus } = require("../services/foodStatusService");
+const { createNotificationHelper } = require("../utils/notificationUtils");
 
 /**
  * Helper: Get authenticated user from req.user
@@ -10,7 +10,7 @@ const { createNotificationHelper } = require('../utils/notificationUtils');
 const getAuthenticatedUser = async (req) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
-    const err = new Error('Unauthorized - Firebase user token missing');
+    const err = new Error("Unauthorized - Firebase user token missing");
     err.statusCode = 401;
     throw err;
   }
@@ -18,9 +18,9 @@ const getAuthenticatedUser = async (req) => {
   if (!mongoUser) {
     mongoUser = await User.create({
       firebaseUid,
-      email: req.user.email || 'user@replate.org',
-      name: req.user.name || 'RePlate User',
-      role: 'RECIPIENT',
+      email: req.user.email || "user@replate.org",
+      name: req.user.name || "RePlate User",
+      role: "RECIPIENT",
     });
   }
   return mongoUser;
@@ -35,9 +35,11 @@ const createReservation = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
 
-    if (mongoUser.role !== 'RECIPIENT' && mongoUser.role !== 'ADMIN') {
+    if (mongoUser.role !== "RECIPIENT" && mongoUser.role !== "ADMIN") {
       res.status(403);
-      throw new Error('Forbidden - Only verified Recipient accounts can reserve surplus food');
+      throw new Error(
+        "Forbidden - Only verified Recipient accounts can reserve surplus food",
+      );
     }
 
     const { foodId, quantity } = req.body;
@@ -47,43 +49,48 @@ const createReservation = async (req, res, next) => {
 
     if (!foodId) {
       res.status(400);
-      throw new Error('Food ID is required to create a reservation');
+      throw new Error("Food ID is required to create a reservation");
     }
 
     // 1. Fetch initial food listing to inspect status & expiry
     const food = await Food.findById(foodId);
     if (!food) {
       res.status(404);
-      throw new Error('Food listing not found');
+      throw new Error("Food listing not found");
     }
 
     // Centralized status check
     const currentComputedStatus = calculateFoodStatus(food);
 
-    if (currentComputedStatus === 'EXPIRED') {
-      if (food.status !== 'EXPIRED') {
-        food.status = 'EXPIRED';
+    if (currentComputedStatus === "EXPIRED") {
+      if (food.status !== "EXPIRED") {
+        food.status = "EXPIRED";
         await food.save().catch(() => {});
       }
       res.status(400);
-      throw new Error('This surplus food listing has expired and cannot be reserved');
+      throw new Error(
+        "This surplus food listing has expired and cannot be reserved",
+      );
     }
 
-    if (currentComputedStatus === 'SOLD_OUT' || food.quantity < 1) {
+    if (currentComputedStatus === "SOLD_OUT" || food.quantity < 1) {
       res.status(400);
-      throw new Error('This food listing is sold out and no longer available');
+      throw new Error("This food listing is sold out and no longer available");
     }
 
     if (requestedQty > food.quantity) {
       res.status(400);
-      throw new Error(`Requested quantity exceeds available stock (${food.quantity} ${food.quantityUnit || 'units'} available)`);
+      throw new Error(
+        `Requested quantity exceeds available stock (${food.quantity} ${food.quantityUnit || "units"} available)`,
+      );
     }
 
     // 2. Concurrency-Safe Atomic Stock Deduction
+    const now = new Date();
     const updatedFood = await Food.findOneAndUpdate(
       {
         _id: foodId,
-        status: { $in: ['AVAILABLE', 'EXPIRING_SOON', 'ALMOST_EXPIRED'] },
+        status: { $in: ["AVAILABLE", "EXPIRING_SOON", "ALMOST_EXPIRED"] },
         quantity: { $gte: requestedQty },
         $or: [
           { expiryTime: { $gt: now } },
@@ -94,18 +101,20 @@ const createReservation = async (req, res, next) => {
       {
         $inc: { quantity: -requestedQty },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedFood) {
       res.status(400);
-      throw new Error('Unable to reserve item. Stock became unavailable or has expired.');
+      throw new Error(
+        "Unable to reserve item. Stock became unavailable or has expired.",
+      );
     }
 
     // Automatically mark food as SOLD_OUT when remaining quantity reaches 0
     if (updatedFood.quantity <= 0) {
       updatedFood.quantity = 0;
-      updatedFood.status = 'SOLD_OUT';
+      updatedFood.status = "SOLD_OUT";
       await updatedFood.save();
     }
 
@@ -116,8 +125,8 @@ const createReservation = async (req, res, next) => {
     const claimCode = `RPL-${randomSuffix}`;
 
     const formattedDeadline = updatedFood.expiryTime
-      ? `Today before ${new Date(updatedFood.expiryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-      : 'Today before 8:30 PM';
+      ? `Today before ${new Date(updatedFood.expiryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+      : "Today before 8:30 PM";
 
     // Create reservation linking derived authenticated IDs
     const reservation = await Reservation.create({
@@ -127,27 +136,27 @@ const createReservation = async (req, res, next) => {
       quantity: requestedQty,
       totalPrice, // Server-calculated price
       claimCode,
-      status: 'PENDING',
+      status: "PENDING",
       reservedAt: new Date(),
       pickupTime: formattedDeadline,
     });
 
     const populatedReservation = await Reservation.findById(reservation._id)
-      .populate('foodId')
-      .populate('businessId', 'name email phone organizationName');
+      .populate("foodId")
+      .populate("businessId", "name email phone organizationName");
 
     // Automatically notify Business owner of new reservation claim
     await createNotificationHelper({
       userId: updatedFood.businessId,
-      type: 'RESERVATION_CREATED',
-      title: 'New Surplus Claim Reserved',
-      message: `${mongoUser.name || 'Recipient NGO'} reserved ${requestedQty} servings of "${updatedFood.name}". Claim code: ${claimCode}`,
+      type: "RESERVATION_CREATED",
+      title: "New Surplus Claim Reserved",
+      message: `${mongoUser.name || "Recipient NGO"} reserved ${requestedQty} servings of "${updatedFood.name}". Claim code: ${claimCode}`,
       relatedId: reservation._id,
     });
 
     res.status(201).json({
       success: true,
-      message: 'Food reservation claimed successfully',
+      message: "Food reservation claimed successfully",
       reservation: populatedReservation,
     });
   } catch (error) {
@@ -166,18 +175,21 @@ const getMyReservations = async (req, res, next) => {
     const { status } = req.query;
 
     const query = { recipientId: mongoUser._id };
-    
-    if (status && status !== 'All') {
-      if (status === 'Active') {
-        query.status = { $in: ['PENDING', 'CONFIRMED', 'READY_FOR_PICKUP'] };
+
+    if (status && status !== "All") {
+      if (status === "Active") {
+        query.status = { $in: ["PENDING", "CONFIRMED", "READY_FOR_PICKUP"] };
       } else {
-        query.status = status.toUpperCase().replace(' ', '_');
+        query.status = status.toUpperCase().replace(" ", "_");
       }
     }
 
     const reservations = await Reservation.find(query)
-      .populate('foodId')
-      .populate('businessId', 'name email phone organizationName businessType location')
+      .populate("foodId")
+      .populate(
+        "businessId",
+        "name email phone organizationName businessType location",
+      )
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -199,14 +211,19 @@ const getBusinessReservations = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
 
-    if (mongoUser.role !== 'BUSINESS' && mongoUser.role !== 'ADMIN') {
+    if (mongoUser.role !== "BUSINESS" && mongoUser.role !== "ADMIN") {
       res.status(403);
-      throw new Error('Forbidden - Only commercial business accounts can view incoming reservations');
+      throw new Error(
+        "Forbidden - Only commercial business accounts can view incoming reservations",
+      );
     }
 
     const reservations = await Reservation.find({ businessId: mongoUser._id })
-      .populate('foodId')
-      .populate('recipientId', 'name email phone organizationName recipientType')
+      .populate("foodId")
+      .populate(
+        "recipientId",
+        "name email phone organizationName recipientType",
+      )
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -229,21 +246,26 @@ const getReservationById = async (req, res, next) => {
     const mongoUser = await getAuthenticatedUser(req);
 
     const reservation = await Reservation.findById(req.params.id)
-      .populate('foodId')
-      .populate('recipientId', 'name email phone organizationName recipientType')
-      .populate('businessId', 'name email phone organizationName businessType');
+      .populate("foodId")
+      .populate(
+        "recipientId",
+        "name email phone organizationName recipientType",
+      )
+      .populate("businessId", "name email phone organizationName businessType");
 
     if (!reservation) {
       res.status(404);
-      throw new Error('Reservation not found');
+      throw new Error("Reservation not found");
     }
 
     const isRecipientOwner = reservation.recipientId._id.equals(mongoUser._id);
     const isBusinessOwner = reservation.businessId._id.equals(mongoUser._id);
 
-    if (!isRecipientOwner && !isBusinessOwner && mongoUser.role !== 'ADMIN') {
+    if (!isRecipientOwner && !isBusinessOwner && mongoUser.role !== "ADMIN") {
       res.status(403);
-      throw new Error('Forbidden - You do not have permission to view this reservation');
+      throw new Error(
+        "Forbidden - You do not have permission to view this reservation",
+      );
     }
 
     res.status(200).json({
@@ -259,9 +281,9 @@ const getReservationById = async (req, res, next) => {
  * Valid state transitions table for Reservation Workflow
  */
 const ALLOWED_TRANSITIONS = {
-  PENDING: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['READY_FOR_PICKUP', 'CANCELLED'],
-  READY_FOR_PICKUP: ['COMPLETED', 'CANCELLED'],
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["READY_FOR_PICKUP", "CANCELLED"],
+  READY_FOR_PICKUP: ["COMPLETED", "CANCELLED"],
   COMPLETED: [],
   CANCELLED: [],
   EXPIRED: [],
@@ -277,10 +299,19 @@ const updateReservationStatus = async (req, res, next) => {
     const mongoUser = await getAuthenticatedUser(req);
     const { status } = req.body;
 
-    const validStatuses = ['PENDING', 'CONFIRMED', 'READY_FOR_PICKUP', 'COMPLETED', 'CANCELLED', 'EXPIRED'];
+    const validStatuses = [
+      "PENDING",
+      "CONFIRMED",
+      "READY_FOR_PICKUP",
+      "COMPLETED",
+      "CANCELLED",
+      "EXPIRED",
+    ];
     if (!status || !validStatuses.includes(status.toUpperCase())) {
       res.status(400);
-      throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+      throw new Error(
+        `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      );
     }
 
     const newStatus = status.toUpperCase();
@@ -288,13 +319,18 @@ const updateReservationStatus = async (req, res, next) => {
 
     if (!reservation) {
       res.status(404);
-      throw new Error('Reservation not found');
+      throw new Error("Reservation not found");
     }
 
     // Verify ownership: authenticated user must be the business owner of this reservation
-    if (!reservation.businessId.equals(mongoUser._id) && mongoUser.role !== 'ADMIN') {
+    if (
+      !reservation.businessId.equals(mongoUser._id) &&
+      mongoUser.role !== "ADMIN"
+    ) {
       res.status(403);
-      throw new Error('Forbidden - You can only update status for reservations belonging to your business');
+      throw new Error(
+        "Forbidden - You can only update status for reservations belonging to your business",
+      );
     }
 
     const prevStatus = reservation.status.toUpperCase();
@@ -312,28 +348,32 @@ const updateReservationStatus = async (req, res, next) => {
     const allowedNext = ALLOWED_TRANSITIONS[prevStatus] || [];
     if (!allowedNext.includes(newStatus)) {
       res.status(400);
-      throw new Error(`Forbidden transition. Cannot change status from ${prevStatus} to ${newStatus}`);
+      throw new Error(
+        `Forbidden transition. Cannot change status from ${prevStatus} to ${newStatus}`,
+      );
     }
 
     reservation.status = newStatus;
 
-    if (newStatus === 'COMPLETED') {
+    if (newStatus === "COMPLETED") {
       reservation.completedAt = new Date();
     }
 
-    if (newStatus === 'CANCELLED') {
+    if (newStatus === "CANCELLED") {
       reservation.cancelledAt = new Date();
       // Restore inventory stock atomically
       const restoredFood = await Food.findOneAndUpdate(
         { _id: reservation.foodId },
         { $inc: { quantity: reservation.quantity } },
-        { new: true }
+        { new: true },
       );
 
       if (restoredFood && restoredFood.quantity > 0) {
-        if (restoredFood.status === 'SOLD_OUT') {
-          const isExpired = restoredFood.expiryTime && new Date(restoredFood.expiryTime) <= new Date();
-          restoredFood.status = isExpired ? 'EXPIRED' : 'AVAILABLE';
+        if (restoredFood.status === "SOLD_OUT") {
+          const isExpired =
+            restoredFood.expiryTime &&
+            new Date(restoredFood.expiryTime) <= new Date();
+          restoredFood.status = isExpired ? "EXPIRED" : "AVAILABLE";
           await restoredFood.save();
         }
       }
@@ -342,41 +382,44 @@ const updateReservationStatus = async (req, res, next) => {
     await reservation.save();
 
     const updatedReservation = await Reservation.findById(reservation._id)
-      .populate('foodId')
-      .populate('recipientId', 'name email phone organizationName recipientType')
-      .populate('businessId', 'name email phone organizationName businessType');
+      .populate("foodId")
+      .populate(
+        "recipientId",
+        "name email phone organizationName recipientType",
+      )
+      .populate("businessId", "name email phone organizationName businessType");
 
     // Trigger automatic notification based on new status
-    const foodTitle = updatedReservation.foodId?.name || 'surplus food';
-    if (newStatus === 'CONFIRMED') {
+    const foodTitle = updatedReservation.foodId?.name || "surplus food";
+    if (newStatus === "CONFIRMED") {
       await createNotificationHelper({
         userId: reservation.recipientId,
-        type: 'RESERVATION_CONFIRMED',
-        title: 'Reservation Confirmed',
+        type: "RESERVATION_CONFIRMED",
+        title: "Reservation Confirmed",
         message: `Your claim for "${foodTitle}" (Claim code: ${updatedReservation.claimCode}) was confirmed by the donor.`,
         relatedId: reservation._id,
       });
-    } else if (newStatus === 'READY_FOR_PICKUP') {
+    } else if (newStatus === "READY_FOR_PICKUP") {
       await createNotificationHelper({
         userId: reservation.recipientId,
-        type: 'RESERVATION_READY',
-        title: 'Ready for Pickup',
+        type: "RESERVATION_READY",
+        title: "Ready for Pickup",
         message: `Your order for "${foodTitle}" (Claim code: ${updatedReservation.claimCode}) is packed and ready for pickup!`,
         relatedId: reservation._id,
       });
-    } else if (newStatus === 'COMPLETED') {
+    } else if (newStatus === "COMPLETED") {
       await createNotificationHelper({
         userId: reservation.recipientId,
-        type: 'RESERVATION_COMPLETED',
-        title: 'Pickup Complete',
+        type: "RESERVATION_COMPLETED",
+        title: "Pickup Complete",
         message: `Your claim for "${foodTitle}" (Claim code: ${updatedReservation.claimCode}) is complete. Thank you for rescuing food!`,
         relatedId: reservation._id,
       });
-    } else if (newStatus === 'CANCELLED') {
+    } else if (newStatus === "CANCELLED") {
       await createNotificationHelper({
         userId: reservation.recipientId,
-        type: 'RESERVATION_CANCELLED',
-        title: 'Reservation Cancelled',
+        type: "RESERVATION_CANCELLED",
+        title: "Reservation Cancelled",
         message: `Reservation for "${foodTitle}" (Claim code: ${reservation.claimCode}) was cancelled by the business.`,
         relatedId: reservation._id,
       });
@@ -404,20 +447,29 @@ const cancelReservation = async (req, res, next) => {
 
     if (!reservation) {
       res.status(404);
-      throw new Error('Reservation not found');
+      throw new Error("Reservation not found");
     }
 
-    if (!reservation.recipientId.equals(mongoUser._id) && mongoUser.role !== 'ADMIN') {
+    if (
+      !reservation.recipientId.equals(mongoUser._id) &&
+      mongoUser.role !== "ADMIN"
+    ) {
       res.status(403);
-      throw new Error('Forbidden - You can only cancel your own reservations');
+      throw new Error("Forbidden - You can only cancel your own reservations");
     }
 
-    if (['COMPLETED', 'CANCELLED', 'EXPIRED'].includes(reservation.status.toUpperCase())) {
+    if (
+      ["COMPLETED", "CANCELLED", "EXPIRED"].includes(
+        reservation.status.toUpperCase(),
+      )
+    ) {
       res.status(400);
-      throw new Error(`Cannot cancel reservation that is already ${reservation.status}`);
+      throw new Error(
+        `Cannot cancel reservation that is already ${reservation.status}`,
+      );
     }
 
-    reservation.status = 'CANCELLED';
+    reservation.status = "CANCELLED";
     reservation.cancelledAt = new Date();
     await reservation.save();
 
@@ -425,13 +477,15 @@ const cancelReservation = async (req, res, next) => {
     const restoredFood = await Food.findOneAndUpdate(
       { _id: reservation.foodId },
       { $inc: { quantity: reservation.quantity } },
-      { new: true }
+      { new: true },
     );
 
     if (restoredFood && restoredFood.quantity > 0) {
-      if (restoredFood.status === 'SOLD_OUT') {
-        const isExpired = restoredFood.expiryTime && new Date(restoredFood.expiryTime) <= new Date();
-        restoredFood.status = isExpired ? 'EXPIRED' : 'AVAILABLE';
+      if (restoredFood.status === "SOLD_OUT") {
+        const isExpired =
+          restoredFood.expiryTime &&
+          new Date(restoredFood.expiryTime) <= new Date();
+        restoredFood.status = isExpired ? "EXPIRED" : "AVAILABLE";
         await restoredFood.save();
       }
     }
@@ -439,15 +493,15 @@ const cancelReservation = async (req, res, next) => {
     // Trigger automatic notification to business partner
     await createNotificationHelper({
       userId: reservation.businessId,
-      type: 'RESERVATION_CANCELLED',
-      title: 'Reservation Cancelled by Recipient',
+      type: "RESERVATION_CANCELLED",
+      title: "Reservation Cancelled by Recipient",
       message: `Reservation (Claim code: ${reservation.claimCode}) was cancelled by the recipient.`,
       relatedId: reservation._id,
     });
 
     res.status(200).json({
       success: true,
-      message: 'Reservation cancelled successfully',
+      message: "Reservation cancelled successfully",
       reservation,
     });
   } catch (error) {

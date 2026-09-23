@@ -1,7 +1,8 @@
-const BusinessProfile = require('../models/BusinessProfile');
-const RecipientProfile = require('../models/RecipientProfile');
-const User = require('../models/User');
-const { createNotificationHelper } = require('../utils/notificationUtils');
+const BusinessProfile = require("../models/BusinessProfile");
+const RecipientProfile = require("../models/RecipientProfile");
+const User = require("../models/User");
+const { createNotificationHelper } = require("../utils/notificationUtils");
+const admin = require("../config/firebaseAdmin");
 
 /**
  * @desc    Get all business profiles (Admin moderation)
@@ -14,14 +15,14 @@ const getAllBusinesses = async (req, res, next) => {
 
     const filter = {};
 
-    if (status === 'verified') {
+    if (status === "verified") {
       filter.isVerified = true;
-    } else if (status === 'unverified') {
+    } else if (status === "unverified") {
       filter.isVerified = false;
     }
 
-    if (search && search.trim() !== '') {
-      const regex = new RegExp(search.trim(), 'i');
+    if (search && search.trim() !== "") {
+      const regex = new RegExp(search.trim(), "i");
       filter.$or = [
         { businessName: regex },
         { phone: regex },
@@ -31,7 +32,7 @@ const getAllBusinesses = async (req, res, next) => {
     }
 
     const businesses = await BusinessProfile.find(filter)
-      .populate('userId', 'name email role phone organizationName createdAt')
+      .populate("userId", "name email role phone organizationName createdAt")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -55,14 +56,14 @@ const getAllRecipients = async (req, res, next) => {
 
     const filter = {};
 
-    if (status === 'verified') {
+    if (status === "verified") {
       filter.isVerified = true;
-    } else if (status === 'unverified') {
+    } else if (status === "unverified") {
       filter.isVerified = false;
     }
 
-    if (search && search.trim() !== '') {
-      const regex = new RegExp(search.trim(), 'i');
+    if (search && search.trim() !== "") {
+      const regex = new RegExp(search.trim(), "i");
       filter.$or = [
         { organizationName: regex },
         { phone: regex },
@@ -72,7 +73,10 @@ const getAllRecipients = async (req, res, next) => {
     }
 
     const recipients = await RecipientProfile.find(filter)
-      .populate('userId', 'name email role phone organizationName recipientType createdAt')
+      .populate(
+        "userId",
+        "name email role phone organizationName recipientType createdAt",
+      )
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -107,21 +111,29 @@ const verifyBusiness = async (req, res, next) => {
       throw new Error(`Business profile '${id}' not found`);
     }
 
-    profile.isVerified = isVerified !== undefined ? Boolean(isVerified) : !profile.isVerified;
+    profile.isVerified =
+      isVerified !== undefined ? Boolean(isVerified) : !profile.isVerified;
     await profile.save();
 
+    // Sync isVerified to User model
+    if (profile.userId) {
+      await User.findByIdAndUpdate(profile.userId, {
+        isVerified: profile.isVerified,
+      });
+    }
+
     const updatedProfile = await BusinessProfile.findById(profile._id).populate(
-      'userId',
-      'name email role phone organizationName'
+      "userId",
+      "name email role phone organizationName",
     );
 
     // Notify business user of verification update
     await createNotificationHelper({
       userId: profile.userId,
-      type: 'VERIFICATION_UPDATED',
-      title: 'Account Verification Updated',
+      type: "VERIFICATION_UPDATED",
+      title: "Account Verification Updated",
       message: `Your commercial donor account "${profile.businessName}" verification status is now ${
-        profile.isVerified ? 'VERIFIED' : 'UNVERIFIED'
+        profile.isVerified ? "VERIFIED" : "UNVERIFIED"
       }.`,
       relatedId: profile._id,
     });
@@ -129,7 +141,7 @@ const verifyBusiness = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: `Business partner '${profile.businessName}' ${
-        profile.isVerified ? 'verified' : 'unverified'
+        profile.isVerified ? "verified" : "unverified"
       } successfully`,
       business: updatedProfile,
     });
@@ -160,21 +172,31 @@ const verifyRecipient = async (req, res, next) => {
       throw new Error(`Recipient profile '${id}' not found`);
     }
 
-    profile.isVerified = isVerified !== undefined ? Boolean(isVerified) : !profile.isVerified;
+    profile.isVerified =
+      isVerified !== undefined ? Boolean(isVerified) : !profile.isVerified;
     await profile.save();
 
-    const updatedProfile = await RecipientProfile.findById(profile._id).populate(
-      'userId',
-      'name email role phone organizationName recipientType'
+    // Sync isVerified to User model
+    if (profile.userId) {
+      await User.findByIdAndUpdate(profile.userId, {
+        isVerified: profile.isVerified,
+      });
+    }
+
+    const updatedProfile = await RecipientProfile.findById(
+      profile._id,
+    ).populate(
+      "userId",
+      "name email role phone organizationName recipientType",
     );
 
     // Notify recipient user of verification update
     await createNotificationHelper({
       userId: profile.userId,
-      type: 'VERIFICATION_UPDATED',
-      title: 'Account Verification Updated',
+      type: "VERIFICATION_UPDATED",
+      title: "Account Verification Updated",
       message: `Your NGO recipient account "${profile.organizationName}" verification status is now ${
-        profile.isVerified ? 'VERIFIED' : 'UNVERIFIED'
+        profile.isVerified ? "VERIFIED" : "UNVERIFIED"
       }.`,
       relatedId: profile._id,
     });
@@ -182,10 +204,93 @@ const verifyRecipient = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: `Recipient partner '${profile.organizationName}' ${
-        profile.isVerified ? 'verified' : 'unverified'
+        profile.isVerified ? "verified" : "unverified"
       } successfully`,
       recipient: updatedProfile,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const rejectBusiness = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let profile = await BusinessProfile.findById(id);
+    if (!profile) profile = await BusinessProfile.findOne({ userId: id });
+
+    if (!profile) {
+      res.status(404);
+      throw new Error(`Business profile not found`);
+    }
+
+    let firebaseUidToDelete = null;
+    if (profile.userId) {
+      const userDoc = await User.findById(profile.userId);
+      if (userDoc && userDoc.firebaseUid) {
+        firebaseUidToDelete = userDoc.firebaseUid;
+      }
+      await User.findByIdAndDelete(profile.userId);
+    }
+    await BusinessProfile.findByIdAndDelete(profile._id);
+
+    if (firebaseUidToDelete) {
+      try {
+        await admin.auth().deleteUser(firebaseUidToDelete);
+      } catch (fbErr) {
+        console.warn(
+          "Could not delete user from Firebase (may already be deleted or invalid config):",
+          fbErr.message,
+        );
+      }
+    }
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Business application rejected and removed",
+      });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const rejectRecipient = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let profile = await RecipientProfile.findById(id);
+    if (!profile) profile = await RecipientProfile.findOne({ userId: id });
+
+    if (!profile) {
+      res.status(404);
+      throw new Error(`Recipient profile not found`);
+    }
+
+    let firebaseUidToDelete = null;
+    if (profile.userId) {
+      const userDoc = await User.findById(profile.userId);
+      if (userDoc && userDoc.firebaseUid) {
+        firebaseUidToDelete = userDoc.firebaseUid;
+      }
+      await User.findByIdAndDelete(profile.userId);
+    }
+    await RecipientProfile.findByIdAndDelete(profile._id);
+
+    if (firebaseUidToDelete) {
+      try {
+        await admin.auth().deleteUser(firebaseUidToDelete);
+      } catch (fbErr) {
+        console.warn(
+          "Could not delete user from Firebase (may already be deleted or invalid config):",
+          fbErr.message,
+        );
+      }
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "NGO application rejected and removed" });
   } catch (error) {
     next(error);
   }
@@ -196,4 +301,6 @@ module.exports = {
   getAllRecipients,
   verifyBusiness,
   verifyRecipient,
+  rejectBusiness,
+  rejectRecipient,
 };

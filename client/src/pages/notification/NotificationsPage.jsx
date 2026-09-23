@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Bell,
   CheckCheck,
@@ -12,11 +12,19 @@ import {
   Utensils,
   ArrowRight,
   Filter,
-} from 'lucide-react';
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import { PageHeader, Card, Button, Badge, LoadingSpinner, EmptyState, ErrorState } from '../../components/common';
-import { notificationService } from '../../services/notificationService';
-import { useAuth } from '../../context/AuthContext';
+} from "lucide-react";
+import DashboardLayout from "../../components/layout/DashboardLayout";
+import {
+  PageHeader,
+  Card,
+  Button,
+  Badge,
+  LoadingSpinner,
+  EmptyState,
+  ErrorState,
+} from "../../components/common";
+import { notificationService } from "../../services/notificationService";
+import { useAuth } from "../../context/AuthContext";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -26,7 +34,7 @@ const NotificationsPage = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterTab, setFilterTab] = useState('all'); // 'all' | 'unread'
+  const [filterTab, setFilterTab] = useState("all"); // 'all' | 'unread'
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -38,8 +46,12 @@ const NotificationsPage = () => {
         setUnreadCount(res.unreadCount || 0);
       }
     } catch (err) {
-      console.error('Failed to load notifications page:', err);
-      setError(err.response?.data?.message || err.message || 'Unable to load notifications.');
+      console.error("Failed to load notifications page:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Unable to load notifications.",
+      );
     } finally {
       setLoading(false);
     }
@@ -54,11 +66,11 @@ const NotificationsPage = () => {
     try {
       await notificationService.markAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (err) {
-      console.error('Failed to mark read:', err);
+      console.error("Failed to mark read:", err);
     }
   };
 
@@ -68,7 +80,7 @@ const NotificationsPage = () => {
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {
-      console.error('Failed to mark all read:', err);
+      console.error("Failed to mark all read:", err);
     }
   };
 
@@ -82,7 +94,7 @@ const NotificationsPage = () => {
         setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (err) {
-      console.error('Failed to delete notification:', err);
+      console.error("Failed to delete notification:", err);
     }
   };
 
@@ -94,37 +106,37 @@ const NotificationsPage = () => {
     const type = notif.type;
     const relatedId = notif.relatedId;
 
-    if (type.startsWith('RESERVATION_')) {
-      if (userRole === 'business') {
-        navigate('/business/reservations');
-      } else if (userRole === 'recipient') {
-        navigate('/recipient/dashboard');
+    if (type.startsWith("RESERVATION_")) {
+      if (userRole === "business") {
+        navigate("/business/reservations");
+      } else if (userRole === "recipient") {
+        navigate("/recipient/dashboard");
       } else {
-        navigate(relatedId ? `/reservation/${relatedId}` : '/dashboard');
+        navigate(relatedId ? `/reservation/${relatedId}` : "/dashboard");
       }
-    } else if (type.startsWith('FOOD_')) {
-      navigate(relatedId ? `/food/${relatedId}` : '/food');
-    } else if (type === 'VERIFICATION_UPDATED') {
-      navigate('/profile');
+    } else if (type.startsWith("FOOD_")) {
+      navigate(relatedId ? `/food/${relatedId}` : "/food");
+    } else if (type === "VERIFICATION_UPDATED") {
+      navigate("/profile");
     }
   };
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'RESERVATION_CREATED':
+      case "RESERVATION_CREATED":
         return <Utensils className="w-5 h-5 text-brand-600" />;
-      case 'RESERVATION_CONFIRMED':
+      case "RESERVATION_CONFIRMED":
         return <CheckCircle2 className="w-5 h-5 text-emerald-600" />;
-      case 'RESERVATION_READY':
+      case "RESERVATION_READY":
         return <PackageCheck className="w-5 h-5 text-sky-600" />;
-      case 'RESERVATION_COMPLETED':
+      case "RESERVATION_COMPLETED":
         return <CheckCheck className="w-5 h-5 text-emerald-700" />;
-      case 'RESERVATION_CANCELLED':
+      case "RESERVATION_CANCELLED":
         return <AlertTriangle className="w-5 h-5 text-rose-600" />;
-      case 'FOOD_EXPIRING':
-      case 'FOOD_EXPIRED':
+      case "FOOD_EXPIRING":
+      case "FOOD_EXPIRED":
         return <Clock className="w-5 h-5 text-amber-600" />;
-      case 'VERIFICATION_UPDATED':
+      case "VERIFICATION_UPDATED":
         return <ShieldCheck className="w-5 h-5 text-purple-600" />;
       default:
         return <Bell className="w-5 h-5 text-charcoal-600" />;
@@ -132,7 +144,7 @@ const NotificationsPage = () => {
   };
 
   const filteredNotifications = notifications.filter((n) => {
-    if (filterTab === 'unread') return !n.isRead;
+    if (filterTab === "unread") return !n.isRead;
     return true;
   });
 
@@ -146,7 +158,8 @@ const NotificationsPage = () => {
               Activity & Notifications
             </h2>
             <p className="text-xs text-charcoal-500 mt-0.5">
-              Live updates on food claims, status changes, and partner verification records.
+              Live updates on food claims, status changes, and partner
+              verification records.
             </p>
           </div>
 
@@ -167,21 +180,21 @@ const NotificationsPage = () => {
           <div className="flex items-center justify-between pb-3 border-b border-charcoal-100">
             <div className="flex items-center gap-2 bg-surface-100 p-1 rounded-2xl border border-charcoal-200">
               <button
-                onClick={() => setFilterTab('all')}
+                onClick={() => setFilterTab("all")}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
-                  filterTab === 'all'
-                    ? 'bg-brand-600 text-white shadow-soft-xs'
-                    : 'text-charcoal-600 hover:text-charcoal-900'
+                  filterTab === "all"
+                    ? "bg-brand-600 text-white shadow-soft-xs"
+                    : "text-charcoal-600 hover:text-charcoal-900"
                 }`}
               >
                 All ({notifications.length})
               </button>
               <button
-                onClick={() => setFilterTab('unread')}
+                onClick={() => setFilterTab("unread")}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
-                  filterTab === 'unread'
-                    ? 'bg-brand-600 text-white shadow-soft-xs'
-                    : 'text-charcoal-600 hover:text-charcoal-900'
+                  filterTab === "unread"
+                    ? "bg-brand-600 text-white shadow-soft-xs"
+                    : "text-charcoal-600 hover:text-charcoal-900"
                 }`}
               >
                 Unread ({unreadCount})
@@ -192,7 +205,10 @@ const NotificationsPage = () => {
           {/* List Content / Loading / Error / Empty */}
           {loading ? (
             <div className="py-16 flex justify-center">
-              <LoadingSpinner size="lg" text="Loading notification history..." />
+              <LoadingSpinner
+                size="lg"
+                text="Loading notification history..."
+              />
             </div>
           ) : error ? (
             <ErrorState
@@ -204,14 +220,14 @@ const NotificationsPage = () => {
             <EmptyState
               icon={Bell}
               title={
-                filterTab === 'unread'
-                  ? 'No unread notifications'
-                  : 'Notification inbox clear'
+                filterTab === "unread"
+                  ? "No unread notifications"
+                  : "Notification inbox clear"
               }
               message={
-                filterTab === 'unread'
-                  ? 'You have read all current notification updates.'
-                  : 'Important platform events and claim status updates will appear here.'
+                filterTab === "unread"
+                  ? "You have read all current notification updates."
+                  : "Important platform events and claim status updates will appear here."
               }
             />
           ) : (
@@ -222,7 +238,7 @@ const NotificationsPage = () => {
                   onClick={() => handleItemClick(notif)}
                   className={`
                     p-4 hover:bg-surface-50 transition-colors cursor-pointer flex items-start gap-4 rounded-2xl my-1 group relative
-                    ${!notif.isRead ? 'bg-brand-50/30' : ''}
+                    ${!notif.isRead ? "bg-brand-50/30" : ""}
                   `}
                 >
                   <div className="p-2.5 rounded-2xl bg-surface-100 border border-charcoal-100 shrink-0 mt-0.5">
@@ -231,7 +247,9 @@ const NotificationsPage = () => {
 
                   <div className="flex-1 min-w-0 pr-8">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className={`text-sm ${!notif.isRead ? 'font-black text-charcoal-900' : 'font-bold text-charcoal-800'}`}>
+                      <h3
+                        className={`text-sm ${!notif.isRead ? "font-black text-charcoal-900" : "font-bold text-charcoal-800"}`}
+                      >
                         {notif.title}
                       </h3>
                       {!notif.isRead && (
@@ -245,8 +263,8 @@ const NotificationsPage = () => {
                     </p>
                     <span className="text-[11px] font-medium text-charcoal-400">
                       {new Date(notif.createdAt).toLocaleString(undefined, {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
+                        dateStyle: "medium",
+                        timeStyle: "short",
                       })}
                     </span>
                   </div>

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { PageHeader, Card, Button } from '../../components/common';
-import { HeartHandshake, ShieldCheck, Truck, ArrowRight } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { PageHeader, Card, Button } from "../../components/common";
+import { HeartHandshake, ShieldCheck, Truck, ArrowRight } from "lucide-react";
 
 const RecipientPage = () => {
   return (
@@ -22,19 +22,28 @@ const RecipientPage = () => {
         <Card variant="default">
           <ShieldCheck className="w-8 h-8 text-brand-600 mb-4" />
           <Card.Title>Verified NGO Network</Card.Title>
-          <Card.Description>Strict onboarding standards to ensure safe and accountable food distribution.</Card.Description>
+          <Card.Description>
+            Strict onboarding standards to ensure safe and accountable food
+            distribution.
+          </Card.Description>
         </Card>
 
         <Card variant="default">
           <Truck className="w-8 h-8 text-brand-600 mb-4" />
           <Card.Title>Real-Time Proximity Alerts</Card.Title>
-          <Card.Description>Receive instant SMS & app notifications when food is posted near your facility.</Card.Description>
+          <Card.Description>
+            Receive instant SMS & app notifications when food is posted near
+            your facility.
+          </Card.Description>
         </Card>
 
         <Card variant="default">
           <HeartHandshake className="w-8 h-8 text-brand-600 mb-4" />
           <Card.Title>Dignified Food Access</Card.Title>
-          <Card.Description>Fresh, high-quality meals delivered safely to those who need them most.</Card.Description>
+          <Card.Description>
+            Fresh, high-quality meals delivered safely to those who need them
+            most.
+          </Card.Description>
         </Card>
       </div>
     </div>

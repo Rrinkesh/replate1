@@ -1,6 +1,6 @@
-import React from 'react';
-import { PageHeader, Card } from '../../components/common';
-import { RefreshCw, Clock, CheckCircle2, ShieldCheck } from 'lucide-react';
+import React from "react";
+import { PageHeader, Card } from "../../components/common";
+import { RefreshCw, Clock, CheckCircle2, ShieldCheck } from "lucide-react";
 
 const HowItWorksPage = () => {
   return (
@@ -12,15 +12,39 @@ const HowItWorksPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { step: '01', title: 'Food Surplus Logged', desc: 'Hotels & cloud kitchens post excess prepared food with expiry timing and packaging details.', icon: Clock },
-          { step: '02', title: 'Instant Matching', desc: 'Algorithm alerts verified recipient NGOs within proximity for rapid recovery.', icon: RefreshCw },
-          { step: '03', title: 'Quality Verification', desc: 'Food safety protocols and temperature checks verified prior to dispatch.', icon: ShieldCheck },
-          { step: '04', title: 'Safe Redistribution', desc: 'Plates distributed directly to community centers and shelter networks.', icon: CheckCircle2 },
+          {
+            step: "01",
+            title: "Food Surplus Logged",
+            desc: "Hotels & cloud kitchens post excess prepared food with expiry timing and packaging details.",
+            icon: Clock,
+          },
+          {
+            step: "02",
+            title: "Instant Matching",
+            desc: "Algorithm alerts verified recipient NGOs within proximity for rapid recovery.",
+            icon: RefreshCw,
+          },
+          {
+            step: "03",
+            title: "Quality Verification",
+            desc: "Food safety protocols and temperature checks verified prior to dispatch.",
+            icon: ShieldCheck,
+          },
+          {
+            step: "04",
+            title: "Safe Redistribution",
+            desc: "Plates distributed directly to community centers and shelter networks.",
+            icon: CheckCircle2,
+          },
         ].map((item, idx) => (
           <Card key={idx} variant="default" className="relative">
-            <div className="text-3xl font-black text-brand-600 mb-3">{item.step}</div>
+            <div className="text-3xl font-black text-brand-600 mb-3">
+              {item.step}
+            </div>
             <Card.Title>{item.title}</Card.Title>
-            <Card.Description className="mt-2 leading-relaxed">{item.desc}</Card.Description>
+            <Card.Description className="mt-2 leading-relaxed">
+              {item.desc}
+            </Card.Description>
           </Card>
         ))}
       </div>

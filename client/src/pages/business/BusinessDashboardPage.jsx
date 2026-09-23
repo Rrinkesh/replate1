@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Utensils,
   Plus,
@@ -17,21 +17,29 @@ import {
   RefreshCw,
   FileText,
   PackageCheck,
-} from 'lucide-react';
+} from "lucide-react";
 
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import { StatCard, Card, Badge, Button, LoadingSpinner, EmptyState, Modal } from '../../components/common';
-import ReservationCard from '../../components/reservation/ReservationCard';
+import DashboardLayout from "../../components/layout/DashboardLayout";
+import {
+  StatCard,
+  Card,
+  Badge,
+  Button,
+  LoadingSpinner,
+  EmptyState,
+  Modal,
+} from "../../components/common";
+import ReservationCard from "../../components/reservation/ReservationCard";
 import {
   DailySurplusChart,
   FoodRescuedChart,
   RevenueRecoveredChart,
   WasteReductionChart,
-} from '../../components/dashboard';
-import { reservationService } from '../../services/reservationService';
-import { foodService } from '../../services/foodService';
-import { analyticsService } from '../../services/analyticsService';
-import { useAuth } from '../../context/AuthContext';
+} from "../../components/dashboard";
+import { reservationService } from "../../services/reservationService";
+import { foodService } from "../../services/foodService";
+import { analyticsService } from "../../services/analyticsService";
+import { useAuth } from "../../context/AuthContext";
 
 const BusinessDashboardPage = () => {
   const { currentUser } = useAuth();
@@ -41,14 +49,18 @@ const BusinessDashboardPage = () => {
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
   // Analytics & Timeframe state
-  const [timeframe, setTimeframe] = useState('30d');
+  const [timeframe, setTimeframe] = useState("30d");
   const [analytics, setAnalytics] = useState(null);
   const [dailyTrends, setDailyTrends] = useState([]);
 
   // Edit / Delete Food Modal State
   const [deletingFoodId, setDeletingFoodId] = useState(null);
   const [editingFood, setEditingFood] = useState(null);
-  const [editFormData, setEditFormData] = useState({ name: '', quantity: '', price: '' });
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    quantity: "",
+    price: "",
+  });
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
   const fetchDashboardData = async () => {
@@ -61,7 +73,7 @@ const BusinessDashboardPage = () => {
           setReservations(resData.reservations);
         }
       } catch (err) {
-        console.warn('Business reservations fetch failed:', err.message);
+        console.warn("Business reservations fetch failed:", err.message);
       }
 
       // 2. Fetch Business listings
@@ -70,18 +82,19 @@ const BusinessDashboardPage = () => {
         const items = foodData?.foods || foodData?.food || [];
         setMyFoodListings(items);
       } catch (err) {
-        console.warn('Business listings fetch failed:', err.message);
+        console.warn("Business listings fetch failed:", err.message);
       }
 
       // 3. Fetch Real Business Analytics
       try {
-        const analyticsRes = await analyticsService.getBusinessAnalytics(timeframe);
+        const analyticsRes =
+          await analyticsService.getBusinessAnalytics(timeframe);
         if (analyticsRes && analyticsRes.metrics) {
           setAnalytics(analyticsRes.metrics);
           setDailyTrends(analyticsRes.dailyTrends || []);
         }
       } catch (err) {
-        console.warn('Business analytics fetch failed:', err.message);
+        console.warn("Business analytics fetch failed:", err.message);
       }
     } finally {
       setLoading(false);
@@ -95,23 +108,29 @@ const BusinessDashboardPage = () => {
   const handleStatusChange = async (reservationId, newStatus) => {
     setActionLoadingId(reservationId);
     try {
-      await reservationService.updateReservationStatus(reservationId, newStatus);
+      await reservationService.updateReservationStatus(
+        reservationId,
+        newStatus,
+      );
       await fetchDashboardData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update reservation status');
+      alert(
+        err.response?.data?.message || "Failed to update reservation status",
+      );
     } finally {
       setActionLoadingId(null);
     }
   };
 
   const handleDeleteFood = async (foodId) => {
-    if (!window.confirm('Are you sure you want to delete this food listing?')) return;
+    if (!window.confirm("Are you sure you want to delete this food listing?"))
+      return;
     setDeletingFoodId(foodId);
     try {
       await foodService.deleteFood(foodId);
       await fetchDashboardData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete food listing');
+      alert(err.response?.data?.message || "Failed to delete food listing");
     } finally {
       setDeletingFoodId(null);
     }
@@ -120,9 +139,9 @@ const BusinessDashboardPage = () => {
   const handleOpenEditModal = (foodItem) => {
     setEditingFood(foodItem);
     setEditFormData({
-      name: foodItem.name || '',
-      quantity: foodItem.quantity || '',
-      price: foodItem.price || '',
+      name: foodItem.name || "",
+      quantity: foodItem.quantity || "",
+      price: foodItem.price || "",
     });
   };
 
@@ -138,7 +157,7 @@ const BusinessDashboardPage = () => {
       setEditingFood(null);
       await fetchDashboardData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update food listing');
+      alert(err.response?.data?.message || "Failed to update food listing");
     } finally {
       setIsSubmittingEdit(false);
     }
@@ -146,25 +165,27 @@ const BusinessDashboardPage = () => {
 
   // Aggregated Summary Calculations
   const activeListingsCount = myFoodListings.filter(
-    (f) => f.quantity > 0 && f.status !== 'EXPIRED'
+    (f) => f.quantity > 0 && f.status !== "EXPIRED",
   ).length;
 
   const pendingReservationsCount = reservations.filter(
-    (r) => r.status?.toUpperCase() === 'PENDING'
+    (r) => r.status?.toUpperCase() === "PENDING",
   ).length;
 
   const totalMealsReserved = reservations
-    .filter((r) => r.status?.toUpperCase() !== 'CANCELLED')
+    .filter((r) => r.status?.toUpperCase() !== "CANCELLED")
     .reduce((sum, r) => sum + (r.quantity || 1), 0);
 
   const totalMealsCompleted = reservations
-    .filter((r) => r.status?.toUpperCase() === 'COMPLETED')
+    .filter((r) => r.status?.toUpperCase() === "COMPLETED")
     .reduce((sum, r) => sum + (r.quantity || 1), 0);
 
   // Map reservation count per food item
   const getReservationCountForFood = (foodId) => {
     return reservations.filter(
-      (r) => (r.foodId?._id || r.foodId) === foodId && r.status?.toUpperCase() !== 'CANCELLED'
+      (r) =>
+        (r.foodId?._id || r.foodId) === foodId &&
+        r.status?.toUpperCase() !== "CANCELLED",
     ).length;
   };
 
@@ -175,7 +196,7 @@ const BusinessDashboardPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-charcoal-900 tracking-tight">
-              {currentUser?.name || 'Radisson Hotel Noida'}
+              {currentUser?.name || "Radisson Hotel Noida"}
             </h2>
             <p className="text-xs text-charcoal-500 mt-0.5">
               Sector 55, Noida • Commercial Food Surplus Partner
@@ -218,20 +239,22 @@ const BusinessDashboardPage = () => {
             </h3>
             {/* Timeframe Filter Selector */}
             <div className="flex items-center gap-1 bg-surface-100 p-1 rounded-xl border border-charcoal-200 text-xs font-semibold self-start sm:self-auto">
-              <span className="text-charcoal-400 text-[10px] uppercase font-extrabold px-2">Period:</span>
+              <span className="text-charcoal-400 text-[10px] uppercase font-extrabold px-2">
+                Period:
+              </span>
               {[
-                { id: '7d', label: '7 Days' },
-                { id: '30d', label: '30 Days' },
-                { id: '90d', label: '90 Days' },
-                { id: 'all', label: 'All Time' },
+                { id: "7d", label: "7 Days" },
+                { id: "30d", label: "30 Days" },
+                { id: "90d", label: "90 Days" },
+                { id: "all", label: "All Time" },
               ].map((tf) => (
                 <button
                   key={tf.id}
                   onClick={() => setTimeframe(tf.id)}
                   className={`px-2.5 py-1 rounded-lg transition-all text-xs ${
                     timeframe === tf.id
-                      ? 'bg-brand-600 text-white shadow-soft-xs font-extrabold'
-                      : 'text-charcoal-600 hover:text-charcoal-900'
+                      ? "bg-brand-600 text-white shadow-soft-xs font-extrabold"
+                      : "text-charcoal-600 hover:text-charcoal-900"
                   }`}
                 >
                   {tf.label}
@@ -253,13 +276,17 @@ const BusinessDashboardPage = () => {
               title="Pending Claims"
               value={String(pendingReservationsCount)}
               change="Requires confirmation"
-              changeDirection={pendingReservationsCount > 0 ? 'warning' : 'neutral'}
+              changeDirection={
+                pendingReservationsCount > 0 ? "warning" : "neutral"
+              }
               icon={Clock}
               helperText="Awaiting business action"
             />
             <StatCard
               title="Meals Rescued"
-              value={String(analytics?.totalQuantityRescued ?? totalMealsCompleted)}
+              value={String(
+                analytics?.totalQuantityRescued ?? totalMealsCompleted,
+              )}
               change="Total plates claimed"
               changeDirection="up"
               icon={PackageCheck}
@@ -286,7 +313,7 @@ const BusinessDashboardPage = () => {
               data={
                 dailyTrends.length > 0
                   ? dailyTrends.map((t) => ({
-                      day: t._id ? t._id.slice(5) : 'Day',
+                      day: t._id ? t._id.slice(5) : "Day",
                       kg: Number((t.meals * 0.4).toFixed(1)),
                       meals: t.meals,
                     }))
@@ -305,7 +332,9 @@ const BusinessDashboardPage = () => {
               }
             />
             <WasteReductionChart
-              valueKg={Number(((analytics?.totalQuantityRescued || 0) * 0.4).toFixed(1))}
+              valueKg={Number(
+                ((analytics?.totalQuantityRescued || 0) * 0.4).toFixed(1),
+              )}
             />
           </div>
         </div>
@@ -321,7 +350,9 @@ const BusinessDashboardPage = () => {
                   <h3 className="text-base font-bold text-charcoal-900 tracking-tight">
                     My Food Listings
                   </h3>
-                  <p className="text-xs text-charcoal-500">Live surplus food inventory and reservation count</p>
+                  <p className="text-xs text-charcoal-500">
+                    Live surplus food inventory and reservation count
+                  </p>
                 </div>
                 <Link to="/list-food">
                   <Button size="sm" variant="primary" iconLeft={Plus}>
@@ -339,7 +370,7 @@ const BusinessDashboardPage = () => {
                   title="No surplus food listed"
                   message="You haven't posted any surplus food listings yet."
                   actionLabel="Post Surplus Food"
-                  onAction={() => window.location.href = '/list-food'}
+                  onAction={() => (window.location.href = "/list-food")}
                 />
               ) : (
                 <div className="overflow-x-auto">
@@ -360,12 +391,19 @@ const BusinessDashboardPage = () => {
                         const claimsCount = getReservationCountForFood(foodId);
 
                         return (
-                          <tr key={foodId} className="hover:bg-surface-50 transition-colors">
-                            <td className="py-3 px-3 font-bold text-charcoal-900">{item.name}</td>
-                            <td className="py-3 px-3 font-bold text-charcoal-800">
-                              {item.quantity} {item.quantityUnit || 'servings'}
+                          <tr
+                            key={foodId}
+                            className="hover:bg-surface-50 transition-colors"
+                          >
+                            <td className="py-3 px-3 font-bold text-charcoal-900">
+                              {item.name}
                             </td>
-                            <td className="py-3 px-3 font-black text-emerald-700">₹{item.price}</td>
+                            <td className="py-3 px-3 font-bold text-charcoal-800">
+                              {item.quantity} {item.quantityUnit || "servings"}
+                            </td>
+                            <td className="py-3 px-3 font-black text-emerald-700">
+                              ₹{item.price}
+                            </td>
                             <td className="py-3 px-3 font-extrabold text-brand-700">
                               {claimsCount} claims
                             </td>
@@ -374,7 +412,11 @@ const BusinessDashboardPage = () => {
                             </td>
                             <td className="py-3 px-3 text-right space-x-1">
                               <Link to={`/food/${foodId}`}>
-                                <Button size="sm" variant="ghost" className="p-1.5 text-charcoal-600">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="p-1.5 text-charcoal-600"
+                                >
                                   <Eye className="w-4 h-4" />
                                 </Button>
                               </Link>
@@ -412,7 +454,9 @@ const BusinessDashboardPage = () => {
                   <h3 className="text-base font-bold text-charcoal-900 tracking-tight">
                     Recent Recipient Orders
                   </h3>
-                  <p className="text-xs text-charcoal-500">Live incoming claims needing confirmation</p>
+                  <p className="text-xs text-charcoal-500">
+                    Live incoming claims needing confirmation
+                  </p>
                 </div>
                 <Link to="/business/reservations">
                   <Button size="sm" variant="ghost" iconRight={ArrowRight}>
@@ -458,7 +502,11 @@ const BusinessDashboardPage = () => {
 
               <div className="p-4 bg-white/80 rounded-2xl border border-brand-100 space-y-2">
                 <p className="text-xs text-charcoal-800 font-semibold leading-relaxed">
-                  "Your kitchen may generate <strong className="text-brand-700">18–25 surplus meals</strong> today by 8:00 PM based on occupancy patterns."
+                  "Your kitchen may generate{" "}
+                  <strong className="text-brand-700">
+                    18–25 surplus meals
+                  </strong>{" "}
+                  today by 8:00 PM based on occupancy patterns."
                 </p>
 
                 <div className="pt-2 text-[11px] text-charcoal-500 font-medium border-t border-charcoal-100">
@@ -470,19 +518,33 @@ const BusinessDashboardPage = () => {
             {/* Impact Summary Card */}
             <Card variant="default">
               <Card.Title>Impact Summary</Card.Title>
-              <Card.Description>Monthly sustainability highlights</Card.Description>
+              <Card.Description>
+                Monthly sustainability highlights
+              </Card.Description>
               <div className="mt-4 space-y-3 text-xs">
                 <div className="p-3 bg-surface-50 rounded-xl flex justify-between items-center">
-                  <span className="text-charcoal-600 font-medium">Monthly CO₂ Avoided:</span>
-                  <span className="font-bold text-emerald-700">320 kg CO₂e</span>
+                  <span className="text-charcoal-600 font-medium">
+                    Monthly CO₂ Avoided:
+                  </span>
+                  <span className="font-bold text-emerald-700">
+                    320 kg CO₂e
+                  </span>
                 </div>
                 <div className="p-3 bg-surface-50 rounded-xl flex justify-between items-center">
-                  <span className="text-charcoal-600 font-medium">Active NGO Network:</span>
-                  <span className="font-bold text-charcoal-900">14 Partners</span>
+                  <span className="text-charcoal-600 font-medium">
+                    Active NGO Network:
+                  </span>
+                  <span className="font-bold text-charcoal-900">
+                    14 Partners
+                  </span>
                 </div>
                 <div className="p-3 bg-surface-50 rounded-xl flex justify-between items-center">
-                  <span className="text-charcoal-600 font-medium">RePlate Star Rating:</span>
-                  <span className="font-bold text-amber-600">★ 4.9 Zero Waste</span>
+                  <span className="text-charcoal-600 font-medium">
+                    RePlate Star Rating:
+                  </span>
+                  <span className="font-bold text-amber-600">
+                    ★ 4.9 Zero Waste
+                  </span>
                 </div>
               </div>
             </Card>
@@ -500,43 +562,66 @@ const BusinessDashboardPage = () => {
         {editingFood && (
           <div className="space-y-4 text-xs">
             <div>
-              <label className="font-bold text-charcoal-700 block mb-1">Food Item Name:</label>
+              <label className="font-bold text-charcoal-700 block mb-1">
+                Food Item Name:
+              </label>
               <input
                 type="text"
                 value={editFormData.name}
-                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-charcoal-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="font-bold text-charcoal-700 block mb-1">Quantity Remaining:</label>
+                <label className="font-bold text-charcoal-700 block mb-1">
+                  Quantity Remaining:
+                </label>
                 <input
                   type="number"
                   min="0"
                   value={editFormData.quantity}
-                  onChange={(e) => setEditFormData({ ...editFormData, quantity: e.target.value })}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      quantity: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-charcoal-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none"
                 />
               </div>
               <div>
-                <label className="font-bold text-charcoal-700 block mb-1">Recovery Price (₹):</label>
+                <label className="font-bold text-charcoal-700 block mb-1">
+                  Recovery Price (₹):
+                </label>
                 <input
                   type="number"
                   min="0"
                   value={editFormData.price}
-                  onChange={(e) => setEditFormData({ ...editFormData, price: e.target.value })}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, price: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-charcoal-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none"
                 />
               </div>
             </div>
 
             <div className="pt-4 flex justify-end gap-3 border-t border-charcoal-100">
-              <Button variant="outline" onClick={() => setEditingFood(null)} disabled={isSubmittingEdit}>
+              <Button
+                variant="outline"
+                onClick={() => setEditingFood(null)}
+                disabled={isSubmittingEdit}
+              >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleSaveEditFood} disabled={isSubmittingEdit}>
-                {isSubmittingEdit ? 'Saving...' : 'Save Changes'}
+              <Button
+                variant="primary"
+                onClick={handleSaveEditFood}
+                disabled={isSubmittingEdit}
+              >
+                {isSubmittingEdit ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>

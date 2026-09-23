@@ -1,59 +1,59 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const recipientProfileSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'User reference is required'],
+      ref: "User",
+      required: [true, "User reference is required"],
       unique: true,
     },
     organizationName: {
       type: String,
-      required: [true, 'Organization name is required'],
+      required: [true, "Organization name is required"],
       trim: true,
     },
     recipientType: {
       type: String,
-      required: [true, 'Recipient type is required'],
+      required: [true, "Recipient type is required"],
       enum: {
-        values: ['INDIVIDUAL', 'NGO', 'COMMUNITY', 'ORGANIZATION', 'BUYER'],
-        message: '{VALUE} is not a valid recipient type',
+        values: ["INDIVIDUAL", "NGO", "COMMUNITY", "ORGANIZATION", "BUYER"],
+        message: "{VALUE} is not a valid recipient type",
       },
-      default: 'NGO',
+      default: "NGO",
       uppercase: true,
     },
     description: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     phone: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     address: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     city: {
       type: String,
-      default: 'Noida',
+      default: "Noida",
     },
     state: {
       type: String,
-      default: 'Uttar Pradesh',
+      default: "Uttar Pradesh",
     },
     pincode: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     profileImage: {
       type: String,
-      default: '',
+      default: "",
     },
     isVerified: {
       type: Boolean,
@@ -62,7 +62,7 @@ const recipientProfileSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-module.exports = mongoose.model('RecipientProfile', recipientProfileSchema);
+module.exports = mongoose.model("RecipientProfile", recipientProfileSchema);

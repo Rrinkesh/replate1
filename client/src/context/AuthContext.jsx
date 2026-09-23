@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -7,16 +7,16 @@ import {
   onAuthStateChanged,
   updateProfile,
   sendPasswordResetEmail,
-} from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase';
-import { syncUserProfile, getCurrentUserProfile } from '../services/api';
+} from "firebase/auth";
+import { auth, googleProvider } from "../config/firebase";
+import { syncUserProfile, getCurrentUserProfile } from "../services/api";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   // Initialize currentUser from localStorage persistence so page refreshes retain session
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem('replate_current_user');
+      const savedUser = localStorage.getItem("replate_current_user");
       return savedUser ? JSON.parse(savedUser) : null;
     } catch (e) {
       return null;
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const [mongoUser, setMongoUser] = useState(null);
   const [userRole, setUserRole] = useState(
-    () => localStorage.getItem('replate_user_role') || 'business'
+    () => localStorage.getItem("replate_user_role") || "business",
   );
   const [loading, setLoading] = useState(true);
 
@@ -44,57 +44,76 @@ export const AuthProvider = ({ children }) => {
       const sanitizedUser = {
         uid: userObj.uid,
         email: userObj.email,
-        displayName: userObj.displayName || userObj.name || userObj.email?.split('@')[0],
-        photoURL: userObj.photoURL || '',
+        displayName:
+          userObj.displayName || userObj.name || userObj.email?.split("@")[0],
+        photoURL: userObj.photoURL || "",
       };
       setCurrentUser(sanitizedUser);
-      localStorage.setItem('replate_current_user', JSON.stringify(sanitizedUser));
+      localStorage.setItem(
+        "replate_current_user",
+        JSON.stringify(sanitizedUser),
+      );
     }
   };
 
   // Helper to sync user profile with MongoDB backend
-  const syncWithMongoDB = async (fbUser, role = 'business', extraData = {}) => {
+  const syncWithMongoDB = async (fbUser, role = "business", extraData = {}) => {
     try {
       const payload = {
         firebaseUid: fbUser.uid,
         email: fbUser.email,
-        name: extraData.name || fbUser.displayName || fbUser.email?.split('@')[0],
+        name:
+          extraData.name || fbUser.displayName || fbUser.email?.split("@")[0],
         role: role.toUpperCase(),
-        organizationName: extraData.organizationName || extraData.name || '',
+        organizationName: extraData.organizationName || extraData.name || "",
+        phone: extraData.phone || "",
+        location: extraData.location || undefined,
       };
       const res = await syncUserProfile(payload);
       if (res.success && res.data) {
         setMongoUser(res.data);
         const syncedRole = res.data.role.toLowerCase();
-        localStorage.setItem('replate_user_role', syncedRole);
+        localStorage.setItem("replate_user_role", syncedRole);
         setUserRole(syncedRole);
       }
     } catch (err) {
-      console.warn('MongoDB Sync Fallback:', err.message);
+      console.warn("MongoDB Sync Fallback:", err.message);
     }
   };
 
   // Signup with Email & Password
-  const signup = async (email, password, displayName, role = 'business') => {
+  const signup = async (
+    email,
+    password,
+    displayName,
+    role = "business",
+    extraData = {},
+  ) => {
     try {
       let user;
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
         user = userCredential.user;
         if (displayName && user) {
           await updateProfile(user, { displayName });
         }
       } catch (fbErr) {
         if (
-          fbErr.code === 'auth/invalid-api-key' ||
-          fbErr.message?.includes('API key') ||
-          fbErr.message?.includes('api-key')
+          fbErr.code === "auth/invalid-api-key" ||
+          fbErr.message?.includes("API key") ||
+          fbErr.message?.includes("api-key")
         ) {
-          console.warn('Dev Mode Fallback: Firebase API key is unconfigured. Creating local user session.');
+          console.warn(
+            "Dev Mode Fallback: Firebase API key is unconfigured. Creating local user session.",
+          );
           user = {
             uid: `dev-user-${Date.now()}`,
             email,
-            displayName: displayName || email.split('@')[0],
+            displayName: displayName || email.split("@")[0],
           };
         } else {
           throw fbErr;
@@ -102,12 +121,12 @@ export const AuthProvider = ({ children }) => {
       }
 
       saveUserSession(user);
-      localStorage.setItem('replate_user_role', role);
+      localStorage.setItem("replate_user_role", role);
       setUserRole(role);
-      await syncWithMongoDB(user, role, { name: displayName });
+      await syncWithMongoDB(user, role, { name: displayName, ...extraData });
       return user;
     } catch (error) {
-      console.error('Firebase Signup Error:', error);
+      console.error("Firebase Signup Error:", error);
       throw error;
     }
   };
@@ -117,19 +136,25 @@ export const AuthProvider = ({ children }) => {
     try {
       let user;
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
         user = userCredential.user;
       } catch (fbErr) {
         if (
-          fbErr.code === 'auth/invalid-api-key' ||
-          fbErr.message?.includes('API key') ||
-          fbErr.message?.includes('api-key')
+          fbErr.code === "auth/invalid-api-key" ||
+          fbErr.message?.includes("API key") ||
+          fbErr.message?.includes("api-key")
         ) {
-          console.warn('Dev Mode Fallback: Firebase API key is unconfigured. Logging in local user session.');
+          console.warn(
+            "Dev Mode Fallback: Firebase API key is unconfigured. Logging in local user session.",
+          );
           user = {
-            uid: `dev-user-${email.replace(/[^a-zA-Z0-9]/g, '')}`,
+            uid: `dev-user-${email.replace(/[^a-zA-Z0-9]/g, "")}`,
             email,
-            displayName: email.split('@')[0],
+            displayName: email.split("@")[0],
           };
         } else {
           throw fbErr;
@@ -140,13 +165,13 @@ export const AuthProvider = ({ children }) => {
       await syncWithMongoDB(user, userRole);
       return user;
     } catch (error) {
-      console.error('Firebase Login Error:', error);
+      console.error("Firebase Login Error:", error);
       throw error;
     }
   };
 
   // Login with Google Popup
-  const loginWithGoogle = async (role = 'business') => {
+  const loginWithGoogle = async (role = "business") => {
     try {
       let user;
       try {
@@ -154,15 +179,17 @@ export const AuthProvider = ({ children }) => {
         user = userCredential.user;
       } catch (fbErr) {
         if (
-          fbErr.code === 'auth/invalid-api-key' ||
-          fbErr.message?.includes('API key') ||
-          fbErr.message?.includes('api-key')
+          fbErr.code === "auth/invalid-api-key" ||
+          fbErr.message?.includes("API key") ||
+          fbErr.message?.includes("api-key")
         ) {
-          console.warn('Dev Mode Fallback: Firebase API key is unconfigured. Logging in local Google user session.');
+          console.warn(
+            "Dev Mode Fallback: Firebase API key is unconfigured. Logging in local Google user session.",
+          );
           user = {
             uid: `dev-google-user-${Date.now()}`,
-            email: 'google.partner@replate.org',
-            displayName: 'Google Partner User',
+            email: "google.partner@replate.org",
+            displayName: "Google Partner User",
           };
         } else {
           throw fbErr;
@@ -170,12 +197,12 @@ export const AuthProvider = ({ children }) => {
       }
 
       saveUserSession(user);
-      localStorage.setItem('replate_user_role', role);
+      localStorage.setItem("replate_user_role", role);
       setUserRole(role);
       await syncWithMongoDB(user, role);
       return user;
     } catch (error) {
-      console.error('Firebase Google Login Error:', error);
+      console.error("Firebase Google Login Error:", error);
       throw error;
     }
   };
@@ -185,10 +212,11 @@ export const AuthProvider = ({ children }) => {
     try {
       await signOut(auth).catch(() => {});
     } finally {
-      localStorage.removeItem('replate_user_role');
-      localStorage.removeItem('replate_current_user');
+      localStorage.removeItem("replate_user_role");
+      localStorage.removeItem("replate_current_user");
       setCurrentUser(null);
       setMongoUser(null);
+      setUserRole("business"); // Reset to default
     }
   };
 
@@ -197,14 +225,14 @@ export const AuthProvider = ({ children }) => {
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
-      console.error('Firebase Reset Password Error:', error);
+      console.error("Firebase Reset Password Error:", error);
       throw error;
     }
   };
 
   // Update user role state manually
   const switchRole = (role) => {
-    localStorage.setItem('replate_user_role', role);
+    localStorage.setItem("replate_user_role", role);
     setUserRole(role);
   };
 
@@ -217,7 +245,7 @@ export const AuthProvider = ({ children }) => {
           saveUserSession(user);
         } else {
           // If Firebase SDK returns null (dev mode or unconfigured SDK), check localStorage session fallback
-          const savedUser = localStorage.getItem('replate_current_user');
+          const savedUser = localStorage.getItem("replate_current_user");
           if (savedUser) {
             try {
               setCurrentUser(JSON.parse(savedUser));
@@ -229,10 +257,15 @@ export const AuthProvider = ({ children }) => {
           }
         }
 
-        const savedRole = localStorage.getItem('replate_user_role') || 'business';
+        const savedRole =
+          localStorage.getItem("replate_user_role") || "business";
         setUserRole(savedRole);
 
-        const activeUser = user || (localStorage.getItem('replate_current_user') ? JSON.parse(localStorage.getItem('replate_current_user')) : null);
+        const activeUser =
+          user ||
+          (localStorage.getItem("replate_current_user")
+            ? JSON.parse(localStorage.getItem("replate_current_user"))
+            : null);
         if (activeUser) {
           try {
             const profileRes = await getCurrentUserProfile();
@@ -240,25 +273,31 @@ export const AuthProvider = ({ children }) => {
               setMongoUser(profileRes.data);
               const mRole = profileRes.data.role.toLowerCase();
               setUserRole(mRole);
-              localStorage.setItem('replate_user_role', mRole);
+              localStorage.setItem("replate_user_role", mRole);
             }
           } catch (e) {
-            // Dev fallback
+            if (e.response?.status === 401 || e.message?.includes("401")) {
+              await signOut(auth).catch(() => {});
+              localStorage.removeItem("replate_current_user");
+              localStorage.removeItem("replate_user_role");
+              setCurrentUser(null);
+              setMongoUser(null);
+            }
           }
         }
 
         setLoading(false);
       },
       (error) => {
-        console.warn('Firebase Auth State listener fallback:', error.message);
-        const savedUser = localStorage.getItem('replate_current_user');
+        console.warn("Firebase Auth State listener fallback:", error.message);
+        const savedUser = localStorage.getItem("replate_current_user");
         if (savedUser) {
           try {
             setCurrentUser(JSON.parse(savedUser));
           } catch (e) {}
         }
         setLoading(false);
-      }
+      },
     );
 
     return unsubscribe;

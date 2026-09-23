@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 /**
  * MongoDB Atlas Connection Configuration
@@ -8,8 +8,10 @@ const connectDB = async () => {
   try {
     const connStr = process.env.MONGODB_URI;
 
-    if (!connStr || connStr.trim() === '') {
-      console.warn('MongoDB Warning: MONGODB_URI not provided in .env. Database connection skipped.');
+    if (!connStr || connStr.trim() === "") {
+      console.warn(
+        "MongoDB Warning: MONGODB_URI not provided in .env. Database connection skipped.",
+      );
       return;
     }
 

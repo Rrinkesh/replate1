@@ -1,9 +1,9 @@
-import api from './api';
+import api from "./api";
 
 export const notificationService = {
   // Fetch user notifications & unread count
   getNotifications: async () => {
-    const response = await api.get('/notifications');
+    const response = await api.get("/notifications");
     return response.data;
   },
 
@@ -15,7 +15,7 @@ export const notificationService = {
 
   // Mark all notifications as read
   markAllAsRead: async () => {
-    const response = await api.put('/notifications/read-all');
+    const response = await api.put("/notifications/read-all");
     return response.data;
   },
 

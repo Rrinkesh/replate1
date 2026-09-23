@@ -1,4 +1,4 @@
-const Notification = require('../models/Notification');
+const Notification = require("../models/Notification");
 
 /**
  * Helper to create a user notification asynchronously
@@ -9,10 +9,18 @@ const Notification = require('../models/Notification');
  * @param {string} params.message
  * @param {string|ObjectId} [params.relatedId]
  */
-const createNotificationHelper = async ({ userId, type, title, message, relatedId = null }) => {
+const createNotificationHelper = async ({
+  userId,
+  type,
+  title,
+  message,
+  relatedId = null,
+}) => {
   try {
     if (!userId || !type || !title || !message) {
-      console.warn('createNotificationHelper skipped: Missing required parameters');
+      console.warn(
+        "createNotificationHelper skipped: Missing required parameters",
+      );
       return null;
     }
 
@@ -27,7 +35,7 @@ const createNotificationHelper = async ({ userId, type, title, message, relatedI
 
     return notification;
   } catch (error) {
-    console.error('Failed to create notification document:', error.message);
+    console.error("Failed to create notification document:", error.message);
     return null;
   }
 };

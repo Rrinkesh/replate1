@@ -1,12 +1,18 @@
-import React, { useEffect } from 'react';
-import { X, CheckCircle2, AlertTriangle, AlertCircle, HelpCircle } from 'lucide-react';
-import Button from './Button';
+import React, { useEffect } from "react";
+import {
+  X,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  HelpCircle,
+} from "lucide-react";
+import Button from "./Button";
 
 const sizeClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
+  sm: "max-w-sm",
+  md: "max-w-lg",
+  lg: "max-w-2xl",
+  xl: "max-w-4xl",
 };
 
 const variantIcons = {
@@ -18,11 +24,11 @@ const variantIcons = {
 };
 
 const variantColors = {
-  confirmation: 'text-brand-600 bg-brand-50 border-brand-200',
-  success: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-  warning: 'text-amber-600 bg-amber-50 border-amber-200',
-  danger: 'text-rose-600 bg-rose-50 border-rose-200',
-  default: '',
+  confirmation: "text-brand-600 bg-brand-50 border-brand-200",
+  success: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  warning: "text-amber-600 bg-amber-50 border-amber-200",
+  danger: "text-rose-600 bg-rose-50 border-rose-200",
+  default: "",
 };
 
 const Modal = ({
@@ -32,28 +38,28 @@ const Modal = ({
   subtitle,
   children,
   footer,
-  size = 'md',
-  variant = 'default',
+  size = "md",
+  variant = "default",
   showCloseButton = true,
   closeOnOverlayClick = true,
-  className = '',
+  className = "",
 }) => {
   // Handle ESC key press for accessibility
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen && onClose) {
+      if (e.key === "Escape" && isOpen && onClose) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
     }
 
     return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
 
@@ -66,7 +72,7 @@ const Modal = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
-      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-labelledby={title ? "modal-title" : undefined}
     >
       {/* Backdrop Overlay with Blur */}
       <div
@@ -89,13 +95,18 @@ const Modal = ({
           <div className="flex items-start justify-between p-6 pb-4 border-b border-charcoal-100">
             <div className="flex items-center gap-3">
               {IconComponent && (
-                <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 ${variantColors[variant]}`}>
+                <div
+                  className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 ${variantColors[variant]}`}
+                >
                   <IconComponent className="w-5 h-5" />
                 </div>
               )}
               <div>
                 {title && (
-                  <h2 id="modal-title" className="text-xl font-bold text-charcoal-900 tracking-tight">
+                  <h2
+                    id="modal-title"
+                    className="text-xl font-bold text-charcoal-900 tracking-tight"
+                  >
                     {title}
                   </h2>
                 )}
@@ -120,9 +131,7 @@ const Modal = ({
         )}
 
         {/* Content Body */}
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
 
         {/* Footer Actions */}
         {footer && (

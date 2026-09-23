@@ -1,23 +1,28 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
-const Logo = ({ size = 'md', showTagline = false, className = '' }) => {
+const Logo = ({ size = "md", showTagline = false, className = "" }) => {
   const iconSizes = {
-    sm: 'w-7 h-7',
-    md: 'w-9 h-9',
-    lg: 'w-11 h-11',
+    sm: "w-7 h-7",
+    md: "w-9 h-9",
+    lg: "w-11 h-11",
   };
 
   const textSizes = {
-    sm: 'text-lg',
-    md: 'text-xl',
-    lg: 'text-2xl',
+    sm: "text-lg",
+    md: "text-xl",
+    lg: "text-2xl",
   };
 
   return (
-    <Link to="/" className={`inline-flex items-center gap-2.5 group ${className}`}>
+    <Link
+      to="/"
+      className={`inline-flex items-center gap-2.5 group ${className}`}
+    >
       {/* Plate + Circular Reuse Arrow Icon Concept */}
-      <div className={`relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 text-white shadow-soft-sm group-hover:shadow-soft-md group-hover:scale-105 transition-all duration-200 shrink-0 ${iconSizes[size]}`}>
+      <div
+        className={`relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 text-white shadow-soft-sm group-hover:shadow-soft-md group-hover:scale-105 transition-all duration-200 shrink-0 ${iconSizes[size]}`}
+      >
         {/* Custom SVG Plate + Circular Arrows Logo */}
         <svg
           viewBox="0 0 24 24"
@@ -43,7 +48,9 @@ const Logo = ({ size = 'md', showTagline = false, className = '' }) => {
 
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5">
-          <span className={`font-black tracking-tight text-charcoal-900 ${textSizes[size]}`}>
+          <span
+            className={`font-black tracking-tight text-charcoal-900 ${textSizes[size]}`}
+          >
             RePlate
           </span>
           <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />

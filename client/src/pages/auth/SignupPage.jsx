@@ -1,38 +1,58 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Building2, Mail, Lock, User, HeartHandshake, ArrowRight, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { Card, Input, Button } from '../../components/common';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Building2,
+  Mail,
+  Lock,
+  User,
+  HeartHandshake,
+  ArrowRight,
+  AlertCircle,
+  Phone,
+  MapPin,
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { Card, Input, Button } from "../../components/common";
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signup, loginWithGoogle } = useAuth();
 
-  const [role, setRole] = useState('business'); // 'business' or 'recipient'
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState("business"); // 'business' or 'recipient'
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   const validateForm = () => {
     if (!name.trim()) {
-      setErrorMessage('Please enter your name or organization name.');
+      setErrorMessage("Please enter your name or organization name.");
       return false;
     }
     if (!email.trim()) {
-      setErrorMessage('Please enter a valid email address.');
+      setErrorMessage("Please enter a valid email address.");
       return false;
     }
     if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long.');
+      setErrorMessage("Password must be at least 6 characters long.");
       return false;
     }
     if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
+      setErrorMessage("Passwords do not match.");
+      return false;
+    }
+    if (!phone.trim()) {
+      setErrorMessage("Please enter your contact phone number.");
+      return false;
+    }
+    if (!address.trim()) {
+      setErrorMessage("Please enter your full address.");
       return false;
     }
     return true;
@@ -40,28 +60,43 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessage("");
 
     if (!validateForm()) return;
 
     try {
       setIsSubmitting(true);
-      await signup(email, password, name, role);
-      // Redirect to specific portal
-      navigate(role === 'business' ? '/business/dashboard' : '/recipient/dashboard', {
-        replace: true,
+      await signup(email, password, name, role, {
+        phone,
+        location: { address },
       });
+      // Redirect to specific portal
+      navigate(
+        role === "business" ? "/business/dashboard" : "/recipient/dashboard",
+        {
+          replace: true,
+        },
+      );
     } catch (err) {
-      if (err.code === 'auth/email-already-in-use') {
-        setErrorMessage('This email is already registered. Please sign in instead.');
-      } else if (err.code === 'auth/invalid-email') {
-        setErrorMessage('Please enter a valid email address.');
-      } else if (err.code === 'auth/weak-password') {
-        setErrorMessage('Password is too weak. Choose a stronger password.');
-      } else if (err.code === 'auth/invalid-api-key' || err.message?.includes('API key')) {
-        setErrorMessage('Firebase API key is unconfigured. Using dev fallback session.');
+      if (err.code === "auth/email-already-in-use") {
+        setErrorMessage(
+          "This email is already registered. Please sign in instead.",
+        );
+      } else if (err.code === "auth/invalid-email") {
+        setErrorMessage("Please enter a valid email address.");
+      } else if (err.code === "auth/weak-password") {
+        setErrorMessage("Password is too weak. Choose a stronger password.");
+      } else if (
+        err.code === "auth/invalid-api-key" ||
+        err.message?.includes("API key")
+      ) {
+        setErrorMessage(
+          "Firebase API key is unconfigured. Using dev fallback session.",
+        );
       } else {
-        setErrorMessage(err.message || 'Failed to create account. Please try again.');
+        setErrorMessage(
+          err.message || "Failed to create account. Please try again.",
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -69,16 +104,21 @@ const SignupPage = () => {
   };
 
   const handleGoogleSignup = async () => {
-    setErrorMessage('');
+    setErrorMessage("");
     try {
       setIsGoogleSubmitting(true);
       await loginWithGoogle(role);
-      navigate(role === 'business' ? '/business/dashboard' : '/recipient/dashboard', {
-        replace: true,
-      });
+      navigate(
+        role === "business" ? "/business/dashboard" : "/recipient/dashboard",
+        {
+          replace: true,
+        },
+      );
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setErrorMessage(err.message || 'Failed to sign up with Google. Please try again.');
+      if (err.code !== "auth/popup-closed-by-user") {
+        setErrorMessage(
+          err.message || "Failed to sign up with Google. Please try again.",
+        );
       }
     } finally {
       setIsGoogleSubmitting(false);
@@ -106,11 +146,11 @@ const SignupPage = () => {
             <div className="grid grid-cols-2 gap-2 p-1 bg-surface-100 rounded-2xl border border-charcoal-200">
               <button
                 type="button"
-                onClick={() => setRole('business')}
+                onClick={() => setRole("business")}
                 className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all ${
-                  role === 'business'
-                    ? 'bg-brand-600 text-white shadow-soft-xs'
-                    : 'text-charcoal-700 hover:bg-surface-200'
+                  role === "business"
+                    ? "bg-brand-600 text-white shadow-soft-xs"
+                    : "text-charcoal-700 hover:bg-surface-200"
                 }`}
               >
                 <Building2 className="w-4 h-4" />
@@ -119,11 +159,11 @@ const SignupPage = () => {
 
               <button
                 type="button"
-                onClick={() => setRole('recipient')}
+                onClick={() => setRole("recipient")}
                 className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all ${
-                  role === 'recipient'
-                    ? 'bg-brand-600 text-white shadow-soft-xs'
-                    : 'text-charcoal-700 hover:bg-surface-200'
+                  role === "recipient"
+                    ? "bg-brand-600 text-white shadow-soft-xs"
+                    : "text-charcoal-700 hover:bg-surface-200"
                 }`}
               >
                 <HeartHandshake className="w-4 h-4" />
@@ -131,9 +171,9 @@ const SignupPage = () => {
               </button>
             </div>
             <p className="text-[11px] text-charcoal-500 mt-1.5 text-center">
-              {role === 'business'
-                ? 'For hotels, restaurants, bakeries, and cloud kitchens posting food surplus.'
-                : 'For verified NGOs, shelters, and community kitchens receiving food.'}
+              {role === "business"
+                ? "For hotels, restaurants, bakeries, and cloud kitchens posting food surplus."
+                : "For verified NGOs, shelters, and community kitchens receiving food."}
             </p>
           </div>
 
@@ -148,10 +188,18 @@ const SignupPage = () => {
           {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label={role === 'business' ? 'Business / Kitchen Name' : 'Organization / NGO Name'}
+              label={
+                role === "business"
+                  ? "Business / Kitchen Name"
+                  : "Organization / NGO Name"
+              }
               type="text"
-              placeholder={role === 'business' ? 'Radisson Blu Noida' : 'Hope Care Foundation'}
-              iconLeft={role === 'business' ? Building2 : User}
+              placeholder={
+                role === "business"
+                  ? "Radisson Blu Noida"
+                  : "Hope Care Foundation"
+              }
+              iconLeft={role === "business" ? Building2 : User}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -164,6 +212,30 @@ const SignupPage = () => {
               iconLeft={Mail}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <Input
+              label="Phone Number"
+              type="tel"
+              placeholder="+91 98765 43210"
+              iconLeft={Phone}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+
+            <Input
+              label="Full Address"
+              type="text"
+              placeholder={
+                role === "business"
+                  ? "123 Kitchen St, Sector 62, Noida"
+                  : "45 Relief Rd, Sector 62, Noida"
+              }
+              iconLeft={MapPin}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               required
             />
 
@@ -197,7 +269,8 @@ const SignupPage = () => {
               isLoading={isSubmitting}
               iconRight={ArrowRight}
             >
-              Create {role === 'business' ? 'Business Partner' : 'Recipient'} Account
+              Create {role === "business" ? "Business Partner" : "Recipient"}{" "}
+              Account
             </Button>
           </form>
 
@@ -236,13 +309,20 @@ const SignupPage = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>{isGoogleSubmitting ? 'Signing up with Google...' : 'Sign up with Google'}</span>
+            <span>
+              {isGoogleSubmitting
+                ? "Signing up with Google..."
+                : "Sign up with Google"}
+            </span>
           </button>
         </Card.Content>
 
         <Card.Footer className="justify-center text-xs text-charcoal-500">
-          Already registered?{' '}
-          <Link to="/login" className="text-brand-700 font-bold ml-1 hover:underline">
+          Already registered?{" "}
+          <Link
+            to="/login"
+            className="text-brand-700 font-bold ml-1 hover:underline"
+          >
             Sign In Here
           </Link>
         </Card.Footer>

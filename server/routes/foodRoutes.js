@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   createFood,
@@ -7,20 +7,18 @@ const {
   getFoodById,
   updateFood,
   deleteFood,
-} = require('../controllers/foodController');
-const { protect } = require('../middleware/authMiddleware');
+} = require("../controllers/foodController");
+const { protect, verifiedOnly } = require("../middleware/authMiddleware");
 
 // Food Listings CRUD Routes
-router.route('/')
-  .get(getFoodListings)
-  .post(protect, createFood);
+router.route("/").get(getFoodListings).post(protect, verifiedOnly, createFood);
 
-router.route('/me/listings')
-  .get(protect, getMyFoodListings);
+router.route("/me/listings").get(protect, getMyFoodListings);
 
-router.route('/:id')
+router
+  .route("/:id")
   .get(getFoodById)
-  .put(protect, updateFood)
-  .delete(protect, deleteFood);
+  .put(protect, verifiedOnly, updateFood)
+  .delete(protect, verifiedOnly, deleteFood);
 
 module.exports = router;

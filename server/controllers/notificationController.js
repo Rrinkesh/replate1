@@ -1,5 +1,5 @@
-const Notification = require('../models/Notification');
-const User = require('../models/User');
+const Notification = require("../models/Notification");
+const User = require("../models/User");
 
 /**
  * Helper: Find authenticated MongoDB user from req.user
@@ -7,7 +7,7 @@ const User = require('../models/User');
 const getAuthenticatedMongoUser = async (req) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
-    const err = new Error('Unauthorized - Firebase user token missing');
+    const err = new Error("Unauthorized - Firebase user token missing");
     err.statusCode = 401;
     throw err;
   }
@@ -16,9 +16,9 @@ const getAuthenticatedMongoUser = async (req) => {
   if (!mongoUser) {
     mongoUser = await User.create({
       firebaseUid,
-      email: req.user.email || 'user@replate.org',
-      name: req.user.name || 'RePlate User',
-      role: 'RECIPIENT',
+      email: req.user.email || "user@replate.org",
+      name: req.user.name || "RePlate User",
+      role: "RECIPIENT",
     });
   }
 
@@ -72,7 +72,7 @@ const markAsRead = async (req, res, next) => {
 
     if (notification.userId.toString() !== mongoUser._id.toString()) {
       res.status(403);
-      throw new Error('Forbidden - You can only update your own notifications');
+      throw new Error("Forbidden - You can only update your own notifications");
     }
 
     notification.isRead = true;
@@ -85,7 +85,7 @@ const markAsRead = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Notification marked as read',
+      message: "Notification marked as read",
       unreadCount,
       notification,
     });
@@ -105,12 +105,12 @@ const markAllAsRead = async (req, res, next) => {
 
     await Notification.updateMany(
       { userId: mongoUser._id, isRead: false },
-      { $set: { isRead: true } }
+      { $set: { isRead: true } },
     );
 
     res.status(200).json({
       success: true,
-      message: 'All notifications marked as read',
+      message: "All notifications marked as read",
       unreadCount: 0,
     });
   } catch (error) {
@@ -136,7 +136,7 @@ const deleteNotification = async (req, res, next) => {
 
     if (notification.userId.toString() !== mongoUser._id.toString()) {
       res.status(403);
-      throw new Error('Forbidden - You can only delete your own notifications');
+      throw new Error("Forbidden - You can only delete your own notifications");
     }
 
     await notification.deleteOne();
@@ -148,7 +148,7 @@ const deleteNotification = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Notification deleted successfully',
+      message: "Notification deleted successfully",
       id,
       unreadCount,
     });

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   QrCode,
@@ -14,17 +14,24 @@ import {
   AlertTriangle,
   XCircle,
   Calendar,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { Card, Badge, Button, Modal, LoadingSpinner, EmptyState } from '../../components/common';
-import { reservationService } from '../../services/reservationService';
-import { useAuth } from '../../context/AuthContext';
+import {
+  Card,
+  Badge,
+  Button,
+  Modal,
+  LoadingSpinner,
+  EmptyState,
+} from "../../components/common";
+import { reservationService } from "../../services/reservationService";
+import { useAuth } from "../../context/AuthContext";
 
 const TIMELINE_STEPS = [
-  { status: 'PENDING', label: 'Reservation Placed', icon: Clock },
-  { status: 'CONFIRMED', label: 'Order Confirmed', icon: CheckCircle2 },
-  { status: 'READY_FOR_PICKUP', label: 'Ready for Pickup', icon: Package },
-  { status: 'COMPLETED', label: 'Pickup Completed', icon: ShieldCheck },
+  { status: "PENDING", label: "Reservation Placed", icon: Clock },
+  { status: "CONFIRMED", label: "Order Confirmed", icon: CheckCircle2 },
+  { status: "READY_FOR_PICKUP", label: "Ready for Pickup", icon: Package },
+  { status: "COMPLETED", label: "Pickup Completed", icon: ShieldCheck },
 ];
 
 const ReservationDetailPage = () => {
@@ -49,11 +56,15 @@ const ReservationDetailPage = () => {
       if (data && data.reservation) {
         setReservation(data.reservation);
       } else {
-        setError('Reservation details not found');
+        setError("Reservation details not found");
       }
     } catch (err) {
-      console.error('Error fetching reservation:', err);
-      setError(err.response?.data?.message || err.message || 'Unable to access reservation details');
+      console.error("Error fetching reservation:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Unable to access reservation details",
+      );
     } finally {
       setLoading(false);
     }
@@ -68,15 +79,22 @@ const ReservationDetailPage = () => {
     setIsSubmitting(true);
     setModalError(null);
     try {
-      if (targetStatus === 'CANCEL_RECIPIENT') {
+      if (targetStatus === "CANCEL_RECIPIENT") {
         await reservationService.cancelReservation(reservation._id);
       } else {
-        await reservationService.updateReservationStatus(reservation._id, targetStatus);
+        await reservationService.updateReservationStatus(
+          reservation._id,
+          targetStatus,
+        );
       }
       setTargetStatus(null);
       await fetchReservationDetail();
     } catch (err) {
-      setModalError(err.response?.data?.message || err.message || 'Failed to update reservation status');
+      setModalError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to update reservation status",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +103,10 @@ const ReservationDetailPage = () => {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 flex flex-col items-center justify-center min-h-[50vh]">
-        <LoadingSpinner size="lg" text="Loading reservation timeline details..." />
+        <LoadingSpinner
+          size="lg"
+          text="Loading reservation timeline details..."
+        />
       </div>
     );
   }
@@ -95,7 +116,10 @@ const ReservationDetailPage = () => {
       <div className="max-w-3xl mx-auto px-4 py-16">
         <EmptyState
           title="Reservation Access Error"
-          message={error || 'You may not have permission to view this reservation or it does not exist.'}
+          message={
+            error ||
+            "You may not have permission to view this reservation or it does not exist."
+          }
           actionLabel="Return to Console"
           onAction={() => navigate(-1)}
         />
@@ -108,21 +132,26 @@ const ReservationDetailPage = () => {
   const recipient = reservation.recipientId || {};
 
   const currentStatus = reservation.status?.toUpperCase();
-  const isCancelled = currentStatus === 'CANCELLED';
+  const isCancelled = currentStatus === "CANCELLED";
 
   const getStepIndex = (status) => {
     switch (status) {
-      case 'PENDING': return 0;
-      case 'CONFIRMED': return 1;
-      case 'READY_FOR_PICKUP': return 2;
-      case 'COMPLETED': return 3;
-      default: return -1;
+      case "PENDING":
+        return 0;
+      case "CONFIRMED":
+        return 1;
+      case "READY_FOR_PICKUP":
+        return 2;
+      case "COMPLETED":
+        return 3;
+      default:
+        return -1;
     }
   };
   const activeStepIdx = getStepIndex(currentStatus);
 
-  const isBusinessUser = userRole === 'business' || userRole === 'admin';
-  const isRecipientUser = userRole === 'recipient' || userRole === 'admin';
+  const isBusinessUser = userRole === "business" || userRole === "admin";
+  const isRecipientUser = userRole === "recipient" || userRole === "admin";
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -149,7 +178,7 @@ const ReservationDetailPage = () => {
                 Claim Code: {reservation.claimCode}
               </span>
               <h1 className="text-xl font-black text-charcoal-900 tracking-tight">
-                {food.name || 'Surplus Food Claim'}
+                {food.name || "Surplus Food Claim"}
               </h1>
             </div>
           </div>
@@ -158,12 +187,12 @@ const ReservationDetailPage = () => {
             <Badge
               variant={
                 isCancelled
-                  ? 'danger'
-                  : currentStatus === 'COMPLETED'
-                  ? 'success'
-                  : currentStatus === 'READY_FOR_PICKUP'
-                  ? 'brand'
-                  : 'warning'
+                  ? "danger"
+                  : currentStatus === "COMPLETED"
+                    ? "success"
+                    : currentStatus === "READY_FOR_PICKUP"
+                      ? "brand"
+                      : "warning"
               }
               size="lg"
               showDot
@@ -193,10 +222,10 @@ const ReservationDetailPage = () => {
                       p-3.5 rounded-2xl border transition-all flex flex-col items-start space-y-2
                       ${
                         isCurrent
-                          ? 'bg-brand-50 border-brand-300 text-brand-900 shadow-soft-xs'
+                          ? "bg-brand-50 border-brand-300 text-brand-900 shadow-soft-xs"
                           : isDone
-                          ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                          : 'bg-surface-50 border-charcoal-100 text-charcoal-400'
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                            : "bg-surface-50 border-charcoal-100 text-charcoal-400"
                       }
                     `}
                   >
@@ -220,7 +249,11 @@ const ReservationDetailPage = () => {
             <div>
               <p className="font-extrabold">Reservation Cancelled</p>
               <p className="text-[11px] text-red-700">
-                This food claim was cancelled on {new Date(reservation.cancelledAt || reservation.updatedAt).toLocaleString()}. Restored stock is back in available inventory.
+                This food claim was cancelled on{" "}
+                {new Date(
+                  reservation.cancelledAt || reservation.updatedAt,
+                ).toLocaleString()}
+                . Restored stock is back in available inventory.
               </p>
             </div>
           </div>
@@ -234,26 +267,40 @@ const ReservationDetailPage = () => {
             </h3>
             <div className="p-4 bg-surface-50 rounded-2xl border border-charcoal-100 space-y-3 text-xs">
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Food Name:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Food Name:
+                </span>
                 <span className="font-bold text-charcoal-900">{food.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-charcoal-500 font-medium">Category:</span>
-                <span className="font-semibold text-brand-700">{food.category}</span>
+                <span className="font-semibold text-brand-700">
+                  {food.category}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Claimed Quantity:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Claimed Quantity:
+                </span>
                 <span className="font-extrabold text-charcoal-900">
-                  {reservation.quantity} {food.quantityUnit || 'servings'}
+                  {reservation.quantity} {food.quantityUnit || "servings"}
                 </span>
               </div>
               <div className="flex justify-between border-t border-charcoal-200 pt-2">
-                <span className="text-charcoal-500 font-medium">Unit Price:</span>
-                <span className="font-bold text-charcoal-900">₹{food.price || 0}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Unit Price:
+                </span>
+                <span className="font-bold text-charcoal-900">
+                  ₹{food.price || 0}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Total Recovery Amount:</span>
-                <span className="font-black text-emerald-700 text-sm">₹{reservation.totalPrice}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Total Recovery Amount:
+                </span>
+                <span className="font-black text-emerald-700 text-sm">
+                  ₹{reservation.totalPrice}
+                </span>
               </div>
             </div>
           </div>
@@ -264,25 +311,41 @@ const ReservationDetailPage = () => {
             </h3>
             <div className="p-4 bg-surface-50 rounded-2xl border border-charcoal-100 space-y-3 text-xs">
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Pickup Window:</span>
-                <span className="font-extrabold text-amber-700">{reservation.pickupTime}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Pickup Window:
+                </span>
+                <span className="font-extrabold text-amber-700">
+                  {reservation.pickupTime}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Reserved Timestamp:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Reserved Timestamp:
+                </span>
                 <span className="font-medium text-charcoal-800">
-                  {new Date(reservation.reservedAt || reservation.createdAt).toLocaleString()}
+                  {new Date(
+                    reservation.reservedAt || reservation.createdAt,
+                  ).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between border-t border-charcoal-200 pt-2">
-                <span className="text-charcoal-500 font-medium">Commercial Donor:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Commercial Donor:
+                </span>
                 <span className="font-bold text-charcoal-900">
-                  {business.organizationName || business.name || 'Commercial Kitchen Partner'}
+                  {business.organizationName ||
+                    business.name ||
+                    "Commercial Kitchen Partner"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Recipient Partner:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Recipient Partner:
+                </span>
                 <span className="font-bold text-charcoal-900">
-                  {recipient.organizationName || recipient.name || 'Verified NGO'}
+                  {recipient.organizationName ||
+                    recipient.name ||
+                    "Verified NGO"}
                 </span>
               </div>
             </div>
@@ -292,57 +355,60 @@ const ReservationDetailPage = () => {
         {/* Interactive Action Buttons */}
         <div className="pt-4 border-t border-charcoal-100 flex flex-wrap items-center justify-between gap-3">
           <div className="text-xs text-charcoal-500 font-medium">
-            Authorized portal role: <strong className="capitalize text-charcoal-800">{userRole}</strong>
+            Authorized portal role:{" "}
+            <strong className="capitalize text-charcoal-800">{userRole}</strong>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Business Status Actions */}
-            {isBusinessUser && currentStatus === 'PENDING' && (
+            {isBusinessUser && currentStatus === "PENDING" && (
               <Button
                 variant="primary"
-                onClick={() => setTargetStatus('CONFIRMED')}
+                onClick={() => setTargetStatus("CONFIRMED")}
               >
                 Confirm Reservation
               </Button>
             )}
 
-            {isBusinessUser && currentStatus === 'CONFIRMED' && (
+            {isBusinessUser && currentStatus === "CONFIRMED" && (
               <Button
                 variant="outline"
-                onClick={() => setTargetStatus('READY_FOR_PICKUP')}
+                onClick={() => setTargetStatus("READY_FOR_PICKUP")}
               >
                 Mark Ready for Pickup
               </Button>
             )}
 
-            {isBusinessUser && currentStatus === 'READY_FOR_PICKUP' && (
+            {isBusinessUser && currentStatus === "READY_FOR_PICKUP" && (
               <Button
                 variant="primary"
                 iconLeft={CheckCircle2}
-                onClick={() => setTargetStatus('COMPLETED')}
+                onClick={() => setTargetStatus("COMPLETED")}
               >
                 Complete Pickup
               </Button>
             )}
 
-            {isBusinessUser && !['COMPLETED', 'CANCELLED'].includes(currentStatus) && (
-              <Button
-                variant="danger"
-                onClick={() => setTargetStatus('CANCELLED')}
-              >
-                Cancel Order
-              </Button>
-            )}
+            {isBusinessUser &&
+              !["COMPLETED", "CANCELLED"].includes(currentStatus) && (
+                <Button
+                  variant="danger"
+                  onClick={() => setTargetStatus("CANCELLED")}
+                >
+                  Cancel Order
+                </Button>
+              )}
 
             {/* Recipient Action */}
-            {isRecipientUser && ['PENDING', 'CONFIRMED'].includes(currentStatus) && (
-              <Button
-                variant="danger"
-                onClick={() => setTargetStatus('CANCEL_RECIPIENT')}
-              >
-                Cancel Reservation
-              </Button>
-            )}
+            {isRecipientUser &&
+              ["PENDING", "CONFIRMED"].includes(currentStatus) && (
+                <Button
+                  variant="danger"
+                  onClick={() => setTargetStatus("CANCEL_RECIPIENT")}
+                >
+                  Cancel Reservation
+                </Button>
+              )}
           </div>
         </div>
       </Card>
@@ -357,7 +423,8 @@ const ReservationDetailPage = () => {
         {targetStatus && (
           <div className="space-y-4 text-xs">
             <p className="text-charcoal-600 leading-relaxed">
-              Are you sure you want to execute action for claim <strong>{reservation.claimCode}</strong>?
+              Are you sure you want to execute action for claim{" "}
+              <strong>{reservation.claimCode}</strong>?
             </p>
 
             {modalError && (
@@ -368,23 +435,39 @@ const ReservationDetailPage = () => {
 
             <div className="p-4 bg-surface-50 rounded-2xl border border-charcoal-100 space-y-2">
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Current Status:</span>
-                <span className="font-bold text-amber-700">{reservation.status}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Current Status:
+                </span>
+                <span className="font-bold text-amber-700">
+                  {reservation.status}
+                </span>
               </div>
               <div className="flex justify-between pt-1 border-t border-charcoal-200">
-                <span className="text-charcoal-500 font-medium">Target Status:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Target Status:
+                </span>
                 <span className="font-black text-brand-700">
-                  {targetStatus === 'CANCEL_RECIPIENT' ? 'CANCELLED' : targetStatus}
+                  {targetStatus === "CANCEL_RECIPIENT"
+                    ? "CANCELLED"
+                    : targetStatus}
                 </span>
               </div>
             </div>
 
             <div className="pt-4 flex justify-end gap-3 border-t border-charcoal-100">
-              <Button variant="outline" onClick={() => setTargetStatus(null)} disabled={isSubmitting}>
+              <Button
+                variant="outline"
+                onClick={() => setTargetStatus(null)}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleUpdateStatus} disabled={isSubmitting}>
-                {isSubmitting ? 'Updating...' : 'Confirm Action'}
+              <Button
+                variant="primary"
+                onClick={handleUpdateStatus}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Updating..." : "Confirm Action"}
               </Button>
             </div>
           </div>

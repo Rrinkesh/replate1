@@ -1,55 +1,62 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const businessProfileSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'User reference is required'],
+      ref: "User",
+      required: [true, "User reference is required"],
       unique: true,
     },
     businessName: {
       type: String,
-      required: [true, 'Business name is required'],
+      required: [true, "Business name is required"],
       trim: true,
     },
     businessType: {
       type: String,
-      required: [true, 'Business type is required'],
+      required: [true, "Business type is required"],
       enum: {
-        values: ['HOTEL', 'RESTAURANT', 'CAFE', 'BAKERY', 'CLOUD_KITCHEN', 'OTHER'],
-        message: '{VALUE} is not a valid business type',
+        values: [
+          "HOTEL",
+          "RESTAURANT",
+          "CAFE",
+          "BAKERY",
+          "CLOUD_KITCHEN",
+          "OTHER",
+        ],
+        message: "{VALUE} is not a valid business type",
       },
-      default: 'RESTAURANT',
+      default: "RESTAURANT",
       uppercase: true,
     },
     description: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     phone: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     address: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     city: {
       type: String,
-      default: 'Noida',
+      default: "Noida",
     },
     state: {
       type: String,
-      default: 'Uttar Pradesh',
+      default: "Uttar Pradesh",
     },
     pincode: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     latitude: {
       type: Number,
@@ -57,11 +64,11 @@ const businessProfileSchema = new mongoose.Schema(
     },
     longitude: {
       type: Number,
-      default: 77.3910,
+      default: 77.391,
     },
     profileImage: {
       type: String,
-      default: '',
+      default: "",
     },
     isVerified: {
       type: Boolean,
@@ -70,7 +77,7 @@ const businessProfileSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-module.exports = mongoose.model('BusinessProfile', businessProfileSchema);
+module.exports = mongoose.model("BusinessProfile", businessProfileSchema);

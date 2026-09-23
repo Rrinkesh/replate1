@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const PageHeader = ({
   title,
@@ -6,11 +6,13 @@ const PageHeader = ({
   badge,
   breadcrumbs,
   actions,
-  className = '',
+  className = "",
 }) => {
   return (
     <div className={`mb-8 pb-6 border-b border-charcoal-100 ${className}`}>
-      {breadcrumbs && <div className="mb-3 text-xs text-charcoal-500">{breadcrumbs}</div>}
+      {breadcrumbs && (
+        <div className="mb-3 text-xs text-charcoal-500">{breadcrumbs}</div>
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

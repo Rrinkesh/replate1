@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import {
   ShieldCheck,
   Building2,
@@ -14,9 +14,9 @@ import {
   AlertTriangle,
   UserCheck,
   UserX,
-} from 'lucide-react';
+} from "lucide-react";
 
-import DashboardLayout from '../../components/layout/DashboardLayout';
+import DashboardLayout from "../../components/layout/DashboardLayout";
 import {
   StatCard,
   Card,
@@ -26,29 +26,32 @@ import {
   LoadingSpinner,
   EmptyState,
   ErrorState,
-} from '../../components/common';
-import { adminService } from '../../services/adminService';
-import { analyticsService } from '../../services/analyticsService';
-import { DailySurplusChart, RevenueRecoveredChart } from '../../components/dashboard';
-import { useAuth } from '../../context/AuthContext';
+} from "../../components/common";
+import { adminService } from "../../services/adminService";
+import { analyticsService } from "../../services/analyticsService";
+import {
+  DailySurplusChart,
+  RevenueRecoveredChart,
+} from "../../components/dashboard";
+import { useAuth } from "../../context/AuthContext";
 
 const AdminDashboardPage = () => {
   const { currentUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('businesses'); // 'businesses' | 'recipients'
+  const [activeTab, setActiveTab] = useState("businesses"); // 'businesses' | 'recipients'
   const [businesses, setBusinesses] = useState([]);
   const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Platform Analytics & Timeframe state
-  const [timeframe, setTimeframe] = useState('30d');
+  const [timeframe, setTimeframe] = useState("30d");
   const [adminAnalytics, setAdminAnalytics] = useState(null);
   const [dailyTrends, setDailyTrends] = useState([]);
 
   // Search & Filter state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'verified' | 'unverified'
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'verified' | 'unverified'
 
   // Confirmation Modal State
   const [selectedPartner, setSelectedPartner] = useState(null);
@@ -73,9 +76,11 @@ const AdminDashboardPage = () => {
         setDailyTrends(analyticsRes.dailyTrends || []);
       }
     } catch (err) {
-      console.error('Failed to load admin verification data:', err);
+      console.error("Failed to load admin verification data:", err);
       setError(
-        err.response?.data?.message || err.message || 'Unable to access platform verification records.'
+        err.response?.data?.message ||
+          err.message ||
+          "Unable to access platform verification records.",
       );
     } finally {
       setLoading(false);
@@ -89,17 +94,57 @@ const AdminDashboardPage = () => {
   const handleOpenVerifyModal = (partner, partnerType) => {
     setModalError(null);
     const partnerName =
-      partnerType === 'business'
+      partnerType === "business"
         ? partner.businessName
         : partner.organizationName;
 
     setSelectedPartner({
       id: partner._id,
       type: partnerType,
-      name: partnerName || 'Partner Account',
+      name: partnerName || "Partner Account",
       currentVerified: Boolean(partner.isVerified),
       targetVerified: !partner.isVerified,
     });
+  };
+
+  const [selectedDeletePartner, setSelectedDeletePartner] = useState(null);
+
+  const handleOpenDeleteModal = (partner, partnerType) => {
+    setModalError(null);
+    const partnerName =
+      partnerType === "business"
+        ? partner.businessName
+        : partner.organizationName;
+
+    setSelectedDeletePartner({
+      id: partner._id,
+      type: partnerType,
+      name: partnerName || "Partner Account",
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedDeletePartner) return;
+    setIsSubmitting(true);
+    setModalError(null);
+    try {
+      if (selectedDeletePartner.type === "business") {
+        await adminService.rejectBusiness(selectedDeletePartner.id);
+      } else {
+        await adminService.rejectRecipient(selectedDeletePartner.id);
+      }
+      setSelectedDeletePartner(null);
+      await fetchAdminData();
+    } catch (err) {
+      console.error("Delete error:", err);
+      setModalError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to delete partner",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleConfirmVerificationToggle = async () => {
@@ -107,23 +152,25 @@ const AdminDashboardPage = () => {
     setIsSubmitting(true);
     setModalError(null);
     try {
-      if (selectedPartner.type === 'business') {
+      if (selectedPartner.type === "business") {
         await adminService.verifyBusiness(
           selectedPartner.id,
-          selectedPartner.targetVerified
+          selectedPartner.targetVerified,
         );
       } else {
         await adminService.verifyRecipient(
           selectedPartner.id,
-          selectedPartner.targetVerified
+          selectedPartner.targetVerified,
         );
       }
       setSelectedPartner(null);
       await fetchAdminData();
     } catch (err) {
-      console.error('Verification toggle error:', err);
+      console.error("Verification toggle error:", err);
       setModalError(
-        err.response?.data?.message || err.message || 'Failed to update partner verification'
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to update partner verification",
       );
     } finally {
       setIsSubmitting(false);
@@ -138,18 +185,21 @@ const AdminDashboardPage = () => {
   const verifiedRecipientsCount = recipients.filter((r) => r.isVerified).length;
   const totalVerifiedCount = verifiedBusinessesCount + verifiedRecipientsCount;
 
-  const unverifiedBusinessesCount = totalBusinessesCount - verifiedBusinessesCount;
-  const unverifiedRecipientsCount = totalRecipientsCount - verifiedRecipientsCount;
-  const totalPendingQueueCount = unverifiedBusinessesCount + unverifiedRecipientsCount;
+  const unverifiedBusinessesCount =
+    totalBusinessesCount - verifiedBusinessesCount;
+  const unverifiedRecipientsCount =
+    totalRecipientsCount - verifiedRecipientsCount;
+  const totalPendingQueueCount =
+    unverifiedBusinessesCount + unverifiedRecipientsCount;
 
   // Filtered List Memo
-  const currentList = activeTab === 'businesses' ? businesses : recipients;
+  const currentList = activeTab === "businesses" ? businesses : recipients;
 
   const filteredList = useMemo(() => {
     return currentList.filter((item) => {
       // Status Filter
-      if (statusFilter === 'verified' && !item.isVerified) return false;
-      if (statusFilter === 'unverified' && item.isVerified) return false;
+      if (statusFilter === "verified" && !item.isVerified) return false;
+      if (statusFilter === "unverified" && item.isVerified) return false;
 
       // Search Term
       if (searchTerm.trim()) {
@@ -157,14 +207,14 @@ const AdminDashboardPage = () => {
         const name = (
           item.businessName ||
           item.organizationName ||
-          ''
+          ""
         ).toLowerCase();
-        const city = (item.city || '').toLowerCase();
-        const phone = (item.phone || '').toLowerCase();
+        const city = (item.city || "").toLowerCase();
+        const phone = (item.phone || "").toLowerCase();
         const category = (
           item.businessType ||
           item.recipientType ||
-          ''
+          ""
         ).toLowerCase();
 
         if (
@@ -191,7 +241,8 @@ const AdminDashboardPage = () => {
               Platform Verification & Moderation
             </h2>
             <p className="text-xs text-charcoal-500 mt-0.5">
-              Review and audit commercial donors & NGO recipients across Noida & NCR.
+              Review and audit commercial donors & NGO recipients across Noida &
+              NCR.
             </p>
           </div>
 
@@ -219,20 +270,22 @@ const AdminDashboardPage = () => {
             </h3>
             {/* Timeframe Filter Selector for System Analytics */}
             <div className="flex items-center gap-1 bg-surface-100 p-1 rounded-xl border border-charcoal-200 text-xs font-semibold self-start sm:self-auto">
-              <span className="text-charcoal-400 text-[10px] uppercase font-extrabold px-2">Analytics Window:</span>
+              <span className="text-charcoal-400 text-[10px] uppercase font-extrabold px-2">
+                Analytics Window:
+              </span>
               {[
-                { id: '7d', label: '7 Days' },
-                { id: '30d', label: '30 Days' },
-                { id: '90d', label: '90 Days' },
-                { id: 'all', label: 'All Time' },
+                { id: "7d", label: "7 Days" },
+                { id: "30d", label: "30 Days" },
+                { id: "90d", label: "90 Days" },
+                { id: "all", label: "All Time" },
               ].map((tf) => (
                 <button
                   key={tf.id}
                   onClick={() => setTimeframe(tf.id)}
                   className={`px-2.5 py-1 rounded-lg transition-all text-xs ${
                     timeframe === tf.id
-                      ? 'bg-brand-600 text-white shadow-soft-xs font-extrabold'
-                      : 'text-charcoal-600 hover:text-charcoal-900'
+                      ? "bg-brand-600 text-white shadow-soft-xs font-extrabold"
+                      : "text-charcoal-600 hover:text-charcoal-900"
                   }`}
                 >
                   {tf.label}
@@ -244,7 +297,9 @@ const AdminDashboardPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard
               title="Total Commercial Donors"
-              value={String(adminAnalytics?.totalBusinesses ?? totalBusinessesCount)}
+              value={String(
+                adminAnalytics?.totalBusinesses ?? totalBusinessesCount,
+              )}
               change={`${adminAnalytics?.verifiedBusinesses ?? verifiedBusinessesCount} verified`}
               changeDirection="up"
               icon={Building2}
@@ -252,7 +307,9 @@ const AdminDashboardPage = () => {
             />
             <StatCard
               title="Total NGO Recipients"
-              value={String(adminAnalytics?.totalRecipients ?? totalRecipientsCount)}
+              value={String(
+                adminAnalytics?.totalRecipients ?? totalRecipientsCount,
+              )}
               change={`${adminAnalytics?.verifiedRecipients ?? verifiedRecipientsCount} verified`}
               changeDirection="up"
               icon={HeartHandshake}
@@ -283,7 +340,7 @@ const AdminDashboardPage = () => {
               data={
                 dailyTrends.length > 0
                   ? dailyTrends.map((t) => ({
-                      day: t._id ? t._id.slice(5) : 'Day',
+                      day: t._id ? t._id.slice(5) : "Day",
                       kg: Number((t.meals * 0.4).toFixed(1)),
                       meals: t.meals,
                     }))
@@ -311,13 +368,13 @@ const AdminDashboardPage = () => {
             {/* Tab Switcher */}
             <div className="flex items-center gap-2 bg-surface-100 p-1 rounded-2xl border border-charcoal-200">
               <button
-                onClick={() => setActiveTab('businesses')}
+                onClick={() => setActiveTab("businesses")}
                 className={`
                   px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2
                   ${
-                    activeTab === 'businesses'
-                      ? 'bg-brand-600 text-white shadow-soft-xs'
-                      : 'text-charcoal-600 hover:text-charcoal-900'
+                    activeTab === "businesses"
+                      ? "bg-brand-600 text-white shadow-soft-xs"
+                      : "text-charcoal-600 hover:text-charcoal-900"
                   }
                 `}
               >
@@ -326,13 +383,13 @@ const AdminDashboardPage = () => {
               </button>
 
               <button
-                onClick={() => setActiveTab('recipients')}
+                onClick={() => setActiveTab("recipients")}
                 className={`
                   px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2
                   ${
-                    activeTab === 'recipients'
-                      ? 'bg-brand-600 text-white shadow-soft-xs'
-                      : 'text-charcoal-600 hover:text-charcoal-900'
+                    activeTab === "recipients"
+                      ? "bg-brand-600 text-white shadow-soft-xs"
+                      : "text-charcoal-600 hover:text-charcoal-900"
                   }
                 `}
               >
@@ -369,7 +426,10 @@ const AdminDashboardPage = () => {
           {/* Table Content / Loading / Error / Empty */}
           {loading ? (
             <div className="py-16 flex justify-center">
-              <LoadingSpinner size="lg" text="Loading partner audit records..." />
+              <LoadingSpinner
+                size="lg"
+                text="Loading partner audit records..."
+              />
             </div>
           ) : error ? (
             <ErrorState
@@ -381,14 +441,14 @@ const AdminDashboardPage = () => {
             <EmptyState
               title="No partner accounts found"
               message={
-                searchTerm || statusFilter !== 'all'
-                  ? 'No records match your active search and status filter criteria.'
+                searchTerm || statusFilter !== "all"
+                  ? "No records match your active search and status filter criteria."
                   : `No registered ${activeTab} accounts exist in the database yet.`
               }
               actionLabel="Reset Search & Filters"
               onAction={() => {
-                setSearchTerm('');
-                setStatusFilter('all');
+                setSearchTerm("");
+                setStatusFilter("all");
               }}
             />
           ) : (
@@ -404,12 +464,14 @@ const AdminDashboardPage = () => {
                       <th className="py-3.5 px-4">Phone / Contact</th>
                       <th className="py-3.5 px-4">Registered Date</th>
                       <th className="py-3.5 px-4">Verification</th>
-                      <th className="py-3.5 px-4 text-right">Moderation Action</th>
+                      <th className="py-3.5 px-4 text-right">
+                        Moderation Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-charcoal-100 font-medium">
                     {filteredList.map((item) => {
-                      const isBus = activeTab === 'businesses';
+                      const isBus = activeTab === "businesses";
                       const name = isBus
                         ? item.businessName
                         : item.organizationName;
@@ -418,61 +480,79 @@ const AdminDashboardPage = () => {
                         : item.recipientType;
 
                       return (
-                        <tr key={item._id} className="hover:bg-surface-50 transition-colors">
+                        <tr
+                          key={item._id}
+                          className="hover:bg-surface-50 transition-colors"
+                        >
                           <td className="py-3.5 px-4 font-extrabold text-charcoal-900">
-                            {name || 'Unnamed Partner'}
+                            {name || "Unnamed Partner"}
                           </td>
                           <td className="py-3.5 px-4 font-semibold text-brand-700">
-                            {category || 'Standard Partner'}
+                            {category || "Standard Partner"}
                           </td>
                           <td className="py-3.5 px-4 text-charcoal-600">
                             {item.city}, {item.state}
                           </td>
                           <td className="py-3.5 px-4 text-charcoal-600 font-mono">
-                            {item.phone || item.userId?.phone || 'N/A'}
+                            {item.phone || item.userId?.phone || "N/A"}
                           </td>
                           <td className="py-3.5 px-4 text-charcoal-500 font-medium">
                             {new Date(item.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-3.5 px-4">
                             <Badge
-                              variant={item.isVerified ? 'success' : 'warning'}
+                              variant={item.isVerified ? "success" : "warning"}
                               size="sm"
                               showDot
                             >
-                              {item.isVerified ? 'Verified' : 'Unverified'}
+                              {item.isVerified ? "Verified" : "Unverified"}
                             </Badge>
                           </td>
                           <td className="py-3.5 px-4 text-right">
-                            {item.isVerified ? (
+                            <div className="flex justify-end gap-2">
+                              {item.isVerified ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  iconLeft={UserX}
+                                  onClick={() =>
+                                    handleOpenVerifyModal(
+                                      item,
+                                      isBus ? "business" : "recipient",
+                                    )
+                                  }
+                                >
+                                  Revoke Verification
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="primary"
+                                  iconLeft={UserCheck}
+                                  onClick={() =>
+                                    handleOpenVerifyModal(
+                                      item,
+                                      isBus ? "business" : "recipient",
+                                    )
+                                  }
+                                >
+                                  Verify Partner
+                                </Button>
+                              )}
                               <Button
                                 size="sm"
                                 variant="outline"
-                                iconLeft={UserX}
+                                className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                                 onClick={() =>
-                                  handleOpenVerifyModal(
+                                  handleOpenDeleteModal(
                                     item,
-                                    isBus ? 'business' : 'recipient'
+                                    isBus ? "business" : "recipient",
                                   )
                                 }
                               >
-                                Revoke Verification
+                                Delete
                               </Button>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="primary"
-                                iconLeft={UserCheck}
-                                onClick={() =>
-                                  handleOpenVerifyModal(
-                                    item,
-                                    isBus ? 'business' : 'recipient'
-                                  )
-                                }
-                              >
-                                Verify Partner
-                              </Button>
-                            )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -484,7 +564,7 @@ const AdminDashboardPage = () => {
               {/* Mobile Touch-Friendly Card View */}
               <div className="md:hidden space-y-4">
                 {filteredList.map((item) => {
-                  const isBus = activeTab === 'businesses';
+                  const isBus = activeTab === "businesses";
                   const name = isBus
                     ? item.businessName
                     : item.organizationName;
@@ -493,23 +573,29 @@ const AdminDashboardPage = () => {
                     : item.recipientType;
 
                   return (
-                    <Card key={item._id} variant="default" className="space-y-3 shadow-soft-xs">
+                    <Card
+                      key={item._id}
+                      variant="default"
+                      className="space-y-3 shadow-soft-xs"
+                    >
                       <div className="flex items-center justify-between pb-2 border-b border-charcoal-100">
                         <h4 className="font-extrabold text-charcoal-900 text-sm">
-                          {name || 'Unnamed Partner'}
+                          {name || "Unnamed Partner"}
                         </h4>
                         <Badge
-                          variant={item.isVerified ? 'success' : 'warning'}
+                          variant={item.isVerified ? "success" : "warning"}
                           size="sm"
                         >
-                          {item.isVerified ? 'Verified' : 'Unverified'}
+                          {item.isVerified ? "Verified" : "Unverified"}
                         </Badge>
                       </div>
 
                       <div className="space-y-1 text-xs text-charcoal-600">
                         <div className="flex justify-between">
                           <span className="text-charcoal-400">Category:</span>
-                          <span className="font-bold text-brand-700">{category}</span>
+                          <span className="font-bold text-brand-700">
+                            {category}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-charcoal-400">Location:</span>
@@ -519,7 +605,9 @@ const AdminDashboardPage = () => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-charcoal-400">Phone:</span>
-                          <span className="font-mono text-charcoal-800">{item.phone || 'N/A'}</span>
+                          <span className="font-mono text-charcoal-800">
+                            {item.phone || "N/A"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-charcoal-400">Registered:</span>
@@ -538,7 +626,7 @@ const AdminDashboardPage = () => {
                             onClick={() =>
                               handleOpenVerifyModal(
                                 item,
-                                isBus ? 'business' : 'recipient'
+                                isBus ? "business" : "recipient",
                               )
                             }
                           >
@@ -552,13 +640,26 @@ const AdminDashboardPage = () => {
                             onClick={() =>
                               handleOpenVerifyModal(
                                 item,
-                                isBus ? 'business' : 'recipient'
+                                isBus ? "business" : "recipient",
                               )
                             }
                           >
                             Verify Partner
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 w-full mt-2"
+                          onClick={() =>
+                            handleOpenDeleteModal(
+                              item,
+                              isBus ? "business" : "recipient",
+                            )
+                          }
+                        >
+                          Delete
+                        </Button>
                       </div>
                     </Card>
                   );
@@ -575,18 +676,20 @@ const AdminDashboardPage = () => {
         onClose={() => setSelectedPartner(null)}
         title={
           selectedPartner?.targetVerified
-            ? 'Confirm Partner Verification'
-            : 'Revoke Partner Verification'
+            ? "Confirm Partner Verification"
+            : "Revoke Partner Verification"
         }
         size="md"
       >
         {selectedPartner && (
           <div className="space-y-4 text-xs">
             <p className="text-charcoal-600 leading-relaxed">
-              Are you sure you want to{' '}
+              Are you sure you want to{" "}
               <strong>
-                {selectedPartner.targetVerified ? 'verify' : 'revoke verification for'}
-              </strong>{' '}
+                {selectedPartner.targetVerified
+                  ? "verify"
+                  : "revoke verification for"}
+              </strong>{" "}
               <strong>{selectedPartner.name}</strong>?
             </p>
 
@@ -598,25 +701,33 @@ const AdminDashboardPage = () => {
 
             <div className="p-4 bg-surface-50 rounded-2xl border border-charcoal-100 space-y-2">
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Partner Name:</span>
-                <span className="font-bold text-charcoal-900">{selectedPartner.name}</span>
+                <span className="text-charcoal-500 font-medium">
+                  Partner Name:
+                </span>
+                <span className="font-bold text-charcoal-900">
+                  {selectedPartner.name}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-charcoal-500 font-medium">Account Type:</span>
+                <span className="text-charcoal-500 font-medium">
+                  Account Type:
+                </span>
                 <span className="font-bold text-brand-700 uppercase">
                   {selectedPartner.type} Account
                 </span>
               </div>
               <div className="flex justify-between border-t border-charcoal-200 pt-2">
-                <span className="text-charcoal-500 font-medium">New Status:</span>
+                <span className="text-charcoal-500 font-medium">
+                  New Status:
+                </span>
                 <span
                   className={`font-black ${
                     selectedPartner.targetVerified
-                      ? 'text-emerald-700'
-                      : 'text-amber-700'
+                      ? "text-emerald-700"
+                      : "text-amber-700"
                   }`}
                 >
-                  {selectedPartner.targetVerified ? 'VERIFIED' : 'UNVERIFIED'}
+                  {selectedPartner.targetVerified ? "VERIFIED" : "UNVERIFIED"}
                 </span>
               </div>
             </div>
@@ -630,15 +741,60 @@ const AdminDashboardPage = () => {
                 Cancel
               </Button>
               <Button
-                variant={selectedPartner.targetVerified ? 'primary' : 'danger'}
+                variant={selectedPartner.targetVerified ? "primary" : "danger"}
                 onClick={handleConfirmVerificationToggle}
                 disabled={isSubmitting}
               >
                 {isSubmitting
-                  ? 'Updating...'
+                  ? "Updating..."
                   : selectedPartner.targetVerified
-                  ? 'Confirm Verification'
-                  : 'Confirm Revocation'}
+                    ? "Confirm Verification"
+                    : "Confirm Revocation"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(selectedDeletePartner)}
+        onClose={() => setSelectedDeletePartner(null)}
+        title="Delete Partner Account"
+        size="md"
+      >
+        {selectedDeletePartner && (
+          <div className="space-y-4 text-xs">
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl font-medium flex gap-2 items-start">
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+              <p>
+                Are you sure you want to completely delete{" "}
+                <strong>{selectedDeletePartner.name}</strong>? This action is
+                irreversible and will remove all their data from the platform.
+              </p>
+            </div>
+
+            {modalError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl font-medium">
+                {modalError}
+              </div>
+            )}
+
+            <div className="pt-4 flex justify-end gap-3 border-t border-charcoal-100">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedDeletePartner(null)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleConfirmDelete}
+                disabled={isSubmitting}
+                className="bg-red-600 hover:bg-red-700 border-red-700 text-white"
+              >
+                {isSubmitting ? "Deleting..." : "Delete Permanently"}
               </Button>
             </div>
           </div>

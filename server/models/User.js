@@ -1,34 +1,35 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
     firebaseUid: {
       type: String,
-      required: [true, 'Firebase UID is required'],
+      required: [true, "Firebase UID is required"],
       unique: true,
       index: true,
       trim: true,
     },
     name: {
       type: String,
-      required: [true, 'User name is required'],
+      required: [true, "User name is required"],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Email address is required'],
+      required: [true, "Email address is required"],
       unique: true,
       lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address'],
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
     },
     role: {
       type: String,
       enum: {
-        values: ['BUSINESS', 'RECIPIENT', 'ADMIN'],
-        message: '{VALUE} is not a valid role. Allowed roles: BUSINESS, RECIPIENT, ADMIN',
+        values: ["BUSINESS", "RECIPIENT", "ADMIN"],
+        message:
+          "{VALUE} is not a valid role. Allowed roles: BUSINESS, RECIPIENT, ADMIN",
       },
-      default: 'BUSINESS',
+      default: "BUSINESS",
       uppercase: true,
     },
     phone: {
@@ -37,21 +38,21 @@ const userSchema = new mongoose.Schema(
     },
     profileImage: {
       type: String,
-      default: '',
+      default: "",
     },
     organizationName: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     location: {
-      address: { type: String, default: '' },
-      city: { type: String, default: 'Noida' },
-      state: { type: String, default: 'Uttar Pradesh' },
-      pincode: { type: String, default: '' },
+      address: { type: String, default: "" },
+      city: { type: String, default: "Noida" },
+      state: { type: String, default: "Uttar Pradesh" },
+      pincode: { type: String, default: "" },
       coordinates: {
         lat: { type: Number, default: 28.5355 },
-        lng: { type: Number, default: 77.3910 },
+        lng: { type: Number, default: 77.391 },
       },
     },
     isVerified: {
@@ -61,10 +62,10 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Mongoose Model compile
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;

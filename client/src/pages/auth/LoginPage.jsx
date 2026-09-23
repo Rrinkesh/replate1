@@ -1,54 +1,60 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { Card, Input, Button, Modal } from '../../components/common';
+import React, { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { Card, Input, Button, Modal } from "../../components/common";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, loginWithGoogle, resetPassword } = useAuth();
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from?.pathname || "/dashboard";
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Password reset modal state
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetSuccessMessage, setResetSuccessMessage] = useState('');
-  const [resetErrorMessage, setResetErrorMessage] = useState('');
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSuccessMessage, setResetSuccessMessage] = useState("");
+  const [resetErrorMessage, setResetErrorMessage] = useState("");
 
   // Map Firebase Auth errors to user-friendly messages
   const getFriendlyErrorMessage = (code) => {
     switch (code) {
-      case 'auth/invalid-credential':
-      case 'auth/wrong-password':
-      case 'auth/user-not-found':
-        return 'Invalid email or password. Please check your credentials.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled. Contact support.';
-      case 'auth/too-many-requests':
-        return 'Too many failed login attempts. Please try again later.';
+      case "auth/invalid-credential":
+      case "auth/wrong-password":
+      case "auth/user-not-found":
+        return "Invalid email or password. Please check your credentials.";
+      case "auth/invalid-email":
+        return "Please enter a valid email address.";
+      case "auth/user-disabled":
+        return "This account has been disabled. Contact support.";
+      case "auth/too-many-requests":
+        return "Too many failed login attempts. Please try again later.";
       default:
-        return 'Failed to log in. Please try again.';
+        return "Failed to log in. Please try again.";
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessage("");
 
     if (!email || !password) {
-      setErrorMessage('Please fill in both email and password.');
+      setErrorMessage("Please fill in both email and password.");
       return;
     }
 
@@ -57,7 +63,7 @@ const LoginPage = () => {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      const code = err.code || '';
+      const code = err.code || "";
       setErrorMessage(getFriendlyErrorMessage(code));
     } finally {
       setIsSubmitting(false);
@@ -65,14 +71,14 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = async () => {
-    setErrorMessage('');
+    setErrorMessage("");
     try {
       setIsGoogleSubmitting(true);
-      await loginWithGoogle('business');
+      await loginWithGoogle("business");
       navigate(from, { replace: true });
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setErrorMessage('Failed to sign in with Google. Please try again.');
+      if (err.code !== "auth/popup-closed-by-user") {
+        setErrorMessage("Failed to sign in with Google. Please try again.");
       }
     } finally {
       setIsGoogleSubmitting(false);
@@ -81,19 +87,19 @@ const LoginPage = () => {
 
   const handleSendResetPassword = async (e) => {
     e.preventDefault();
-    setResetErrorMessage('');
-    setResetSuccessMessage('');
+    setResetErrorMessage("");
+    setResetSuccessMessage("");
 
     if (!resetEmail) {
-      setResetErrorMessage('Please enter your account email address.');
+      setResetErrorMessage("Please enter your account email address.");
       return;
     }
 
     try {
       await resetPassword(resetEmail);
-      setResetSuccessMessage('Password reset email sent! Check your inbox.');
+      setResetSuccessMessage("Password reset email sent! Check your inbox.");
     } catch (err) {
-      setResetErrorMessage('Failed to send reset email. Verify email address.');
+      setResetErrorMessage("Failed to send reset email. Verify email address.");
     }
   };
 
@@ -212,13 +218,20 @@ const LoginPage = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>{isGoogleSubmitting ? 'Signing in with Google...' : 'Continue with Google'}</span>
+            <span>
+              {isGoogleSubmitting
+                ? "Signing in with Google..."
+                : "Continue with Google"}
+            </span>
           </button>
         </Card.Content>
 
         <Card.Footer className="justify-center text-xs text-charcoal-500">
-          Don't have an account yet?{' '}
-          <Link to="/signup" className="text-brand-700 font-bold ml-1 hover:underline">
+          Don't have an account yet?{" "}
+          <Link
+            to="/signup"
+            className="text-brand-700 font-bold ml-1 hover:underline"
+          >
             Register Here
           </Link>
         </Card.Footer>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   HeartHandshake,
   Utensils,
@@ -12,18 +12,28 @@ import {
   Building2,
   RefreshCw,
   FileText,
-} from 'lucide-react';
+} from "lucide-react";
 
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import { StatCard, Card, Badge, Button, LoadingSpinner, EmptyState } from '../../components/common';
-import FoodCard from '../../components/food/FoodCard';
-import ReservationCard from '../../components/reservation/ReservationCard';
-import { DailySurplusChart, WasteReductionChart } from '../../components/dashboard';
-import { mockFoodItems } from '../../utils/mockFoodData';
-import { reservationService } from '../../services/reservationService';
-import { foodService } from '../../services/foodService';
-import { analyticsService } from '../../services/analyticsService';
-import { useAuth } from '../../context/AuthContext';
+import DashboardLayout from "../../components/layout/DashboardLayout";
+import {
+  StatCard,
+  Card,
+  Badge,
+  Button,
+  LoadingSpinner,
+  EmptyState,
+} from "../../components/common";
+import FoodCard from "../../components/food/FoodCard";
+import ReservationCard from "../../components/reservation/ReservationCard";
+import {
+  DailySurplusChart,
+  WasteReductionChart,
+} from "../../components/dashboard";
+
+import { reservationService } from "../../services/reservationService";
+import { foodService } from "../../services/foodService";
+import { analyticsService } from "../../services/analyticsService";
+import { useAuth } from "../../context/AuthContext";
 
 const RecipientDashboardPage = () => {
   const { currentUser } = useAuth();
@@ -33,7 +43,7 @@ const RecipientDashboardPage = () => {
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
   // Analytics & Timeframe state
-  const [timeframe, setTimeframe] = useState('30d');
+  const [timeframe, setTimeframe] = useState("30d");
   const [analytics, setAnalytics] = useState(null);
   const [dailyTrends, setDailyTrends] = useState([]);
 
@@ -47,31 +57,32 @@ const RecipientDashboardPage = () => {
           setReservations(resData.reservations);
         }
       } catch (err) {
-        console.warn('API reservations fetch failed, using empty array or fallback:', err.message);
+        console.warn(
+          "API reservations fetch failed, using empty array or fallback:",
+          err.message,
+        );
       }
 
       // 2. Fetch Available Nearby Food from API
       try {
-        const foodData = await foodService.getFoods({ status: 'AVAILABLE' });
+        const foodData = await foodService.getFoods({ status: "AVAILABLE" });
         const items = foodData?.foods || foodData?.food || [];
-        if (items.length > 0) {
-          setAvailableFood(items.slice(0, 3));
-        } else {
-          setAvailableFood(mockFoodItems.slice(0, 3));
-        }
+        setAvailableFood(items.slice(0, 3));
       } catch (err) {
-        setAvailableFood(mockFoodItems.slice(0, 3));
+        console.warn("API food fetch failed:", err.message);
+        setAvailableFood([]);
       }
 
       // 3. Fetch Real Recipient Analytics
       try {
-        const analyticsRes = await analyticsService.getRecipientAnalytics(timeframe);
+        const analyticsRes =
+          await analyticsService.getRecipientAnalytics(timeframe);
         if (analyticsRes && analyticsRes.metrics) {
           setAnalytics(analyticsRes.metrics);
           setDailyTrends(analyticsRes.dailyTrends || []);
         }
       } catch (err) {
-        console.warn('Recipient analytics fetch failed:', err.message);
+        console.warn("Recipient analytics fetch failed:", err.message);
       }
     } finally {
       setLoading(false);
@@ -83,28 +94,36 @@ const RecipientDashboardPage = () => {
   }, [timeframe]);
 
   const handleCancelReservation = async (reservationId) => {
-    if (!window.confirm('Are you sure you want to cancel this food reservation?')) return;
+    if (
+      !window.confirm("Are you sure you want to cancel this food reservation?")
+    )
+      return;
     setActionLoadingId(reservationId);
     try {
       await reservationService.cancelReservation(reservationId);
       await fetchDashboardData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to cancel reservation');
+      alert(err.response?.data?.message || "Failed to cancel reservation");
     } finally {
       setActionLoadingId(null);
     }
   };
 
   const activeClaims = reservations.filter((r) =>
-    ['PENDING', 'CONFIRMED', 'READY_FOR_PICKUP'].includes(r.status?.toUpperCase())
+    ["PENDING", "CONFIRMED", "READY_FOR_PICKUP"].includes(
+      r.status?.toUpperCase(),
+    ),
   );
   const nextPickup = activeClaims[0];
 
   const totalMealsReceived = reservations
-    .filter((r) => r.status?.toUpperCase() === 'COMPLETED')
+    .filter((r) => r.status?.toUpperCase() === "COMPLETED")
     .reduce((sum, r) => sum + (r.quantity || 1), 0);
 
-  const totalCostSaved = reservations.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
+  const totalCostSaved = reservations.reduce(
+    (sum, r) => sum + (r.totalPrice || 0),
+    0,
+  );
 
   return (
     <DashboardLayout title="Recipient NGO Console">
@@ -113,7 +132,7 @@ const RecipientDashboardPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-charcoal-900 tracking-tight">
-              {currentUser?.name || 'Verified NGO Partner'}
+              {currentUser?.name || "Verified NGO Partner"}
             </h2>
             <p className="text-xs text-charcoal-500 mt-0.5">
               Community Welfare Network • Noida Sector 62
@@ -151,20 +170,22 @@ const RecipientDashboardPage = () => {
             </h3>
             {/* Timeframe Filter Selector */}
             <div className="flex items-center gap-1 bg-surface-100 p-1 rounded-xl border border-charcoal-200 text-xs font-semibold self-start sm:self-auto">
-              <span className="text-charcoal-400 text-[10px] uppercase font-extrabold px-2">Period:</span>
+              <span className="text-charcoal-400 text-[10px] uppercase font-extrabold px-2">
+                Period:
+              </span>
               {[
-                { id: '7d', label: '7 Days' },
-                { id: '30d', label: '30 Days' },
-                { id: '90d', label: '90 Days' },
-                { id: 'all', label: 'All Time' },
+                { id: "7d", label: "7 Days" },
+                { id: "30d", label: "30 Days" },
+                { id: "90d", label: "90 Days" },
+                { id: "all", label: "All Time" },
               ].map((tf) => (
                 <button
                   key={tf.id}
                   onClick={() => setTimeframe(tf.id)}
                   className={`px-2.5 py-1 rounded-lg transition-all text-xs ${
                     timeframe === tf.id
-                      ? 'bg-brand-600 text-white shadow-soft-xs font-extrabold'
-                      : 'text-charcoal-600 hover:text-charcoal-900'
+                      ? "bg-brand-600 text-white shadow-soft-xs font-extrabold"
+                      : "text-charcoal-600 hover:text-charcoal-900"
                   }`}
                 >
                   {tf.label}
@@ -176,7 +197,9 @@ const RecipientDashboardPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               title="Meals Received"
-              value={String(analytics?.totalQuantityRescued ?? totalMealsReceived)}
+              value={String(
+                analytics?.totalQuantityRescued ?? totalMealsReceived,
+              )}
               change={`Timeframe: ${timeframe}`}
               changeDirection="up"
               icon={Utensils}
@@ -216,7 +239,7 @@ const RecipientDashboardPage = () => {
             data={
               dailyTrends.length > 0
                 ? dailyTrends.map((t) => ({
-                    day: t._id ? t._id.slice(5) : 'Day',
+                    day: t._id ? t._id.slice(5) : "Day",
                     kg: Number((t.meals * 0.4).toFixed(1)),
                     meals: t.meals,
                   }))
@@ -225,7 +248,9 @@ const RecipientDashboardPage = () => {
           />
           <WasteReductionChart
             title="NGO Environmental Offset"
-            valueKg={Number(((analytics?.totalQuantityRescued || 0) * 0.4).toFixed(1))}
+            valueKg={Number(
+              ((analytics?.totalQuantityRescued || 0) * 0.4).toFixed(1),
+            )}
           />
         </div>
 
@@ -242,7 +267,10 @@ const RecipientDashboardPage = () => {
                     Active Pickup Reminder: ({nextPickup.claimCode})
                   </h3>
                   <p className="text-xs text-brand-800 mt-0.5">
-                    {nextPickup.foodId?.name || 'Surplus Meal Listing'} • {nextPickup.quantity} {nextPickup.foodId?.quantityUnit || 'servings'} • {nextPickup.pickupTime || 'Today before 8:30 PM'}
+                    {nextPickup.foodId?.name || "Surplus Meal Listing"} •{" "}
+                    {nextPickup.quantity}{" "}
+                    {nextPickup.foodId?.quantityUnit || "servings"} •{" "}
+                    {nextPickup.pickupTime || "Today before 8:30 PM"}
                   </p>
                 </div>
               </div>
@@ -250,15 +278,23 @@ const RecipientDashboardPage = () => {
                 size="sm"
                 variant="primary"
                 iconLeft={QrCode}
-                onClick={() => alert(`Verification Claim Code: ${nextPickup.claimCode}`)}
+                onClick={() =>
+                  alert(`Verification Claim Code: ${nextPickup.claimCode}`)
+                }
               >
                 Show Verification Code
               </Button>
             </div>
           </Card>
         ) : (
-          <Card variant="default" className="bg-surface-50 border-charcoal-200 p-4 text-xs text-charcoal-600 flex items-center justify-between">
-            <span>No active pickups pending right now. Browse marketplace to claim surplus food!</span>
+          <Card
+            variant="default"
+            className="bg-surface-50 border-charcoal-200 p-4 text-xs text-charcoal-600 flex items-center justify-between"
+          >
+            <span>
+              No active pickups pending right now. Browse marketplace to claim
+              surplus food!
+            </span>
             <Link to="/food">
               <Button size="sm" variant="outline">
                 Find Surplus Food
@@ -274,7 +310,9 @@ const RecipientDashboardPage = () => {
               <h3 className="text-base font-extrabold text-charcoal-900 tracking-tight">
                 My Food Claims & Reservations
               </h3>
-              <p className="text-xs text-charcoal-500">Live claim records and verification status</p>
+              <p className="text-xs text-charcoal-500">
+                Live claim records and verification status
+              </p>
             </div>
           </div>
 
@@ -287,7 +325,7 @@ const RecipientDashboardPage = () => {
               title="No claims yet"
               message="You haven't reserved any surplus food listings yet."
               actionLabel="Browse Surplus Marketplace"
-              onAction={() => window.location.href = '/food'}
+              onAction={() => (window.location.href = "/food")}
             />
           ) : (
             <div className="space-y-4">
@@ -311,7 +349,9 @@ const RecipientDashboardPage = () => {
               <h3 className="text-base font-extrabold text-charcoal-900 tracking-tight">
                 Available Surplus Nearby
               </h3>
-              <p className="text-xs text-charcoal-500">Commercial surplus listings available in Noida</p>
+              <p className="text-xs text-charcoal-500">
+                Commercial surplus listings available in Noida
+              </p>
             </div>
             <Link to="/food">
               <Button size="sm" variant="ghost" iconRight={ArrowRight}>

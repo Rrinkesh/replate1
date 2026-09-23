@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Search,
   Filter,
@@ -11,42 +11,50 @@ import {
   SlidersHorizontal,
   X,
   RefreshCw,
-} from 'lucide-react';
-import { PageHeader, Input, Select, Button, EmptyState, LoadingSpinner, ErrorState } from '../../components/common';
-import FoodCard from '../../components/food/FoodCard';
-import { foodService } from '../../services/foodService';
+} from "lucide-react";
+import {
+  PageHeader,
+  Input,
+  Select,
+  Button,
+  EmptyState,
+  LoadingSpinner,
+  ErrorState,
+} from "../../components/common";
+import FoodCard from "../../components/food/FoodCard";
+import { foodService } from "../../services/foodService";
 
 const CATEGORIES = [
-  'All Categories',
-  'Prepared Meals',
-  'Rice & Biryani',
-  'Bakery & Pastries',
-  'Snacks',
-  'Desserts',
-  'Beverages',
-  'Other',
+  "All Categories",
+  "Prepared Meals",
+  "Rice & Biryani",
+  "Bakery & Pastries",
+  "Snacks",
+  "Desserts",
+  "Beverages",
+  "Other",
 ];
 
 const PRICE_OPTIONS = [
-  { value: 'all', label: 'Any Price' },
-  { value: '50', label: 'Under ₹50' },
-  { value: '100', label: 'Under ₹100' },
-  { value: '150', label: 'Under ₹150' },
-  { value: '200', label: 'Under ₹200' },
+  { value: "all", label: "Any Price" },
+  { value: "50", label: "Under ₹50" },
+  { value: "100", label: "Under ₹100" },
+  { value: "150", label: "Under ₹150" },
+  { value: "200", label: "Under ₹200" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'all', label: 'All Statuses' },
-  { value: 'AVAILABLE', label: 'Available' },
-  { value: 'EXPIRING_SOON', label: 'Expiring Soon' },
-  { value: 'ALMOST_EXPIRED', label: 'Almost Expired' },
+  { value: "all", label: "All Statuses" },
+  { value: "AVAILABLE", label: "Available" },
+  { value: "EXPIRING_SOON", label: "Expiring Soon" },
+  { value: "ALMOST_EXPIRED", label: "Almost Expired" },
 ];
 
 const SORT_OPTIONS = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'price_low', label: 'Price: Low to High' },
-  { value: 'price_high', label: 'Price: High to Low' },
-  { value: 'expiring_soon', label: 'Expiring Soon' },
+  { value: "newest", label: "Newest First" },
+  { value: "price_low", label: "Price: Low to High" },
+  { value: "price_high", label: "Price: High to Low" },
+  { value: "expiring_soon", label: "Expiring Soon" },
 ];
 
 const FoodDirectoryPage = () => {
@@ -55,12 +63,12 @@ const FoodDirectoryPage = () => {
   const [error, setError] = useState(null);
 
   // Search & Filter State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [selectedPrice, setSelectedPrice] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedSort, setSelectedSort] = useState('newest');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedPrice, setSelectedPrice] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedSort, setSelectedSort] = useState("newest");
 
   // Mobile Filter Drawer State
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -80,9 +88,10 @@ const FoodDirectoryPage = () => {
     try {
       const params = {};
       if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
-      if (selectedCategory !== 'All Categories') params.category = selectedCategory;
-      if (selectedStatus !== 'all') params.status = selectedStatus;
-      if (selectedPrice !== 'all') params.maxPrice = selectedPrice;
+      if (selectedCategory !== "All Categories")
+        params.category = selectedCategory;
+      if (selectedStatus !== "all") params.status = selectedStatus;
+      if (selectedPrice !== "all") params.maxPrice = selectedPrice;
 
       const data = await foodService.getFoods(params);
 
@@ -92,9 +101,14 @@ const FoodDirectoryPage = () => {
       }
       setFoods(items);
     } catch (err) {
-      console.error('Failed to load marketplace listings:', err);
-      setError(err.response?.data?.message || err.message || 'Unable to load surplus food listings.');
-    } fontinally: {
+      console.error("Failed to load marketplace listings:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Unable to load surplus food listings.",
+      );
+    }
+    fontinally: {
       setLoading(false);
     }
   };
@@ -108,37 +122,37 @@ const FoodDirectoryPage = () => {
   const sortedFoods = useMemo(() => {
     const list = [...foods];
     switch (selectedSort) {
-      case 'price_low':
+      case "price_low":
         return list.sort((a, b) => (a.price || 0) - (b.price || 0));
-      case 'price_high':
+      case "price_high":
         return list.sort((a, b) => (b.price || 0) - (a.price || 0));
-      case 'expiring_soon':
+      case "expiring_soon":
         return list.sort(
-          (a, b) => new Date(a.expiryTime || 0) - new Date(b.expiryTime || 0)
+          (a, b) => new Date(a.expiryTime || 0) - new Date(b.expiryTime || 0),
         );
-      case 'newest':
+      case "newest":
       default:
         return list.sort(
-          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
         );
     }
   }, [foods, selectedSort]);
 
   // Reset all active filters
   const handleResetFilters = () => {
-    setSearchTerm('');
-    setDebouncedSearch('');
-    setSelectedCategory('All Categories');
-    setSelectedPrice('all');
-    setSelectedStatus('all');
-    setSelectedSort('newest');
+    setSearchTerm("");
+    setDebouncedSearch("");
+    setSelectedCategory("All Categories");
+    setSelectedPrice("all");
+    setSelectedStatus("all");
+    setSelectedSort("newest");
   };
 
   const isFiltered =
-    searchTerm !== '' ||
-    selectedCategory !== 'All Categories' ||
-    selectedPrice !== 'all' ||
-    selectedStatus !== 'all';
+    searchTerm !== "" ||
+    selectedCategory !== "All Categories" ||
+    selectedPrice !== "all" ||
+    selectedStatus !== "all";
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6">
@@ -204,8 +218,8 @@ const FoodDirectoryPage = () => {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 ${
                 selectedCategory === cat
-                  ? 'bg-brand-600 text-white shadow-soft-xs'
-                  : 'bg-surface-100 text-charcoal-700 hover:bg-surface-200 hover:text-charcoal-900'
+                  ? "bg-brand-600 text-white shadow-soft-xs"
+                  : "bg-surface-100 text-charcoal-700 hover:bg-surface-200 hover:text-charcoal-900"
               }`}
             >
               {cat}
@@ -239,7 +253,12 @@ const FoodDirectoryPage = () => {
       {/* Directory Status Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs sm:text-sm font-bold text-charcoal-700">
-          Showing <span className="text-brand-700 font-extrabold">{sortedFoods.length}</span> surplus food listing{sortedFoods.length !== 1 ? 's' : ''} available nearby
+          Showing{" "}
+          <span className="text-brand-700 font-extrabold">
+            {sortedFoods.length}
+          </span>{" "}
+          surplus food listing{sortedFoods.length !== 1 ? "s" : ""} available
+          nearby
         </p>
       </div>
 
@@ -260,10 +279,10 @@ const FoodDirectoryPage = () => {
           title="No surplus food available right now"
           description={
             isFiltered
-              ? 'No items match your active search or filter preferences. Try clearing your search parameters.'
-              : 'There are currently no active surplus listings posted by partner kitchens.'
+              ? "No items match your active search or filter preferences. Try clearing your search parameters."
+              : "There are currently no active surplus listings posted by partner kitchens."
           }
-          actionLabel={isFiltered ? 'Clear Filters' : 'Refresh Directory'}
+          actionLabel={isFiltered ? "Clear Filters" : "Refresh Directory"}
           onAction={isFiltered ? handleResetFilters : fetchFoodListings}
           className="py-16"
         />
@@ -284,7 +303,9 @@ const FoodDirectoryPage = () => {
           />
           <div className="relative w-full max-w-xs bg-white h-full shadow-soft-xl flex flex-col z-10 ml-auto p-6 space-y-6">
             <div className="flex items-center justify-between border-b border-charcoal-100 pb-4">
-              <h3 className="font-extrabold text-charcoal-900 text-base">Filter Surplus Food</h3>
+              <h3 className="font-extrabold text-charcoal-900 text-base">
+                Filter Surplus Food
+              </h3>
               <button
                 onClick={() => setIsMobileFilterOpen(false)}
                 className="p-1 text-charcoal-500 hover:text-charcoal-900"
@@ -295,7 +316,9 @@ const FoodDirectoryPage = () => {
 
             <div className="space-y-4 flex-1 overflow-y-auto">
               <div>
-                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">Category:</label>
+                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">
+                  Category:
+                </label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
@@ -310,7 +333,9 @@ const FoodDirectoryPage = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">Status:</label>
+                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">
+                  Status:
+                </label>
                 <Select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
@@ -319,7 +344,9 @@ const FoodDirectoryPage = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">Max Price:</label>
+                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">
+                  Max Price:
+                </label>
                 <Select
                   value={selectedPrice}
                   onChange={(e) => setSelectedPrice(e.target.value)}
@@ -328,7 +355,9 @@ const FoodDirectoryPage = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">Sort Order:</label>
+                <label className="text-xs font-bold text-charcoal-700 block mb-1.5">
+                  Sort Order:
+                </label>
                 <Select
                   value={selectedSort}
                   onChange={(e) => setSelectedSort(e.target.value)}

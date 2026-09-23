@@ -1,15 +1,15 @@
-import api from './api';
+import api from "./api";
 
 export const foodService = {
   // Fetch All Available Food Listings (with query filtering)
   getFoods: async (params = {}) => {
-    const response = await api.get('/food', { params });
+    const response = await api.get("/food", { params });
     return response.data;
   },
 
   // Fetch Business User's Own Food Listings (Management)
   getMyFoodListings: async (params = {}) => {
-    const response = await api.get('/food/me/listings', { params });
+    const response = await api.get("/food/me/listings", { params });
     return response.data;
   },
 
@@ -21,7 +21,7 @@ export const foodService = {
 
   // Create New Surplus Food Listing (Business Auth Required)
   createFood: async (foodData) => {
-    const response = await api.post('/food', foodData);
+    const response = await api.post("/food", foodData);
     return response.data;
   },
 
