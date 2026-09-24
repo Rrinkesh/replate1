@@ -4,9 +4,6 @@ const User = require("../models/User");
 const { calculateFoodStatus } = require("../services/foodStatusService");
 const { createNotificationHelper } = require("../utils/notificationUtils");
 
-/**
- * Helper: Get authenticated user from req.user
- */
 const getAuthenticatedUser = async (req) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
@@ -26,11 +23,6 @@ const getAuthenticatedUser = async (req) => {
   return mongoUser;
 };
 
-/**
- * @desc    Create a new food reservation/claim (Concurrency & Quantity Hardened)
- * @route   POST /api/reservations
- * @access  Private (Recipient only)
- */
 const createReservation = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -52,7 +44,6 @@ const createReservation = async (req, res, next) => {
       throw new Error("Food ID is required to create a reservation");
     }
 
-    // 1. Fetch initial food listing to inspect status & expiry
     const food = await Food.findById(foodId);
     if (!food) {
       res.status(404);
@@ -85,7 +76,6 @@ const createReservation = async (req, res, next) => {
       );
     }
 
-    // 2. Concurrency-Safe Atomic Stock Deduction
     const now = new Date();
     const updatedFood = await Food.findOneAndUpdate(
       {
@@ -118,7 +108,6 @@ const createReservation = async (req, res, next) => {
       await updatedFood.save();
     }
 
-    // 3. Recalculate price on the server strictly using food.price
     const unitPrice = updatedFood.price || 0;
     const totalPrice = unitPrice * requestedQty;
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
@@ -164,11 +153,6 @@ const createReservation = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get all reservations for authenticated Recipient
- * @route   GET /api/reservations/my
- * @access  Private (Recipient only)
- */
 const getMyReservations = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -202,11 +186,6 @@ const getMyReservations = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get all reservations for authenticated Business owner
- * @route   GET /api/reservations/business
- * @access  Private (Business only)
- */
 const getBusinessReservations = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -236,11 +215,6 @@ const getBusinessReservations = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get single reservation details
- * @route   GET /api/reservations/:id
- * @access  Private
- */
 const getReservationById = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -277,9 +251,6 @@ const getReservationById = async (req, res, next) => {
   }
 };
 
-/**
- * Valid state transitions table for Reservation Workflow
- */
 const ALLOWED_TRANSITIONS = {
   PENDING: ["CONFIRMED", "CANCELLED"],
   CONFIRMED: ["READY_FOR_PICKUP", "CANCELLED"],
@@ -289,11 +260,6 @@ const ALLOWED_TRANSITIONS = {
   EXPIRED: [],
 };
 
-/**
- * @desc    Update reservation status (Business operations)
- * @route   PUT /api/reservations/:id/status
- * @access  Private (Business owner only)
- */
 const updateReservationStatus = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -435,11 +401,6 @@ const updateReservationStatus = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Cancel reservation (Recipient user)
- * @route   PUT /api/reservations/:id/cancel
- * @access  Private (Recipient only)
- */
 const cancelReservation = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);

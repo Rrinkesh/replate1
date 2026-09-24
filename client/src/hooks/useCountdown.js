@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
 
-/**
- * Custom React hook for live food expiry countdown calculation
- * @param {Date|string|number} expiryTime Target expiry timestamp
- * @returns {Object} { timeRemainingText, diffMs, isExpired, isExpiringSoon, isAlmostExpired }
- */
 export const useCountdown = (expiryTime) => {
   const [now, setNow] = useState(Date.now());
 

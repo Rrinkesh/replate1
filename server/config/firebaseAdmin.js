@@ -1,9 +1,5 @@
 const admin = require("firebase-admin");
 
-/**
- * Firebase Admin SDK Singleton Initialization
- * Uses environment variables: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
- */
 const initFirebaseAdmin = () => {
   if (admin.apps.length > 0) {
     return admin.app();

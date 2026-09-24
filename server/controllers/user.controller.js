@@ -2,11 +2,6 @@ const User = require("../models/User");
 const BusinessProfile = require("../models/BusinessProfile");
 const RecipientProfile = require("../models/RecipientProfile");
 
-/**
- * @desc    Get current authenticated user MongoDB profile
- * @route   GET /api/users/me
- * @access  Private (Protected by authMiddleware)
- */
 const getCurrentUser = async (req, res, next) => {
   try {
     const firebaseUid = req.user?.uid || req.user?.firebaseUid;
@@ -49,11 +44,6 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Sync / Create / Update User Profile after Firebase Auth Signup or Login
- * @route   POST /api/users/sync
- * @access  Private (Protected by authMiddleware)
- */
 const syncUser = async (req, res, next) => {
   try {
     const firebaseUid =
@@ -86,7 +76,6 @@ const syncUser = async (req, res, next) => {
         ? formattedRole
         : "BUSINESS";
 
-    // 🛡️ SUPER ADMIN AUTO-PROMOTION
     const isSuperAdmin =
       email &&
       process.env.SUPER_ADMIN_EMAIL &&
@@ -183,11 +172,6 @@ const syncUser = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get all users (Admin / Dev Architecture)
- * @route   GET /api/users
- * @access  Public / Architecture
- */
 const getUsers = async (req, res, next) => {
   try {
     const users = await User.find().select("-__v");
@@ -201,11 +185,6 @@ const getUsers = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get user profile by Firebase UID
- * @route   GET /api/users/:uid
- * @access  Public / Architecture
- */
 const getUserByUid = async (req, res, next) => {
   try {
     const { uid } = req.params;

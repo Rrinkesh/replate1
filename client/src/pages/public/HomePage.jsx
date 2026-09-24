@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 
+import { useTranslation } from "react-i18next";
 import { Button, Badge, Card, StatCard } from "../../components/common";
 
 // Impact statistics mock dataset
@@ -131,8 +132,9 @@ const recipientFeatures = [
 ];
 
 const HomePage = () => {
+  const { t } = useTranslation();
   return (
-    <div className="space-y-20 sm:space-y-24 pb-20 overflow-x-hidden">
+    <div className="space-y-20 sm:space-y-24 pb-20 overflow-x-hidden page-enter">
       {/* 1. HERO SECTION */}
       <section className="relative pt-10 sm:pt-16 pb-8">
         {/* Subtle background glow */}
@@ -144,35 +146,34 @@ const HomePage = () => {
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-bold shadow-soft-xs">
                 <Sparkles className="w-3.5 h-3.5 text-brand-600 animate-pulse" />
-                <span>Noida / Delhi NCR Food Recovery Platform</span>
+                <span>{t("hero.badge", "Zero Waste Initiative")}</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-charcoal-900 tracking-tight leading-[1.15]">
-                Turn Surplus Food Into{" "}
+                {t("hero.title1", "Good food deserves")}{" "}
                 <span className="bg-gradient-to-r from-brand-600 via-emerald-600 to-teal-700 bg-clip-text text-transparent">
-                  Second Chances.
+                  {t("hero.title2", "another plate.")}
                 </span>
               </h1>
 
               <p className="text-sm sm:text-lg text-charcoal-600 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                RePlate helps food businesses reduce waste, recover value, and
-                connect surplus food with people and organizations that need it.
+                {t("hero.subtitle", "Connect surplus food from commercial kitchens with NGOs and individuals in need. Stop waste, start feeding.")}
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
-                <Link to="/list-food" className="w-full sm:w-auto">
+                <Link to="/food" className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     variant="primary"
                     iconRight={ArrowRight}
                     fullWidth
                   >
-                    List Surplus Food
+                    {t("hero.ctaPrimary", "Find Food Now")}
                   </Button>
                 </Link>
-                <Link to="/how-it-works" className="w-full sm:w-auto">
+                <Link to="/business" className="w-full sm:w-auto">
                   <Button size="lg" variant="outline" fullWidth>
-                    See How It Works
+                    {t("hero.ctaSecondary", "Partner With Us")}
                   </Button>
                 </Link>
               </div>
@@ -191,7 +192,7 @@ const HomePage = () => {
             </div>
 
             {/* Right-Side SaaS Flow & AI Card Composition */}
-            <div className="lg:col-span-6 relative">
+            <div className="lg:col-span-6 relative animate-float-slow hover-3d-mild">
               <div className="relative rounded-3xl bg-gradient-to-b from-white to-surface-100 p-5 sm:p-8 border border-charcoal-100 shadow-soft-xl overflow-hidden">
                 {/* Visual Pipeline Header */}
                 <div className="flex items-center justify-between pb-4 mb-5 border-b border-charcoal-100">
@@ -479,7 +480,7 @@ const HomePage = () => {
             </div>
 
             {/* Tomorrow's Forecast UI Dashboard Mockup */}
-            <div className="lg:col-span-6">
+            <div className="lg:col-span-6 hover-3d-mild">
               <Card
                 variant="glass"
                 className="border-brand-200 shadow-soft-xl p-5 sm:p-6"

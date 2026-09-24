@@ -126,8 +126,8 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-12">
-      <Card variant="default" className="shadow-soft-xl border-charcoal-200">
+    <div className="max-w-lg mx-auto px-4 py-12 page-enter">
+      <Card variant="default" className="shadow-soft-xl border-charcoal-200 hover-3d-mild">
         <Card.Header className="text-center">
           <Card.Title className="text-2xl sm:text-3xl font-extrabold text-charcoal-900 tracking-tight">
             Join RePlate

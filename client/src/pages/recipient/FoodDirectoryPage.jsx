@@ -22,6 +22,7 @@ import {
   ErrorState,
 } from "../../components/common";
 import FoodCard from "../../components/food/FoodCard";
+import FoodMap from "../../components/food/FoodMap";
 import { foodService } from "../../services/foodService";
 
 const CATEGORIES = [
@@ -287,10 +288,20 @@ const FoodDirectoryPage = () => {
           className="py-16"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedFoods.map((food) => (
-            <FoodCard key={food._id || food.id} food={food} />
-          ))}
+        <div className="flex flex-col-reverse lg:flex-row gap-6 relative">
+          {/* Scrollable Listings Column */}
+          <div className="w-full lg:w-3/5 xl:w-2/3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {sortedFoods.map((food) => (
+                <FoodCard key={food._id || food.id} food={food} />
+              ))}
+            </div>
+          </div>
+          
+          {/* Sticky Map Column */}
+          <div className="w-full lg:w-2/5 xl:w-1/3 lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] rounded-2xl overflow-hidden shadow-soft-lg border border-charcoal-200 hover-3d-mild transition-all duration-300 relative z-10">
+            <FoodMap foods={sortedFoods} />
+          </div>
         </div>
       )}
 

@@ -269,7 +269,18 @@ const FoodDetailPage = () => {
               <span>•</span>
               <span className="flex items-center gap-1 text-charcoal-600">
                 <MapPin className="w-4 h-4 text-brand-600" />
-                {pickupLocation}
+                {food.pickupLocation?.coordinates?.lat ? (
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${food.pickupLocation.coordinates.lat},${food.pickupLocation.coordinates.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-brand-600 hover:underline flex items-center gap-1"
+                  >
+                    {pickupLocation} <span className="text-[10px] bg-brand-50 text-brand-700 px-1.5 py-0.5 rounded ml-1 font-bold">View Map</span>
+                  </a>
+                ) : (
+                  pickupLocation
+                )}
               </span>
             </div>
 

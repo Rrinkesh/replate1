@@ -6,9 +6,13 @@ const {
   getBusinessAnalytics,
   getRecipientAnalytics,
   getAdminAnalytics,
+  getGlobalImpact,
 } = require("../controllers/analyticsController");
 
-// All analytics endpoints require authenticated Firebase user
+// Public impact data
+router.get("/impact", getGlobalImpact);
+
+// All other analytics endpoints require authenticated Firebase user
 router.use(protect);
 
 router.get("/business", getBusinessAnalytics);

@@ -1,6 +1,3 @@
-/**
- * Server Logger Utility (Phase 2 Foundation)
- */
 const logger = {
   info: (message, meta = {}) => {
     console.log(`[INFO] ${new Date().toISOString()} - ${message}`, meta);

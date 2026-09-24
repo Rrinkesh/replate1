@@ -4,9 +4,6 @@ const BusinessProfile = require("../models/BusinessProfile");
 const RecipientProfile = require("../models/RecipientProfile");
 const User = require("../models/User");
 
-/**
- * Helper: Find authenticated MongoDB user from req.user
- */
 const getAuthenticatedUser = async (req) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
@@ -26,9 +23,6 @@ const getAuthenticatedUser = async (req) => {
   return mongoUser;
 };
 
-/**
- * Helper: Parse timeframe query param into startDate Date object
- */
 const getStartDateFromTimeframe = (timeframe) => {
   const now = new Date();
   switch (timeframe) {
@@ -45,11 +39,6 @@ const getStartDateFromTimeframe = (timeframe) => {
   }
 };
 
-/**
- * @desc    Get business analytics & impact metrics
- * @route   GET /api/analytics/business
- * @access  Private (Business only)
- */
 const getBusinessAnalytics = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -64,7 +53,6 @@ const getBusinessAnalytics = async (req, res, next) => {
     const { timeframe = "30d" } = req.query;
     const startDate = getStartDateFromTimeframe(timeframe);
 
-    // 1. Food metrics
     const totalFoodListed = await Food.countDocuments({
       businessId: mongoUser._id,
       createdAt: { $gte: startDate },
@@ -76,7 +64,6 @@ const getBusinessAnalytics = async (req, res, next) => {
       quantity: { $gt: 0 },
     });
 
-    // 2. Reservation metrics
     const reservationMatch = {
       businessId: mongoUser._id,
       createdAt: { $gte: startDate },
@@ -168,11 +155,6 @@ const getBusinessAnalytics = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get recipient analytics & impact metrics
- * @route   GET /api/analytics/recipient
- * @access  Private (Recipient only)
- */
 const getRecipientAnalytics = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -268,11 +250,6 @@ const getRecipientAnalytics = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get platform-wide admin analytics & system summary
- * @route   GET /api/analytics/admin
- * @access  Private (Admin only)
- */
 const getAdminAnalytics = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedUser(req);
@@ -388,8 +365,60 @@ const getAdminAnalytics = async (req, res, next) => {
   }
 };
 
+
+
+
+const getGlobalImpact = async (req, res, next) => {
+  try {
+    const totalReservations = await Reservation.countDocuments({ status: "COMPLETED" });
+    const allCompleted = await Reservation.find({ status: "COMPLETED" }).populate("foodId", "quantity");
+    
+    let totalPlates = 0;
+    allCompleted.forEach(res => {
+      const q = res.quantity || (res.foodId && res.foodId.quantity) || 1;
+      totalPlates += q;
+    });
+
+    const co2Saved = ((totalPlates * 2.5) / 1000).toFixed(1);
+    const donorsCount = await User.countDocuments({ role: "BUSINESS" });
+    const ngosCount = await User.countDocuments({ role: "RECIPIENT" });
+
+    const topDonors = await Food.aggregate([
+      { $group: { _id: "$businessId", totalPlates: { $sum: "$quantity" } } },
+      { $sort: { totalPlates: -1 } },
+      { $limit: 5 }
+    ]);
+    
+    const populatedDonors = await User.populate(topDonors, { path: "_id", select: "name location" });
+    
+    const leaderboard = populatedDonors.map(donor => ({
+      name: donor._id ? donor._id.name : "Anonymous Partner",
+      location: donor._id && donor._id.location ? donor._id.location.city : "NCR Region",
+      meals: `${donor.totalPlates} plates`
+    }));
+
+    res.status(200).json({
+      success: true,
+      impact: {
+        totalPlatesSaved: totalPlates,
+        co2EmissionsSaved: co2Saved + " Tons",
+        commercialDonors: donorsCount,
+        ngoBeneficiaries: ngosCount,
+        leaderboard
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports.getGlobalImpact = getGlobalImpact;
+
+
 module.exports = {
   getBusinessAnalytics,
   getRecipientAnalytics,
   getAdminAnalytics,
+  getGlobalImpact
 };
+

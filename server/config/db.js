@@ -1,9 +1,5 @@
 const mongoose = require("mongoose");
 
-/**
- * MongoDB Atlas Connection Configuration
- * Uses MONGODB_URI environment variable from server/.env
- */
 const connectDB = async () => {
   try {
     const connStr = process.env.MONGODB_URI;

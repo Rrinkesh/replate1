@@ -1,8 +1,5 @@
 const User = require("../models/User");
 
-/**
- * Middleware: Requires authenticated user to have ADMIN role in database
- */
 const adminOnly = async (req, res, next) => {
   try {
     const firebaseUid = req.user?.uid || req.user?.firebaseUid;

@@ -2,9 +2,6 @@ const Food = require("../models/Food");
 const User = require("../models/User");
 const { calculateFoodStatus } = require("../services/foodStatusService");
 
-/**
- * Helper: Find authenticated MongoDB user from req.user (Firebase UID)
- */
 const getAuthenticatedMongoUser = async (req) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
@@ -27,11 +24,6 @@ const getAuthenticatedMongoUser = async (req) => {
   return mongoUser;
 };
 
-/**
- * @desc    Create a new surplus food listing
- * @route   POST /api/food
- * @access  Private (Business role required)
- */
 const createFood = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedMongoUser(req);
@@ -104,11 +96,6 @@ const createFood = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get all available food listings (with filtering)
- * @route   GET /api/food
- * @access  Public
- */
 const getFoodListings = async (req, res, next) => {
   try {
     const { search, category, status, minPrice, maxPrice, businessId } =
@@ -181,11 +168,6 @@ const getFoodListings = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get single food listing by ID
- * @route   GET /api/food/:id
- * @access  Public
- */
 const getFoodById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -223,11 +205,6 @@ const getFoodById = async (req, res, next) => {
 
 const { deleteImageFile } = require("../services/uploadService");
 
-/**
- * @desc    Update an owned food listing
- * @route   PUT /api/food/:id
- * @access  Private (Business owner only)
- */
 const updateFood = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -296,11 +273,6 @@ const updateFood = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Delete an owned food listing
- * @route   DELETE /api/food/:id
- * @access  Private (Business owner only)
- */
 const deleteFood = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -339,11 +311,6 @@ const deleteFood = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get authenticated business's food listings (Management)
- * @route   GET /api/food/me/listings
- * @access  Private (Business only)
- */
 const getMyFoodListings = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedMongoUser(req);

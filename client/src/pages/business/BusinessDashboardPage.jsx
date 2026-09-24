@@ -66,7 +66,6 @@ const BusinessDashboardPage = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Business incoming reservations
       try {
         const resData = await reservationService.getBusinessReservations();
         if (resData && resData.reservations) {
@@ -76,16 +75,14 @@ const BusinessDashboardPage = () => {
         console.warn("Business reservations fetch failed:", err.message);
       }
 
-      // 2. Fetch Business listings
       try {
-        const foodData = await foodService.getFoods();
+        const foodData = await foodService.getMyFoodListings();
         const items = foodData?.foods || foodData?.food || [];
         setMyFoodListings(items);
       } catch (err) {
         console.warn("Business listings fetch failed:", err.message);
       }
 
-      // 3. Fetch Real Business Analytics
       try {
         const analyticsRes =
           await analyticsService.getBusinessAnalytics(timeframe);

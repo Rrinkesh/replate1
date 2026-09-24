@@ -17,12 +17,10 @@ const RoleGuard = ({
     );
   }
 
-  // 1. Role mismatch check
   if (allowedRoles.length > 0 && userRole && !allowedRoles.includes(userRole)) {
     return <Navigate to={redirectTo} replace />;
   }
 
-  // 2. Verification Gate: Block unverified businesses and recipients
   if ((!mongoUser || !mongoUser.isVerified) && userRole !== "admin") {
     return (
       <div className="pt-20 max-w-2xl mx-auto px-4">

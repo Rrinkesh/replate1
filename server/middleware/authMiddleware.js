@@ -1,9 +1,5 @@
 const admin = require("../config/firebaseAdmin");
 
-/**
- * Authentication Middleware
- * Verifies Bearer Firebase ID Token in Authorization header
- */
 const protect = async (req, res, next) => {
   let token;
 

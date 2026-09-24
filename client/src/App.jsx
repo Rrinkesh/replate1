@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import AppRoutes from "./routes/AppRoutes";
+import WhatsAppButton from "./components/common/WhatsAppButton";
 
 function App() {
   return (
@@ -16,6 +17,9 @@ function App() {
 
       {/* Site Footer */}
       <Footer />
+      
+      {/* Global Floating WhatsApp Contact */}
+      <WhatsAppButton phoneNumber="919027348898" message="Hello RePlate Admin, I need some assistance." />
     </div>
   );
 }

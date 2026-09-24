@@ -1,9 +1,6 @@
 const Notification = require("../models/Notification");
 const User = require("../models/User");
 
-/**
- * Helper: Find authenticated MongoDB user from req.user
- */
 const getAuthenticatedMongoUser = async (req) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
@@ -25,11 +22,6 @@ const getAuthenticatedMongoUser = async (req) => {
   return mongoUser;
 };
 
-/**
- * @desc    Get user notifications & unread count
- * @route   GET /api/notifications
- * @access  Private
- */
 const getNotifications = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedMongoUser(req);
@@ -54,11 +46,6 @@ const getNotifications = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Mark a single notification as read
- * @route   PUT /api/notifications/:id/read
- * @access  Private
- */
 const markAsRead = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -94,11 +81,6 @@ const markAsRead = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Mark all notifications for authenticated user as read
- * @route   PUT /api/notifications/read-all
- * @access  Private
- */
 const markAllAsRead = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedMongoUser(req);
@@ -118,11 +100,6 @@ const markAllAsRead = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Delete a notification by ID
- * @route   DELETE /api/notifications/:id
- * @access  Private
- */
 const deleteNotification = async (req, res, next) => {
   try {
     const { id } = req.params;

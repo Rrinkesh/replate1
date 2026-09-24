@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ArrowRight, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, ArrowRight, LogOut, LayoutDashboard, Globe } from "lucide-react";
 import Logo from "../common/Logo";
 import Button from "../common/Button";
 import NotificationDropdown from "../notification/NotificationDropdown";
 import { useAuth } from "../../context/AuthContext";
-
-const navLinks = [
-  { name: "How It Works", path: "/how-it-works" },
-  { name: "For Businesses", path: "/business" },
-  { name: "For Recipients", path: "/recipient" },
-  { name: "Impact", path: "/impact" },
-  { name: "Surplus Food", path: "/food" },
-];
+import { useTranslation } from "react-i18next";
+import UserLocationWidget from "../common/UserLocationWidget";
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const navLinks = [
+    { name: t("nav.howItWorks", "How It Works"), path: "/how-it-works" },
+    { name: "For Businesses", path: "/business" },
+    { name: "For Recipients", path: "/recipient" },
+    { name: t("nav.impact", "Impact"), path: "/impact" },
+    { name: t("nav.findFood", "Surplus Food"), path: "/food" },
+  ];
 
   const { currentUser, userRole, logout } = useAuth();
 
@@ -72,8 +75,11 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Logo size="md" />
+          {/* Logo & Zomato-style Location Widget */}
+          <div className="flex items-center gap-4 lg:gap-6">
+            <Logo size="md" />
+            <UserLocationWidget />
+          </div>
 
           {/* Desktop Navigation Links */}
           <nav
@@ -100,6 +106,12 @@ const Navbar = () => {
 
           {/* Desktop Auth State / Action Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Language Switcher */}
+            <div className="flex items-center text-charcoal-500 overflow-hidden h-6">
+              <Globe className="w-4 h-4 mr-1" />
+              <div id="google_translate_element"></div>
+            </div>
+
             {currentUser ? (
               <div className="flex items-center gap-3">
                 <NotificationDropdown />
@@ -109,7 +121,7 @@ const Navbar = () => {
                     size="sm"
                     iconLeft={LayoutDashboard}
                   >
-                    Dashboard
+                    {t("nav.dashboard", "Dashboard")}
                   </Button>
                 </NavLink>
 
@@ -140,12 +152,12 @@ const Navbar = () => {
               <div className="flex items-center gap-3">
                 <NavLink to="/login">
                   <Button variant="ghost" size="sm">
-                    Login
+                    {t("nav.login", "Log in")}
                   </Button>
                 </NavLink>
                 <NavLink to="/signup">
                   <Button variant="primary" size="sm" iconRight={ArrowRight}>
-                    Get Started
+                    {t("nav.signup", "Sign up")}
                   </Button>
                 </NavLink>
               </div>

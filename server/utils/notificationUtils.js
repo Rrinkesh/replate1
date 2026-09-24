@@ -1,14 +1,5 @@
 const Notification = require("../models/Notification");
 
-/**
- * Helper to create a user notification asynchronously
- * @param {Object} params
- * @param {string|ObjectId} params.userId
- * @param {string} params.type
- * @param {string} params.title
- * @param {string} params.message
- * @param {string|ObjectId} [params.relatedId]
- */
 const createNotificationHelper = async ({
   userId,
   type,

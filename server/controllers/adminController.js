@@ -4,11 +4,6 @@ const User = require("../models/User");
 const { createNotificationHelper } = require("../utils/notificationUtils");
 const admin = require("../config/firebaseAdmin");
 
-/**
- * @desc    Get all business profiles (Admin moderation)
- * @route   GET /api/admin/businesses
- * @access  Private (Admin only)
- */
 const getAllBusinesses = async (req, res, next) => {
   try {
     const { search, status } = req.query;
@@ -45,11 +40,6 @@ const getAllBusinesses = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Get all recipient profiles (Admin moderation)
- * @route   GET /api/admin/recipients
- * @access  Private (Admin only)
- */
 const getAllRecipients = async (req, res, next) => {
   try {
     const { search, status } = req.query;
@@ -89,11 +79,6 @@ const getAllRecipients = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Verify or unverify a business profile
- * @route   PUT /api/admin/businesses/:id/verify
- * @access  Private (Admin only)
- */
 const verifyBusiness = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -150,11 +135,6 @@ const verifyBusiness = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Verify or unverify a recipient profile
- * @route   PUT /api/admin/recipients/:id/verify
- * @access  Private (Admin only)
- */
 const verifyRecipient = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -245,12 +225,10 @@ const rejectBusiness = async (req, res, next) => {
       }
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Business application rejected and removed",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Business application rejected and removed",
+    });
   } catch (error) {
     next(error);
   }

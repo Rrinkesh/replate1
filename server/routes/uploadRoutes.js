@@ -3,11 +3,6 @@ const router = express.Router();
 const { upload } = require("../services/uploadService");
 const { protect } = require("../middleware/authMiddleware");
 
-/**
- * @desc    Upload single image
- * @route   POST /api/uploads
- * @access  Private
- */
 router.post("/", protect, (req, res, next) => {
   upload.single("image")(req, res, (err) => {
     if (err) {

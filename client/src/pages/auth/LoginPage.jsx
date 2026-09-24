@@ -104,8 +104,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
-      <Card variant="default" className="shadow-soft-xl border-charcoal-200">
+    <div className="max-w-md mx-auto px-4 py-16 page-enter">
+      <Card variant="default" className="shadow-soft-xl border-charcoal-200 hover-3d-mild">
         <Card.Header className="text-center">
           <Card.Title className="text-2xl sm:text-3xl font-extrabold text-charcoal-900 tracking-tight">
             Welcome Back

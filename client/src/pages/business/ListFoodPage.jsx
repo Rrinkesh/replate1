@@ -39,6 +39,7 @@ const ListFoodPage = () => {
     price: editFood?.price || "",
     originalPrice: editFood?.originalPrice || "",
     location: editFood?.pickupLocation?.address || "Noida Sector 62",
+    coordinates: editFood?.pickupLocation?.coordinates || null,
     description: editFood?.description || "",
     image: editFood?.image || "",
   });
@@ -65,6 +66,31 @@ const ListFoodPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleGetLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setFormData((prev) => ({ ...prev, coordinates: { lat, lng } }));
+          
+          try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await response.json();
+            if (data && data.display_name) {
+              setFormData((prev) => ({ ...prev, location: data.display_name, coordinates: { lat, lng } }));
+            }
+          } catch (error) {
+            console.error("Geocoding failed", error);
+          }
+        },
+        (error) => alert("Please allow location access to use this feature.")
+      );
+    } else {
+      alert("Geolocation is not supported by your browser");
     }
   };
 
@@ -113,7 +139,11 @@ const ListFoodPage = () => {
         originalPrice: formData.originalPrice
           ? Number(formData.originalPrice)
           : undefined,
-        pickupLocation: { address: formData.location, city: "Noida" },
+        pickupLocation: { 
+          address: formData.location, 
+          city: "Noida",
+          coordinates: formData.coordinates || { lat: 28.5355, lng: 77.3910 }
+        },
         description: formData.description,
         image: formData.image,
       };
@@ -293,16 +323,30 @@ const ListFoodPage = () => {
                 required
               />
 
-              <Input
-                label="Pickup Location"
-                name="location"
-                placeholder="e.g. Noida Sector 62"
-                iconLeft={MapPin}
-                value={formData.location}
-                onChange={handleChange}
-                error={errors.location}
-                required
-              />
+              <div className="relative">
+                <Input
+                  label="Pickup Location"
+                  name="location"
+                  placeholder="e.g. Noida Sector 62"
+                  iconLeft={MapPin}
+                  value={formData.location}
+                  onChange={handleChange}
+                  error={errors.location}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={handleGetLocation}
+                  className="absolute right-0 top-0 mt-1 mr-1 text-[10px] bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold py-1 px-2 rounded"
+                >
+                  📍 Use GPS
+                </button>
+                {formData.coordinates && (
+                  <p className="text-[10px] text-emerald-600 mt-1 font-semibold">
+                    GPS Coordinates linked
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 

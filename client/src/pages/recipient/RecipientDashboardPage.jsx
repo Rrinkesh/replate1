@@ -50,7 +50,6 @@ const RecipientDashboardPage = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Recipient's real API reservations
       try {
         const resData = await reservationService.getMyReservations();
         if (resData && resData.reservations) {
@@ -63,7 +62,6 @@ const RecipientDashboardPage = () => {
         );
       }
 
-      // 2. Fetch Available Nearby Food from API
       try {
         const foodData = await foodService.getFoods({ status: "AVAILABLE" });
         const items = foodData?.foods || foodData?.food || [];
@@ -73,7 +71,6 @@ const RecipientDashboardPage = () => {
         setAvailableFood([]);
       }
 
-      // 3. Fetch Real Recipient Analytics
       try {
         const analyticsRes =
           await analyticsService.getRecipientAnalytics(timeframe);

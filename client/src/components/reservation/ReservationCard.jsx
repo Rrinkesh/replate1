@@ -13,9 +13,6 @@ import {
 } from "lucide-react";
 import { Card, Badge, Button } from "../common";
 
-/**
- * Maps reservation status string to appropriate badge variant & text
- */
 const getReservationStatusConfig = (status) => {
   switch (status?.toUpperCase()) {
     case "PENDING":

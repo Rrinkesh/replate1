@@ -1,9 +1,6 @@
 const RecipientProfile = require("../models/RecipientProfile");
 const User = require("../models/User");
 
-/**
- * Helper: Find authenticated MongoDB user and verify RECIPIENT role
- */
 const getAuthenticatedRecipientUser = async (req, res) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
@@ -33,11 +30,6 @@ const getAuthenticatedRecipientUser = async (req, res) => {
   return mongoUser;
 };
 
-/**
- * @desc    Get authenticated recipient profile
- * @route   GET /api/recipients/me
- * @access  Private (Recipient only)
- */
 const getMyRecipientProfile = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedRecipientUser(req, res);
@@ -68,11 +60,6 @@ const getMyRecipientProfile = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Create recipient profile
- * @route   POST /api/recipients/profile
- * @access  Private (Recipient only)
- */
 const createRecipientProfile = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedRecipientUser(req, res);
@@ -129,11 +116,6 @@ const createRecipientProfile = async (req, res, next) => {
 
 const { deleteImageFile } = require("../services/uploadService");
 
-/**
- * @desc    Update recipient profile
- * @route   PUT /api/recipients/profile
- * @access  Private (Recipient only)
- */
 const updateRecipientProfile = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedRecipientUser(req, res);

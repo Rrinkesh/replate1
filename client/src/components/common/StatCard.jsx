@@ -27,7 +27,7 @@ const StatCard = ({
   className = "",
 }) => {
   return (
-    <Card variant={variant} className={`relative overflow-hidden ${className}`}>
+    <Card variant={variant} hoverable className={`relative overflow-hidden ${className}`}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase font-bold tracking-wider text-charcoal-500 mb-1">

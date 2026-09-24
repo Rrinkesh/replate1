@@ -1,9 +1,6 @@
 const BusinessProfile = require("../models/BusinessProfile");
 const User = require("../models/User");
 
-/**
- * Helper: Find authenticated MongoDB user and verify BUSINESS role
- */
 const getAuthenticatedBusinessUser = async (req, res) => {
   const firebaseUid = req.user?.uid || req.user?.firebaseUid;
   if (!firebaseUid) {
@@ -33,11 +30,6 @@ const getAuthenticatedBusinessUser = async (req, res) => {
   return mongoUser;
 };
 
-/**
- * @desc    Get authenticated business profile
- * @route   GET /api/businesses/me
- * @access  Private (Business only)
- */
 const getMyBusinessProfile = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedBusinessUser(req, res);
@@ -67,11 +59,6 @@ const getMyBusinessProfile = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Create business profile
- * @route   POST /api/businesses/profile
- * @access  Private (Business only)
- */
 const createBusinessProfile = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedBusinessUser(req, res);
@@ -128,11 +115,6 @@ const createBusinessProfile = async (req, res, next) => {
 
 const { deleteImageFile } = require("../services/uploadService");
 
-/**
- * @desc    Update business profile
- * @route   PUT /api/businesses/profile
- * @access  Private (Business only)
- */
 const updateBusinessProfile = async (req, res, next) => {
   try {
     const mongoUser = await getAuthenticatedBusinessUser(req, res);

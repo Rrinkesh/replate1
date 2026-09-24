@@ -50,10 +50,6 @@ const upload = multer({
   },
 });
 
-/**
- * Delete a local image file safely
- * @param {string} imageUrl The full URL or relative path stored in DB
- */
 const deleteImageFile = (imageUrl) => {
   if (!imageUrl) return;
 

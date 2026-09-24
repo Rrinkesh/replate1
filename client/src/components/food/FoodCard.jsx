@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Clock,
@@ -12,6 +12,7 @@ import Card from "../common/Card";
 import Badge from "../common/Badge";
 import Button from "../common/Button";
 import { useCountdown } from "../../hooks/useCountdown";
+import { calculateDistance, formatDistance } from "../../utils/geo";
 
 const DEFAULT_FOOD_IMAGE =
   "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80";
@@ -35,7 +36,25 @@ const FoodCard = ({ food, onReserve, className = "" }) => {
       ? `${food.businessId.city}, ${food.businessId.state}`
       : "Location provided upon booking");
 
-  const distanceText = food.distanceText || null;
+  const [calculatedDistance, setCalculatedDistance] = useState(null);
+
+  useEffect(() => {
+    const savedCoords = localStorage.getItem("user_location_coords");
+    if (savedCoords && food.pickupLocation?.coordinates?.lat && food.pickupLocation?.coordinates?.lng) {
+      try {
+        const userLoc = JSON.parse(savedCoords);
+        const dist = calculateDistance(
+          userLoc.lat,
+          userLoc.lng,
+          food.pickupLocation.coordinates.lat,
+          food.pickupLocation.coordinates.lng
+        );
+        setCalculatedDistance(formatDistance(dist));
+      } catch(e) {}
+    }
+  }, [food]);
+
+  const distanceText = food.distanceText || calculatedDistance;
 
   const imageSrc = food.image || DEFAULT_FOOD_IMAGE;
   const quantity = food.quantity !== undefined ? food.quantity : 1;
@@ -134,7 +153,7 @@ const FoodCard = ({ food, onReserve, className = "" }) => {
             </span>
             <span className="flex items-center gap-1 text-charcoal-500 shrink-0">
               <MapPin className="w-3.5 h-3.5 text-brand-600" />
-              {distanceText}
+              {distanceText || addressLocation}
             </span>
           </div>
 

@@ -29,7 +29,7 @@ const Card = ({
         rounded-2xl sm:rounded-3xl transition-all duration-200 ease-in-out overflow-hidden
         ${variantClasses[variant] || variantClasses.default}
         ${paddingClasses[padding] || paddingClasses.md}
-        ${hoverable ? "hover:-translate-y-1 hover:shadow-soft-lg cursor-pointer" : ""}
+        ${hoverable ? "hover-3d cursor-pointer" : ""}
         ${className}
       `}
       {...props}
