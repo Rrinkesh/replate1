@@ -44,6 +44,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Mount API Domain Routes
 app.use("/api", healthRoutes);
+app.use("/api/debug", require("./routes/debug.routes"));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/food", foodRoutes);
