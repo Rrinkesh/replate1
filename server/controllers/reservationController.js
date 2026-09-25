@@ -108,7 +108,13 @@ const createReservation = async (req, res, next) => {
       await updatedFood.save();
     }
 
-    const unitPrice = updatedFood.price || 0;
+    let unitPrice = updatedFood.price || 0;
+    
+    // --- TIERED VISIBILITY LOGIC ---
+    if (mongoUser.role === "RECIPIENT" && (mongoUser.recipientType === "NGO" || !mongoUser.recipientType)) {
+      unitPrice = 0; // 100% discount for NGOs
+    }
+    
     const totalPrice = unitPrice * requestedQty;
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
     const claimCode = `RPL-${randomSuffix}`;
@@ -381,6 +387,13 @@ const updateReservationStatus = async (req, res, next) => {
         message: `Your claim for "${foodTitle}" (Claim code: ${updatedReservation.claimCode}) is complete. Thank you for rescuing food!`,
         relatedId: reservation._id,
       });
+
+      // --- NEW: Process Impact Credits ---
+      const { processOrderCompletionRewards } = require("../utils/impactUtils");
+      const foodDoc = await Food.findById(reservation.foodId);
+      if (foodDoc) {
+        await processOrderCompletionRewards(reservation, foodDoc);
+      }
     } else if (newStatus === "CANCELLED") {
       await createNotificationHelper({
         userId: reservation.recipientId,
@@ -389,6 +402,10 @@ const updateReservationStatus = async (req, res, next) => {
         message: `Reservation for "${foodTitle}" (Claim code: ${reservation.claimCode}) was cancelled by the business.`,
         relatedId: reservation._id,
       });
+
+      // --- NEW: Process Trust Penalty ---
+      const { processOrderCancellationPenalty } = require("../utils/impactUtils");
+      await processOrderCancellationPenalty(mongoUser._id);
     }
 
     res.status(200).json({

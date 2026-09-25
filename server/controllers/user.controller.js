@@ -20,13 +20,11 @@ const getCurrentUser = async (req, res, next) => {
         process.env.SUPER_ADMIN_EMAIL.trim().toLowerCase();
 
     if (!user) {
-      // Auto-create basic profile if first time accessing /me
-      user = await User.create({
-        firebaseUid,
-        email,
-        name: req.user.name || "RePlate User",
-        role: isSuperAdmin ? "ADMIN" : "BUSINESS",
-        isVerified: isSuperAdmin ? true : false,
+      // Do NOT auto-create. Allow syncWithMongoDB to handle creation.
+      // Returning null prevents the frontend from crashing/logging out during the signup race condition.
+      return res.status(200).json({
+        success: true,
+        data: null,
       });
     } else if (isSuperAdmin && (user.role !== "ADMIN" || !user.isVerified)) {
       // Auto-promote existing profile
@@ -57,7 +55,7 @@ const syncUser = async (req, res, next) => {
       );
     }
 
-    const { name, role, phone, organizationName, location, profileImage } =
+    const { name, role, phone, organizationName, location, profileImage, recipientType, businessType, registrationNumber, eventCardImage } =
       req.body;
 
     let user = await User.findOne({ firebaseUid });
@@ -90,6 +88,8 @@ const syncUser = async (req, res, next) => {
       user.name = name || user.name;
       user.email = email || user.email;
       // We only update the role if they were promoted to ADMIN
+      if (finalRole === "RECIPIENT" && recipientType && !user.recipientType) user.recipientType = recipientType;
+      if (finalRole === "BUSINESS" && businessType && !user.businessType) user.businessType = businessType;
       if (isSuperAdmin) {
         user.role = "ADMIN";
         user.isVerified = true;
@@ -117,6 +117,8 @@ const syncUser = async (req, res, next) => {
         email: email || "user@replate.org",
         name: name || req.user?.name || "RePlate Partner",
         role: finalRole,
+        recipientType: finalRole === "RECIPIENT" ? (recipientType || "NGO") : undefined,
+        businessType: finalRole === "BUSINESS" ? (businessType || "RESTAURANT") : undefined,
         isVerified: isSuperAdmin ? true : false,
         phone: phone || "",
         organizationName: organizationName || "",
@@ -133,12 +135,32 @@ const syncUser = async (req, res, next) => {
     // Auto-create associated profile so they appear in Admin Verification Queue immediately
     if (user.role === "BUSINESS") {
       const existing = await BusinessProfile.findOne({ userId: user._id });
+      if (existing) {
+        let changed = false;
+        if (finalRole === "BUSINESS" && businessType && existing.businessType !== businessType) {
+          existing.businessType = businessType;
+          changed = true;
+        }
+        if (registrationNumber && existing.registrationNumber !== registrationNumber) {
+          existing.registrationNumber = registrationNumber;
+          changed = true;
+        }
+        if (eventCardImage && existing.eventCardImage !== eventCardImage) {
+          existing.eventCardImage = eventCardImage;
+          changed = true;
+        }
+        if (changed) {
+          await existing.save().catch(() => {});
+        }
+      }
       if (!existing) {
         await BusinessProfile.create({
           userId: user._id,
           businessName:
             user.organizationName || user.name || "Commercial Kitchen",
-          businessType: "RESTAURANT",
+          businessType: user.businessType || "RESTAURANT",
+          registrationNumber: registrationNumber || "",
+          eventCardImage: eventCardImage || "",
           phone: user.phone || "",
           address: user.location?.address || "",
           city: user.location?.city || "Noida",
@@ -148,11 +170,26 @@ const syncUser = async (req, res, next) => {
       }
     } else if (user.role === "RECIPIENT") {
       const existing = await RecipientProfile.findOne({ userId: user._id });
+      if (existing) {
+        let changed = false;
+        if (recipientType && existing.recipientType !== recipientType) {
+          existing.recipientType = recipientType;
+          changed = true;
+        }
+        if (registrationNumber && existing.registrationNumber !== registrationNumber) {
+          existing.registrationNumber = registrationNumber;
+          changed = true;
+        }
+        if (changed) {
+          await existing.save().catch(() => {});
+        }
+      }
       if (!existing) {
         await RecipientProfile.create({
           userId: user._id,
-          organizationName: user.organizationName || user.name || "NGO Shelter",
-          recipientType: "NGO",
+          organizationName: user.organizationName || user.name || "Recipient Organization",
+          recipientType: user.recipientType || "NGO",
+          registrationNumber: registrationNumber || "",
           phone: user.phone || "",
           address: user.location?.address || "",
           city: user.location?.city || "Noida",

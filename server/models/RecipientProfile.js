@@ -17,7 +17,7 @@ const recipientProfileSchema = new mongoose.Schema(
       type: String,
       required: [true, "Recipient type is required"],
       enum: {
-        values: ["INDIVIDUAL", "NGO", "COMMUNITY", "ORGANIZATION", "BUYER"],
+        values: ["NGO", "BUSINESS"],
         message: "{VALUE} is not a valid recipient type",
       },
       default: "NGO",
@@ -53,6 +53,11 @@ const recipientProfileSchema = new mongoose.Schema(
     },
     profileImage: {
       type: String,
+      default: "",
+    },
+    registrationNumber: {
+      type: String,
+      trim: true,
       default: "",
     },
     isVerified: {

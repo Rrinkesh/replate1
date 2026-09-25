@@ -190,9 +190,15 @@ const FoodCard = ({ food, onReserve, className = "" }) => {
               Recovery Price
             </span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-black text-charcoal-900">
-                ₹{price}
-              </span>
+              {price === 0 ? (
+                <span className="text-lg font-black text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md">
+                  FREE
+                </span>
+              ) : (
+                <span className="text-lg font-black text-charcoal-900">
+                  ₹{price}
+                </span>
+              )}
               {originalPrice && originalPrice > price && (
                 <span className="text-xs text-charcoal-400 line-through font-semibold">
                   ₹{originalPrice}

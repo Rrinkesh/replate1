@@ -35,6 +35,9 @@ import {
   FoodRescuedChart,
   RevenueRecoveredChart,
   WasteReductionChart,
+  AIForecasterCard,
+  ImpactWidget,
+  RewardsPanel
 } from "../../components/dashboard";
 import { reservationService } from "../../services/reservationService";
 import { foodService } from "../../services/foodService";
@@ -42,7 +45,7 @@ import { analyticsService } from "../../services/analyticsService";
 import { useAuth } from "../../context/AuthContext";
 
 const BusinessDashboardPage = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, mongoUser } = useAuth();
   const [reservations, setReservations] = useState([]);
   const [myFoodListings, setMyFoodListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -193,10 +196,10 @@ const BusinessDashboardPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-charcoal-900 tracking-tight">
-              {currentUser?.name || "Radisson Hotel Noida"}
+              {mongoUser?.organizationName || currentUser?.name || "Verified Business Partner"}
             </h2>
             <p className="text-xs text-charcoal-500 mt-0.5">
-              Sector 55, Noida • Commercial Food Surplus Partner
+              {mongoUser?.location?.city || "Noida"} • Food Surplus Partner
             </p>
           </div>
 
@@ -336,6 +339,12 @@ const BusinessDashboardPage = () => {
           </div>
         </div>
 
+        <ImpactWidget />
+        <div className='mt-6'>
+          <RewardsPanel userRole='BUSINESS' credits={currentUser?.impactCredits || 0} level={currentUser?.rewardLevel || 'NEW'} />
+        </div>
+        <AIForecasterCard />
+        
         {/* 3. BUSINESS SECTIONS & FOOD LISTINGS */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: My Food Listings Table & Incoming Pickups */}

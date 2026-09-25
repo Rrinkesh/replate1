@@ -127,7 +127,36 @@ const verifiedOnly = async (req, res, next) => {
   }
 };
 
+const optionalAuth = async (req, res, next) => {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    try {
+      // Just re-use the exact protect logic, but wrap it in a mock res object that traps errors
+      const mockRes = {
+        status: () => mockRes,
+        json: () => {},
+      };
+      
+      let errorThrown = null;
+      const mockNext = (err) => {
+        if (err) errorThrown = err;
+      };
+
+      await protect(req, mockRes, mockNext);
+      
+      // If protect attached req.user and didn't throw, great.
+      // If it threw an error, we ignore it and leave req.user as undefined
+    } catch (err) {
+      // ignore
+    }
+  }
+  next();
+};
+
 module.exports = {
   protect,
   verifiedOnly,
+  optionalAuth,
 };

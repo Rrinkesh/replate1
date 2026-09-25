@@ -23,6 +23,7 @@ const businessProfileSchema = new mongoose.Schema(
           "CAFE",
           "BAKERY",
           "CLOUD_KITCHEN",
+          "PARTY",
           "OTHER",
         ],
         message: "{VALUE} is not a valid business type",
@@ -70,6 +71,8 @@ const businessProfileSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    registrationNumber: { type: String, default: "" },
+    eventCardImage: { type: String, default: "" },
     isVerified: {
       type: Boolean,
       default: false,

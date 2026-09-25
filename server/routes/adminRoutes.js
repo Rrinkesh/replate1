@@ -10,6 +10,10 @@ const {
   verifyRecipient,
   rejectBusiness,
   rejectRecipient,
+  getSystemSettings,
+  updateSystemSettings,
+  getRewardRequests,
+  processRewardRequest,
 } = require("../controllers/adminController");
 
 // All admin routes require authenticated Firebase user + ADMIN role in database
@@ -22,5 +26,10 @@ router.put("/businesses/:id/verify", verifyBusiness);
 router.put("/recipients/:id/verify", verifyRecipient);
 router.delete("/businesses/:id/reject", rejectBusiness);
 router.delete("/recipients/:id/reject", rejectRecipient);
+
+router.get("/settings", getSystemSettings);
+router.put("/settings", updateSystemSettings);
+router.get("/rewards/requests", getRewardRequests);
+router.put("/rewards/requests/:id", processRewardRequest);
 
 module.exports = router;

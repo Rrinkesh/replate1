@@ -102,6 +102,20 @@ const getFoodListings = async (req, res, next) => {
       req.query;
 
     const filter = {};
+    
+    // --- TIERED VISIBILITY LOGIC ---
+    let isNgo = false;
+    if (req.user && !businessId) {
+      const User = require("../models/User");
+      const mongoUser = await User.findOne({ firebaseUid: req.user.firebaseUid || req.user.uid });
+      
+      if (mongoUser && mongoUser.role === "RECIPIENT") {
+        if (mongoUser.recipientType === "NGO" || !mongoUser.recipientType) {
+          isNgo = true;
+        }
+      }
+    }
+    // -------------------------------
 
     // Filter by businessId if provided
     if (businessId) {
@@ -123,7 +137,7 @@ const getFoodListings = async (req, res, next) => {
 
     // Price range filter
     if (minPrice || maxPrice) {
-      filter.price = {};
+      filter.price = filter.price || {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
@@ -155,6 +169,14 @@ const getFoodListings = async (req, res, next) => {
       filteredListings = updatedListings.filter(
         (item) => item.status !== "EXPIRED" && item.status !== "SOLD_OUT",
       );
+    }
+
+    if (isNgo) {
+      filteredListings = filteredListings.map(item => {
+        const obj = item.toObject ? item.toObject({ virtuals: true }) : item;
+        obj.price = 0; // 100% discount for NGOs
+        return obj;
+      });
     }
 
     res.status(200).json({
@@ -194,9 +216,23 @@ const getFoodById = async (req, res, next) => {
       await food.save().catch(() => {});
     }
 
+    let responseFood = food;
+    
+    // --- TIERED VISIBILITY LOGIC ---
+    if (req.user) {
+      const User = require("../models/User");
+      const mongoUser = await User.findOne({ firebaseUid: req.user.firebaseUid || req.user.uid });
+      
+      if (mongoUser && mongoUser.role === "RECIPIENT" && (mongoUser.recipientType === "NGO" || !mongoUser.recipientType)) {
+        responseFood = food.toObject ? food.toObject({ virtuals: true }) : food;
+        responseFood.price = 0; // 100% discount for NGOs
+      }
+    }
+    // -------------------------------
+
     res.status(200).json({
       success: true,
-      food,
+      food: responseFood,
     });
   } catch (error) {
     next(error);

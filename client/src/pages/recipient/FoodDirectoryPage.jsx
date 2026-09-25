@@ -178,7 +178,7 @@ const FoodDirectoryPage = () => {
         {/* Search Bar Row */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Input
-            placeholder="Search by food title, restaurant, or area (e.g. Paneer, Radisson, Sector 62)..."
+            placeholder="Search by food title, restaurant, or area (e.g. Paneer, Hotel, Sector 62)..."
             iconLeft={Search}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

@@ -145,8 +145,8 @@ const ProfilePage = () => {
             mongoUser?.organizationName ||
             mongoUser?.name ||
             (userRole === "business"
-              ? "Radisson Executive Partner"
-              : "Grace Care Shelter"),
+              ? "Verified Business Partner"
+              : "Verified Recipient"),
           email: currentUser?.email || "partner@replate.org",
           phone: "+91 98102 34567",
           type:

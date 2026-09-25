@@ -107,9 +107,15 @@ const ReservationCard = ({
           <span className="text-charcoal-500 font-medium block mb-0.5">
             Recovery Price:
           </span>
-          <span className="font-black text-emerald-700 text-sm">
-            ₹{reservation.totalPrice}
-          </span>
+          {reservation.totalPrice === 0 ? (
+            <span className="font-black text-brand-600 text-sm bg-brand-50 px-2 py-0.5 rounded-md">
+              FREE
+            </span>
+          ) : (
+            <span className="font-black text-emerald-700 text-sm">
+              ₹{reservation.totalPrice}
+            </span>
+          )}
         </div>
 
         {/* Counterpart Partner (Business vs Recipient) */}

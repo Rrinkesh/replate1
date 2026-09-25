@@ -62,12 +62,15 @@ export const AuthProvider = ({ children }) => {
       const payload = {
         firebaseUid: fbUser.uid,
         email: fbUser.email,
-        name:
-          extraData.name || fbUser.displayName || fbUser.email?.split("@")[0],
+        name: extraData.name || fbUser.displayName || fbUser.email?.split("@")[0],
         role: role.toUpperCase(),
         organizationName: extraData.organizationName || extraData.name || "",
         phone: extraData.phone || "",
         location: extraData.location || undefined,
+        recipientType: extraData.recipientType,
+        businessType: extraData.businessType,
+        registrationNumber: extraData.registrationNumber,
+        eventCardImage: extraData.eventCardImage,
       };
       const res = await syncUserProfile(payload);
       if (res.success && res.data) {
@@ -77,7 +80,7 @@ export const AuthProvider = ({ children }) => {
         setUserRole(syncedRole);
       }
     } catch (err) {
-      console.warn("MongoDB Sync Fallback:", err.message);
+      console.warn("MongoDB Sync Fallback:", err.message); alert("API Connection Failed: " + err.message + ". Please check your VITE_API_URL in Vercel.");
     }
   };
 
@@ -171,7 +174,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Login with Google Popup
-  const loginWithGoogle = async (role = "business") => {
+  const loginWithGoogle = async (role = "business", extraData = {}) => {
     try {
       let user;
       try {
@@ -199,7 +202,7 @@ export const AuthProvider = ({ children }) => {
       saveUserSession(user);
       localStorage.setItem("replate_user_role", role);
       setUserRole(role);
-      await syncWithMongoDB(user, role);
+      await syncWithMongoDB(user, role, extraData);
       return user;
     } catch (error) {
       console.error("Firebase Google Login Error:", error);

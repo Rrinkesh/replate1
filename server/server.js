@@ -22,11 +22,13 @@ const adminRoutes = require("./routes/adminRoutes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const notificationRoutes = require("./routes/notification.routes");
 const aiRoutes = require("./routes/ai.routes");
+const impactRoutes = require("./routes/impactRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const path = require("path");
 
 // Import Background Job Modules
 const { startExpiryBackgroundJob } = require("./jobs/expiryJob");
+const startEscalationJob = require("./jobs/escalationJob");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,6 +57,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/impact", impactRoutes);
 app.use("/api/uploads", uploadRoutes);
 
 // Root Welcome Endpoint
@@ -75,4 +78,5 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`RePlate Express Server running on port ${PORT}`);
   // Start food status & expiry monitor background job
   startExpiryBackgroundJob();
+  startEscalationJob();
 });

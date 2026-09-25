@@ -10,15 +10,21 @@ import {
   AlertCircle,
   Phone,
   MapPin,
+  LocateFixed,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { Card, Input, Button } from "../../components/common";
+import { Card, Input, Button, ImageUploader } from "../../components/common";
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signup, loginWithGoogle } = useAuth();
 
-  const [role, setRole] = useState("business"); // 'business' or 'recipient'
+  const [role, setRole] = useState("business");
+  const [recipientType, setRecipientType] = useState("NGO");
+  const [businessType, setBusinessType] = useState("RESTAURANT");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [eventCardImage, setEventCardImage] = useState(""); // 'business' or 'recipient'
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -27,8 +33,43 @@ const SignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  
+  const handleGPSClick = () => {
+    if (!navigator.geolocation) {
+      setErrorMessage("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await response.json();
+          
+          if (data && data.display_name) {
+            setAddress(data.display_name);
+          } else {
+            setAddress(`${latitude}, ${longitude}`);
+          }
+        } catch (err) {
+          console.error(err);
+          setErrorMessage("Failed to retrieve address from GPS.");
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        setErrorMessage("Please allow location permissions to use GPS.");
+      }
+    );
+  };
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -69,6 +110,9 @@ const SignupPage = () => {
       await signup(email, password, name, role, {
         phone,
         location: { address },
+        ...(role === "recipient" && { recipientType, registrationNumber }),
+        ...(role === "business" && { businessType, registrationNumber, eventCardImage }),
+        ...(role === "business" && { businessType, registrationNumber, eventCardImage })
       });
       // Redirect to specific portal
       navigate(
@@ -107,7 +151,9 @@ const SignupPage = () => {
     setErrorMessage("");
     try {
       setIsGoogleSubmitting(true);
-      await loginWithGoogle(role);
+      await loginWithGoogle(role, {
+        ...(role === "recipient" && { recipientType, registrationNumber })
+      });
       navigate(
         role === "business" ? "/business/dashboard" : "/recipient/dashboard",
         {
@@ -177,6 +223,65 @@ const SignupPage = () => {
             </p>
           </div>
 
+          {/* Business Type Sub-Selection */}
+          {role === 'business' && (
+            <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl mb-4">
+              <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2">
+                What type of donor are you?
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="businessType" value="RESTAURANT" checked={businessType === 'RESTAURANT'} onChange={(e) => setBusinessType(e.target.value)} className="accent-emerald-600 w-4 h-4" />
+                  <span className="text-sm font-semibold text-charcoal-900">Restaurant / Hotel</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="businessType" value="PARTY" checked={businessType === 'PARTY'} onChange={(e) => setBusinessType(e.target.value)} className="accent-emerald-600 w-4 h-4" />
+                  <span className="text-sm font-semibold text-charcoal-900">Event / Party</span>
+                </label>
+              </div>
+              <p className="text-xs text-emerald-700 mt-2 font-medium">
+                {businessType === 'RESTAURANT' ? 'For commercial food businesses.' : 'For individuals or event organizers donating large-scale leftover food.'}
+              </p>
+            </div>
+          )}
+
+          {/* Recipient Type Sub-Selection */}
+          {role === 'recipient' && (
+            <div className="p-4 bg-brand-50 border border-brand-100 rounded-xl mb-4">
+              <label className="block text-xs font-bold text-brand-900 uppercase tracking-wider mb-2">
+                Are you an NGO or a Business Buyer?
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="recipientType" value="NGO" checked={recipientType === 'NGO'} onChange={(e) => setRecipientType(e.target.value)} className="accent-brand-600 w-4 h-4" />
+                  <span className="text-sm font-semibold text-charcoal-900">NGO / Charity</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="recipientType" value="BUSINESS" checked={recipientType === 'BUSINESS'} onChange={(e) => setRecipientType(e.target.value)} className="accent-brand-600 w-4 h-4" />
+                  <span className="text-sm font-semibold text-charcoal-900">Business Buyer</span>
+                </label>
+              </div>
+              <p className="text-xs text-brand-700 mt-2 font-medium">
+                {recipientType === 'NGO' ? 'NGOs get a 100% discount on all platform food.' : 'Business buyers can purchase surplus food at heavily discounted rates.'}
+              </p>
+            </div>
+          )}
+
+          
+          {/* Recipient Registration Number Input */}
+          {role === 'recipient' && (
+            <div className="mb-4">
+              <Input
+                label={recipientType === 'NGO' ? "NGO Registration / Trust Number" : "Business Registration Number"}
+                type="text"
+                placeholder={recipientType === 'NGO' ? "e.g. NGO-12345678" : "e.g. BUS-12345678"}
+                value={registrationNumber}
+                onChange={(e) => setRegistrationNumber(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
           {/* Global Error Banner */}
           {errorMessage && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
@@ -185,7 +290,33 @@ const SignupPage = () => {
             </div>
           )}
 
-          {/* Signup Form */}
+          {/* Dynamic Business Inputs */}
+            {role === 'business' && (
+              <div className="space-y-4 mb-4">
+                {businessType === 'RESTAURANT' ? (
+                  <Input
+                    label="Official Registration / FSSAI Number"
+                    type="text"
+                    placeholder="e.g. 12345678901234"
+                    value={registrationNumber}
+                    onChange={(e) => setRegistrationNumber(e.target.value)}
+                    required
+                  />
+                ) : (
+                  <div>
+                    <label className="block text-xs font-bold text-charcoal-700 uppercase tracking-wider mb-2">
+                      Event Invitation Card (Proof of Event)
+                    </label>
+                    <ImageUploader
+                      currentImage={eventCardImage}
+                      onUploadSuccess={(url) => setEventCardImage(url)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label={
@@ -234,6 +365,8 @@ const SignupPage = () => {
                   : "45 Relief Rd, Sector 62, Noida"
               }
               iconLeft={MapPin}
+              iconRight={isLocating ? Loader2 : LocateFixed}
+              onRightIconClick={handleGPSClick}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               required

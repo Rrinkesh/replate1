@@ -1,3 +1,4 @@
+import { ImpactWidget, RewardsPanel } from '../../components/dashboard';
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -36,7 +37,7 @@ import { analyticsService } from "../../services/analyticsService";
 import { useAuth } from "../../context/AuthContext";
 
 const RecipientDashboardPage = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, mongoUser } = useAuth();
   const [reservations, setReservations] = useState([]);
   const [availableFood, setAvailableFood] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -125,14 +126,16 @@ const RecipientDashboardPage = () => {
   return (
     <DashboardLayout title="Recipient NGO Console">
       <div className="space-y-8">
+        <ImpactWidget />
+        <RewardsPanel userRole="NGO" credits={currentUser?.impactCredits || 0} level={currentUser?.rewardLevel || "NEW"} />
         {/* Header Greeting & Action Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-charcoal-900 tracking-tight">
-              {currentUser?.name || "Verified NGO Partner"}
+              {mongoUser?.organizationName || currentUser?.name || "Verified Recipient Partner"}
             </h2>
             <p className="text-xs text-charcoal-500 mt-0.5">
-              Community Welfare Network • Noida Sector 62
+              Verified Recipient • {mongoUser?.location?.city || "Noida"}
             </p>
           </div>
 

@@ -383,9 +383,15 @@ const FoodDetailPage = () => {
                 Recovery Price
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-charcoal-900">
-                  ₹{totalPrice}
-                </span>
+                {totalPrice === 0 ? (
+                  <span className="text-3xl font-black text-brand-600 bg-brand-50 px-3 py-1 rounded-xl">
+                    FREE
+                  </span>
+                ) : (
+                  <span className="text-3xl font-black text-charcoal-900">
+                    ₹{totalPrice}
+                  </span>
+                )}
                 {originalPrice && originalPrice > unitPrice && (
                   <span className="text-sm text-charcoal-400 line-through font-semibold">
                     Original: ₹{originalPrice * quantity}

@@ -8,10 +8,10 @@ const {
   updateFood,
   deleteFood,
 } = require("../controllers/foodController");
-const { protect, verifiedOnly } = require("../middleware/authMiddleware");
+const { protect, verifiedOnly, optionalAuth } = require("../middleware/authMiddleware");
 
 // Food Listings CRUD Routes
-router.route("/").get(getFoodListings).post(protect, verifiedOnly, createFood);
+router.route("/").get(optionalAuth, getFoodListings).post(protect, verifiedOnly, createFood);
 
 router.route("/me/listings").get(protect, getMyFoodListings);
 

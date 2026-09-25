@@ -216,7 +216,12 @@ const rejectBusiness = async (req, res, next) => {
 
     if (firebaseUidToDelete) {
       try {
-        await admin.auth().deleteUser(firebaseUidToDelete);
+        // Wrap Firebase deletion in a 5-second timeout so it never hangs the backend
+        const deletePromise = admin.auth().deleteUser(firebaseUidToDelete);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Firebase delete timed out")), 5000)
+        );
+        await Promise.race([deletePromise, timeoutPromise]);
       } catch (fbErr) {
         console.warn(
           "Could not delete user from Firebase (may already be deleted or invalid config):",
@@ -257,7 +262,12 @@ const rejectRecipient = async (req, res, next) => {
 
     if (firebaseUidToDelete) {
       try {
-        await admin.auth().deleteUser(firebaseUidToDelete);
+        // Wrap Firebase deletion in a 5-second timeout so it never hangs the backend
+        const deletePromise = admin.auth().deleteUser(firebaseUidToDelete);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Firebase delete timed out")), 5000)
+        );
+        await Promise.race([deletePromise, timeoutPromise]);
       } catch (fbErr) {
         console.warn(
           "Could not delete user from Firebase (may already be deleted or invalid config):",
@@ -274,6 +284,62 @@ const rejectRecipient = async (req, res, next) => {
   }
 };
 
+const SystemSettings = require("../models/SystemSettings");
+const RewardRequest = require("../models/RewardRequest");
+
+const getSystemSettings = async (req, res, next) => {
+  try {
+    const settings = await SystemSettings.find({});
+    res.status(200).json({ success: true, settings });
+  } catch (err) { next(err); }
+};
+
+const updateSystemSettings = async (req, res, next) => {
+  try {
+    const { key, value, description } = req.body;
+    let setting = await SystemSettings.findOne({ key });
+    if (setting) {
+      setting.value = value;
+      if (description) setting.description = description;
+      await setting.save();
+    } else {
+      setting = await SystemSettings.create({ key, value, description });
+    }
+    res.status(200).json({ success: true, setting });
+  } catch (err) { next(err); }
+};
+
+const getRewardRequests = async (req, res, next) => {
+  try {
+    const requests = await RewardRequest.find({}).populate("userId", "name email role organizationName").sort({ createdAt: -1 });
+    res.status(200).json({ success: true, requests });
+  } catch (err) { next(err); }
+};
+
+const processRewardRequest = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+    const request = await RewardRequest.findById(id);
+    if (!request) { res.status(404); throw new Error("Request not found"); }
+    
+    request.status = status;
+    if (adminNotes) request.adminNotes = adminNotes;
+    if (status === "APPROVED") request.approvedAt = new Date();
+    await request.save();
+
+    await createNotificationHelper({
+      userId: request.userId,
+      type: "REWARD_STATUS_UPDATED",
+      title: "Reward Request " + status,
+      message: "Your request for " + request.type.replace("_", " ") + " was " + status.toLowerCase(),
+      relatedId: request._id,
+    });
+    
+    res.status(200).json({ success: true, request });
+  } catch (err) { next(err); }
+};
+
 module.exports = {
   getAllBusinesses,
   getAllRecipients,
@@ -281,4 +347,8 @@ module.exports = {
   verifyRecipient,
   rejectBusiness,
   rejectRecipient,
+  getSystemSettings,
+  updateSystemSettings,
+  getRewardRequests,
+  processRewardRequest,
 };

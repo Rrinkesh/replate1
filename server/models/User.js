@@ -32,6 +32,15 @@ const userSchema = new mongoose.Schema(
       default: "BUSINESS",
       uppercase: true,
     },
+    recipientType: {
+      type: String,
+      enum: ["NGO", "BUSINESS"],
+      uppercase: true,
+    },
+    businessType: {
+      type: String,
+      uppercase: true,
+    },
     phone: {
       type: String,
       trim: true,
@@ -58,6 +67,28 @@ const userSchema = new mongoose.Schema(
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    impactCredits: {
+      type: Number,
+      default: 0,
+    },
+    trustScore: {
+      type: Number,
+      default: 100,
+      min: 0,
+      max: 100,
+    },
+    totalCompletedOrders: {
+      type: Number,
+      default: 0,
+    },
+    totalFoodRescuedKg: {
+      type: Number,
+      default: 0,
+    },
+    rewardLevel: {
+      type: String,
+      default: "NEW",
     },
   },
   {
