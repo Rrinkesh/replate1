@@ -14,6 +14,8 @@ const {
   updateSystemSettings,
   getRewardRequests,
   processRewardRequest,
+  repairQueues,
+  reclassifyUser,
 } = require("../controllers/adminController");
 
 // All admin routes require authenticated Firebase user + ADMIN role in database
@@ -31,5 +33,11 @@ router.get("/settings", getSystemSettings);
 router.put("/settings", updateSystemSettings);
 router.get("/rewards/requests", getRewardRequests);
 router.put("/rewards/requests/:id", processRewardRequest);
+
+// Repair misclassified users: ensures each user has exactly one correct profile doc
+router.post("/repair-queues", repairQueues);
+
+// Reclassify a single profile entry between queues
+router.post("/reclassify", reclassifyUser);
 
 module.exports = router;

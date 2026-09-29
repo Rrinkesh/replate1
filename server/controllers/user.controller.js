@@ -21,13 +21,14 @@ const getCurrentUser = async (req, res, next) => {
 
     if (!user) {
       // Do NOT auto-create. Allow syncWithMongoDB to handle creation.
-      // Returning null prevents the frontend from crashing/logging out during the signup race condition.
       return res.status(200).json({
         success: true,
         data: null,
       });
-    } else if (isSuperAdmin && (user.role !== "ADMIN" || !user.isVerified)) {
-      // Auto-promote existing profile
+    }
+
+    // Auto-promote super admin
+    if (isSuperAdmin && (user.role !== "ADMIN" || !user.isVerified)) {
       user.role = "ADMIN";
       user.isVerified = true;
       await user.save();
@@ -41,6 +42,7 @@ const getCurrentUser = async (req, res, next) => {
     next(error);
   }
 };
+
 
 const syncUser = async (req, res, next) => {
   try {
@@ -61,18 +63,14 @@ const syncUser = async (req, res, next) => {
     let user = await User.findOne({ firebaseUid });
 
     // Format role enum safely
-    const formattedRole = role
-      ? role.toUpperCase()
-      : user
-        ? user.role
-        : "BUSINESS";
+    const incomingRole = role ? role.toUpperCase() : null;
+    let finalRole;
 
-    // If user already exists, ALWAYS preserve their role to prevent frontend overwrites during login
-    let finalRole = user
-      ? user.role
-      : ["BUSINESS", "RECIPIENT"].includes(formattedRole)
-        ? formattedRole
-        : "BUSINESS";
+    if (incomingRole && ["BUSINESS", "RECIPIENT"].includes(incomingRole)) {
+      finalRole = incomingRole;
+    } else {
+      finalRole = user ? user.role : "BUSINESS";
+    }
 
     const isSuperAdmin =
       email &&
@@ -87,9 +85,11 @@ const syncUser = async (req, res, next) => {
       // Update existing user profile
       user.name = name || user.name;
       user.email = email || user.email;
-      // We only update the role if they were promoted to ADMIN
-      if (finalRole === "RECIPIENT" && recipientType && !user.recipientType) user.recipientType = recipientType;
-      if (finalRole === "BUSINESS" && businessType && !user.businessType) user.businessType = businessType;
+      if (user.role !== "ADMIN") {
+        user.role = finalRole;
+      }
+      if (finalRole === "RECIPIENT" && recipientType) user.recipientType = recipientType;
+      if (finalRole === "BUSINESS" && businessType) user.businessType = businessType;
       if (isSuperAdmin) {
         user.role = "ADMIN";
         user.isVerified = true;
@@ -132,8 +132,16 @@ const syncUser = async (req, res, next) => {
       });
     }
 
+    // isNewSignup=true means this is a fresh registration — only then delete conflicting profiles.
+    // On login syncs (isNewSignup absent/false) leave existing profiles untouched to avoid data loss.
+    const isNewSignup = req.body.isNewSignup === true || req.body.isNewSignup === "true";
+
     // Auto-create associated profile so they appear in Admin Verification Queue immediately
     if (user.role === "BUSINESS") {
+      if (isNewSignup) {
+        await RecipientProfile.deleteOne({ userId: user._id }).catch(() => {});
+      }
+
       const existing = await BusinessProfile.findOne({ userId: user._id });
       if (existing) {
         let changed = false;
@@ -169,6 +177,10 @@ const syncUser = async (req, res, next) => {
         });
       }
     } else if (user.role === "RECIPIENT") {
+      if (isNewSignup) {
+        await BusinessProfile.deleteOne({ userId: user._id }).catch(() => {});
+      }
+
       const existing = await RecipientProfile.findOne({ userId: user._id });
       if (existing) {
         let changed = false;

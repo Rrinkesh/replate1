@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Helper to sync user profile with MongoDB backend
-  const syncWithMongoDB = async (fbUser, role = "business", extraData = {}) => {
+  const syncWithMongoDB = async (fbUser, role = "business", extraData = {}, isNewSignup = false) => {
     try {
       const payload = {
         firebaseUid: fbUser.uid,
@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }) => {
         businessType: extraData.businessType,
         registrationNumber: extraData.registrationNumber,
         eventCardImage: extraData.eventCardImage,
+        isNewSignup,
       };
       const res = await syncUserProfile(payload);
       if (res.success && res.data) {
@@ -94,6 +95,9 @@ export const AuthProvider = ({ children }) => {
   ) => {
     try {
       let user;
+      // Set a flag so onAuthStateChanged knows not to call getCurrentUserProfile
+      // while we are mid-signup (race condition guard)
+      sessionStorage.setItem("replate_signup_in_progress", "1");
       try {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
@@ -119,6 +123,7 @@ export const AuthProvider = ({ children }) => {
             displayName: displayName || email.split("@")[0],
           };
         } else {
+          sessionStorage.removeItem("replate_signup_in_progress");
           throw fbErr;
         }
       }
@@ -126,13 +131,16 @@ export const AuthProvider = ({ children }) => {
       saveUserSession(user);
       localStorage.setItem("replate_user_role", role);
       setUserRole(role);
-      await syncWithMongoDB(user, role, { name: displayName, ...extraData });
+      await syncWithMongoDB(user, role, { name: displayName, ...extraData }, true);
+      sessionStorage.removeItem("replate_signup_in_progress");
       return user;
     } catch (error) {
+      sessionStorage.removeItem("replate_signup_in_progress");
       console.error("Firebase Signup Error:", error);
       throw error;
     }
   };
+
 
   // Login with Email & Password
   const login = async (email, password) => {
@@ -165,7 +173,21 @@ export const AuthProvider = ({ children }) => {
       }
 
       saveUserSession(user);
-      await syncWithMongoDB(user, userRole);
+
+      try {
+        const profileRes = await getCurrentUserProfile();
+        if (profileRes.success && profileRes.data) {
+          setMongoUser(profileRes.data);
+          const mRole = profileRes.data.role.toLowerCase();
+          setUserRole(mRole);
+          localStorage.setItem("replate_user_role", mRole);
+        } else {
+          await syncWithMongoDB(user, userRole);
+        }
+      } catch (e) {
+        await syncWithMongoDB(user, userRole);
+      }
+
       return user;
     } catch (error) {
       console.error("Firebase Login Error:", error);
@@ -174,7 +196,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Login with Google Popup
-  const loginWithGoogle = async (role = "business", extraData = {}) => {
+  const loginWithGoogle = async (requestedRole = null, extraData = {}) => {
     try {
       let user;
       try {
@@ -200,9 +222,25 @@ export const AuthProvider = ({ children }) => {
       }
 
       saveUserSession(user);
-      localStorage.setItem("replate_user_role", role);
-      setUserRole(role);
-      await syncWithMongoDB(user, role, extraData);
+
+      try {
+        const profileRes = await getCurrentUserProfile();
+        if (profileRes.success && profileRes.data) {
+          setMongoUser(profileRes.data);
+          const mRole = profileRes.data.role.toLowerCase();
+          setUserRole(mRole);
+          localStorage.setItem("replate_user_role", mRole);
+        } else {
+          const role = requestedRole || userRole || "business";
+          localStorage.setItem("replate_user_role", role);
+          setUserRole(role);
+          await syncWithMongoDB(user, role, extraData);
+        }
+      } catch (e) {
+        const role = requestedRole || userRole || "business";
+        await syncWithMongoDB(user, role, extraData);
+      }
+
       return user;
     } catch (error) {
       console.error("Firebase Google Login Error:", error);
@@ -269,7 +307,11 @@ export const AuthProvider = ({ children }) => {
           (localStorage.getItem("replate_current_user")
             ? JSON.parse(localStorage.getItem("replate_current_user"))
             : null);
-        if (activeUser) {
+
+        // Skip profile fetch if signup is in progress — syncWithMongoDB will handle it
+        const signupInProgress = sessionStorage.getItem("replate_signup_in_progress") === "1";
+
+        if (activeUser && !signupInProgress) {
           try {
             const profileRes = await getCurrentUserProfile();
             if (profileRes.success && profileRes.data) {

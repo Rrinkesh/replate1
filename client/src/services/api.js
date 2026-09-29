@@ -1,15 +1,26 @@
 import axios from "axios";
 import { auth } from "../config/firebase";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const resolveApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) {
+    return "http://localhost:5000/api";
+  }
+  const cleanUrl = envUrl.trim().replace(/\/+$/, "");
+  if (!cleanUrl.endsWith("/api")) {
+    return `${cleanUrl}/api`;
+  }
+  return cleanUrl;
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // Axios Request Interceptor: Attach Firebase Bearer Token dynamically
@@ -17,27 +28,30 @@ api.interceptors.request.use(
   async (config) => {
     try {
       const user = auth.currentUser;
-      if (user) {
-        const token = await user.getIdToken();
-        config.headers.Authorization = `Bearer ${token}`;
-      } else {
-        // Fallback check if user is stored in localStorage
-        const savedUserStr = localStorage.getItem("replate_current_user");
-        if (savedUserStr) {
-          const savedUser = JSON.parse(savedUserStr);
-          config.headers.Authorization = `Bearer ${savedUser.uid || "dev-user-firebase-uid-123"}`;
+      if (user && typeof user.getIdToken === "function") {
+        const token = await user.getIdToken(/* forceRefresh */ false).catch(() => null);
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          return config;
+        }
+      }
+
+      // Fallback check if user is stored in localStorage
+      const savedUserStr = localStorage.getItem("replate_current_user");
+      if (savedUserStr) {
+        const savedUser = JSON.parse(savedUserStr);
+        if (savedUser && savedUser.uid) {
+          config.headers.Authorization = `Bearer ${savedUser.uid}`;
         }
       }
     } catch (error) {
-      console.warn(
-        "Axios Auth Interceptor token fetch warning:",
-        error.message,
-      );
       const savedUserStr = localStorage.getItem("replate_current_user");
       if (savedUserStr) {
         try {
           const savedUser = JSON.parse(savedUserStr);
-          config.headers.Authorization = `Bearer ${savedUser.uid || "dev-user-firebase-uid-123"}`;
+          if (savedUser && savedUser.uid) {
+            config.headers.Authorization = `Bearer ${savedUser.uid}`;
+          }
         } catch (e) {}
       }
     }

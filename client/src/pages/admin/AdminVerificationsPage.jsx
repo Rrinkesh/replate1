@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, XCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { ShieldCheck, XCircle, RefreshCw, Wrench, ArrowLeftRight } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import {
   Card,
   Badge,
   Button,
   LoadingSpinner,
-  EmptyState,
 } from "../../components/common";
 import { adminService } from "../../services/adminService";
 
@@ -16,6 +15,9 @@ const AdminVerificationsPage = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [rejectLoadingId, setRejectLoadingId] = useState(null);
+  const [repairLoading, setRepairLoading] = useState(false);
+  const [reclassifyLoadingId, setReclassifyLoadingId] = useState(null);
+
 
   const fetchPendingQueue = async () => {
     setLoading(true);
@@ -83,7 +85,42 @@ const AdminVerificationsPage = () => {
     }
   };
 
+  const handleRepair = async () => {
+    if (!window.confirm("This will scan all users and create any missing profile documents (BusinessProfile / RecipientProfile). Stale profiles for the wrong role will be removed. Continue?")) return;
+    setRepairLoading(true);
+    try {
+      const result = await adminService.repairQueues();
+      alert(`Repair complete: ${result.message}\n${result.report.fixed.map(f => `• ${f.email}: ${f.action}`).join("\n") || "Nothing needed fixing."}`);
+      await fetchPendingQueue();
+    } catch (err) {
+      alert("Repair failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setRepairLoading(false);
+    }
+  };
+
+  // Move a single entry from NGOs → Businesses or vice versa
+  const handleReclassify = async (profileId, fromType, toRole, profileName) => {
+    setReclassifyLoadingId(profileId);
+    try {
+      await adminService.reclassifyEntry(profileId, fromType, toRole);
+      if (toRole === "BUSINESS") {
+        // Remove from recipients list, re-fetch businesses to get the new BusinessProfile
+        setRecipients((prev) => prev.filter((r) => r._id !== profileId));
+      } else {
+        setBusinesses((prev) => prev.filter((b) => b._id !== profileId));
+      }
+      // Refresh both lists to get the newly created profile doc with correct _id
+      await fetchPendingQueue();
+    } catch (err) {
+      alert("Move failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setReclassifyLoadingId(null);
+    }
+  };
+
   const totalPending = businesses.length + recipients.length;
+
 
   return (
     <DashboardLayout title="Verification Queue">
@@ -97,7 +134,7 @@ const AdminVerificationsPage = () => {
               Review and verify new organizations
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold border border-amber-200">
               {totalPending} Awaiting Review
             </span>
@@ -106,25 +143,25 @@ const AdminVerificationsPage = () => {
               size="sm"
               iconLeft={RefreshCw}
               onClick={fetchPendingQueue}
-              disabled={loading}
+              disabled={loading || repairLoading}
             >
               Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              iconLeft={Wrench}
+              onClick={handleRepair}
+              disabled={loading || repairLoading}
+              className="text-amber-700 border-amber-300 hover:bg-amber-50"
+            >
+              {repairLoading ? "Repairing..." : "Repair Queue"}
             </Button>
           </div>
         </div>
 
         {loading ? (
           <LoadingSpinner size="lg" message="Loading pending queue..." />
-        ) : totalPending === 0 ? (
-          <Card variant="default" className="py-12">
-            <EmptyState
-              icon={ShieldCheck}
-              title="All Caught Up!"
-              description="There are no pending accounts waiting for verification at this time."
-              actionLabel="Refresh Queue"
-              onAction={fetchPendingQueue}
-            />
-          </Card>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Businesses Column */}
@@ -176,7 +213,7 @@ const AdminVerificationsPage = () => {
                         size="sm"
                         onClick={() => handleVerify(bus._id, "business")}
                         isLoading={actionLoadingId === bus._id}
-                        disabled={rejectLoadingId === bus._id}
+                        disabled={rejectLoadingId === bus._id || reclassifyLoadingId === bus._id}
                         iconLeft={ShieldCheck}
                       >
                         Approve
@@ -184,10 +221,21 @@ const AdminVerificationsPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                        onClick={() => handleReclassify(bus._id, "business", "RECIPIENT", bus.businessName)}
+                        isLoading={reclassifyLoadingId === bus._id}
+                        disabled={actionLoadingId === bus._id || rejectLoadingId === bus._id}
+                        iconLeft={ArrowLeftRight}
+                      >
+                        Move to NGO
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                         onClick={() => handleReject(bus._id, "business")}
                         isLoading={rejectLoadingId === bus._id}
-                        disabled={actionLoadingId === bus._id}
+                        disabled={actionLoadingId === bus._id || reclassifyLoadingId === bus._id}
                         iconLeft={XCircle}
                       >
                         Reject
@@ -253,7 +301,7 @@ const AdminVerificationsPage = () => {
                         size="sm"
                         onClick={() => handleVerify(rec._id, "recipient")}
                         isLoading={actionLoadingId === rec._id}
-                        disabled={rejectLoadingId === rec._id}
+                        disabled={rejectLoadingId === rec._id || reclassifyLoadingId === rec._id}
                         iconLeft={ShieldCheck}
                       >
                         Approve
@@ -261,10 +309,21 @@ const AdminVerificationsPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                        onClick={() => handleReclassify(rec._id, "recipient", "BUSINESS", rec.organizationName)}
+                        isLoading={reclassifyLoadingId === rec._id}
+                        disabled={actionLoadingId === rec._id || rejectLoadingId === rec._id}
+                        iconLeft={ArrowLeftRight}
+                      >
+                        Move to Business
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                         onClick={() => handleReject(rec._id, "recipient")}
                         isLoading={rejectLoadingId === rec._id}
-                        disabled={actionLoadingId === rec._id}
+                        disabled={actionLoadingId === rec._id || reclassifyLoadingId === rec._id}
                         iconLeft={XCircle}
                       >
                         Reject
